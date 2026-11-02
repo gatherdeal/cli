@@ -36,6 +36,7 @@ type fakeServer struct {
 	tokenCalls      int
 	revokeForms     []url.Values
 	revokeStatus    int
+	revokeFailToken string // this token's revoke answers HTTP 503
 	revoked         map[string]bool
 	statusCalls     int
 	statusError     string // raw response body for the status endpoint
@@ -245,6 +246,10 @@ func (f *fakeServer) handle(w http.ResponseWriter, r *http.Request) {
 		f.revokeForms = append(f.revokeForms, r.PostForm)
 		if r.Header.Get("Authorization") != "" {
 			f.t.Errorf("revoke sent an Authorization header")
+		}
+		if f.revokeFailToken != "" && r.PostForm.Get("token") == f.revokeFailToken {
+			writeJSON(w, 503, `{"error":"temporarily_unavailable"}`)
+			return
 		}
 		if f.revokeStatus != 200 {
 			writeJSON(w, f.revokeStatus, `{"error":"server_error"}`)

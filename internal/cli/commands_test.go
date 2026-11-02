@@ -56,7 +56,7 @@ func TestCommandsUnknownPrefix(t *testing.T) {
 		args []string
 		want string
 	}{
-		{[]string{"pos"}, `unknown command path "pos"; valid next segments: agent-context, auth, commands, crm, outlets, skills, update, version, whatsapp`},
+		{[]string{"pos"}, `unknown command path "pos"; valid next segments: agent-context, auth, commands, crm, outlets, skills, uninstall, update, version, whatsapp`},
 		{[]string{"crm", "orders"}, `unknown command path "crm orders"; valid next segments: contacts`},
 		{[]string{"whatsapp", "agents", "send"}, `unknown command path "whatsapp agents send"; valid next segments: create, delete, get, list, pairing, update`},
 		{[]string{"version", "extra"}, `"version" is a command and has no subcommands`},

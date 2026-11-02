@@ -535,6 +535,36 @@
         "args": [],
         "flags": [
           {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Show the plan and change nothing (exit 0)."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Carry out the plan. Without it the plan is shown and nothing changes (exit 9)."
+          },
+          {
+            "name": "local-only",
+            "type": "bool",
+            "usage": "Do not contact any server: delete the local state, and leave every access valid on its server until it expires or is revoked at passport › Security › Sessions \u0026 devices."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "uninstall",
+        "network": true,
+        "output": "json",
+        "read_only": false,
+        "summary": "Revoke every profile's access, then delete the stored credentials, the installed agent skills and the config directory; without --yes it only shows the plan."
+      },
+      {
+        "args": [],
+        "flags": [
+          {
             "name": "jq",
             "type": "string",
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."

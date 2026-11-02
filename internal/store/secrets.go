@@ -181,6 +181,9 @@ type fileSecret struct {
 	Secret        string `json:"secret"`
 }
 
+// Path is the file that holds the secret of account.
+func (s *FileStore) Path(account string) string { return filepath.Join(s.Dir, s.fileName(account)) }
+
 func (s *FileStore) fileName(account string) string {
 	sum := sha256.Sum256([]byte(account))
 	return hex.EncodeToString(sum[:16]) + ".json"

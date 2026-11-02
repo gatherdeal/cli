@@ -268,7 +268,7 @@ func (inv *Invocation) beginLogin(t *target, secrets store.SecretStore, da *auth
 				ExpiresAt:               expiresAt.UTC(), Interval: da.Interval,
 			}
 		}
-		inv.discardAttempt(t, tx, prof, prof.Login)
+		inv.discardAttempt(t, tx, prof, prof.Login, true)
 		prof.Login = attempt
 		p.Put(t.name, prof)
 		return nil
@@ -279,9 +279,10 @@ func (inv *Invocation) beginLogin(t *target, secrets store.SecretStore, da *auth
 // discardAttempt schedules, for after the commit, the removal of every
 // secret the replaced attempt old may own: its device code and the
 // credential it would have committed (left behind if a process died
-// between writing it and saving the metadata). The committed credential is
+// between writing it and saving the metadata). With revoke, such a
+// credential is also revoked on the server. The committed credential is
 // never touched.
-func (inv *Invocation) discardAttempt(t *target, tx *stateTx, prof *store.Profile, old *store.LoginAttempt) {
+func (inv *Invocation) discardAttempt(t *target, tx *stateTx, prof *store.Profile, old *store.LoginAttempt, revoke bool) {
 	if old == nil || (prof.Credential != nil && prof.Credential.Generation == old.Generation) {
 		return
 	}
@@ -291,7 +292,7 @@ func (inv *Invocation) discardAttempt(t *target, tx *stateTx, prof *store.Profil
 		_ = secrets.Delete(device)
 		// A credential here was issued but never committed: nobody holds
 		// it, so it is revoked as well as deleted.
-		if orphan, err := secrets.Get(cred); err == nil {
+		if orphan, err := secrets.Get(cred); err == nil && revoke {
 			inv.Env.addSecret(orphan)
 			inv.revokeQuietly(context.Background(), t, orphan)
 		}
@@ -335,7 +336,7 @@ func (inv *Invocation) dropLogin(t *target, gen store.Generation) {
 		if prof == nil || prof.Login == nil || prof.Login.Generation != gen {
 			return nil
 		}
-		inv.discardAttempt(t, tx, prof, prof.Login)
+		inv.discardAttempt(t, tx, prof, prof.Login, true)
 		prof.Login = nil
 		if prof.Credential == nil {
 			p.Delete(t.name)

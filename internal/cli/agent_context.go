@@ -130,6 +130,9 @@ Rules
   there is no --yes flag. It never installs anything by itself: it returns
   the command (error.details.action.argv) for the person to run. Show it;
   do not run it unless they ask.
+- Never run ` + "`gatherdeal uninstall --yes`" + ` (with or without --local-only)
+  unless the person explicitly asked to remove the CLI. Run
+  ` + "`gatherdeal uninstall`" + ` first and show them the plan; it changes nothing.
 - On CLIENT_UPGRADE_REQUIRED (exit 9) the server refuses this CLI version:
   tell the person and show the hint (` + "`gatherdeal update`" + `).
 - Exit 3 means log in again (expired, unused for 30 days, or revoked).
