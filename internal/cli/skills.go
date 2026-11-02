@@ -13,7 +13,8 @@ import (
 )
 
 // Paths are relative to either the project directory or the user's home.
-var skillTargets = map[string]string{"claude": ".claude/skills"}
+// "agents" is the shared agent-skills directory read by Codex and other agents.
+var skillTargets = map[string]string{"claude": ".claude/skills", "agents": ".agents/skills"}
 
 func skillTargetNames() []string {
 	names := make([]string, 0, len(skillTargets))
@@ -30,7 +31,7 @@ func skillsInstallCommand() *Command {
 		Output: "json", Run: runSkillsInstall,
 		Flags: []FlagSpec{
 			{Name: "dir", Kind: kindString, Usage: "Parent directory in which to install gatherdeal/; ancestor symlinks are followed. Cannot be combined with --target or --scope."},
-			{Name: "target", Kind: kindString, Values: skillTargetNames(), Usage: "Agent tool to install for; requires --scope. Cannot be combined with --dir."},
+			{Name: "target", Kind: kindString, Values: skillTargetNames(), Usage: "Agent tool to install for: claude (.claude/skills) or agents (.agents/skills, read by Codex and other agents); requires --scope. Cannot be combined with --dir."},
 			{Name: "scope", Kind: kindString, Values: []string{"project", "user"}, Usage: "Install relative to the current directory (project) or home directory (user); requires --target."},
 			{Name: "force", Kind: kindBool, Usage: "Overwrite skill files whose content differs."},
 		},
