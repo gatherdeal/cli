@@ -18,6 +18,10 @@ npm install -g @gatherdeal/cli@latest --ignore-scripts
 gatherdeal auth login
 gatherdeal outlets list
 gatherdeal crm contacts list --limit 10
+
+# Optional: let your AI agent use it (Claude Code, Codex and others)
+gatherdeal skills install --target claude --scope user
+gatherdeal skills install --target agents --scope user
 ```
 
 `auth login` prints an approval page address and a code; open the page,
@@ -172,10 +176,59 @@ gatherdeal auth logout   # revoke on the server, then delete locally
 never the token itself. You can also see and revoke accesses on the approval
 site under Security › Sessions & devices.
 
+## Uninstall
+
+`gatherdeal uninstall` removes everything the CLI keeps on this machine.
+Look at the plan first; it changes nothing:
+
+```sh
+gatherdeal uninstall            # show the plan (exit 9; --dry-run: exit 0)
+gatherdeal uninstall --yes      # carry it out
+```
+
+With `--yes` it, in this order:
+
+1. revokes the access of every profile on its server, then deletes the
+   profile and its credential (OS keyring entry or credential file);
+2. deletes the agent skill directories `skills install` wrote, and
+   `~/.claude/skills/gatherdeal` and `~/.agents/skills/gatherdeal`, but only
+   a directory that holds exactly the generated skill (its `SKILL.md` and
+   `references/<app>.md`, no other files and no symlinks). Any other
+   directory is skipped and reported, never deleted;
+3. deletes the config directory (`$XDG_CONFIG_HOME/gatherdeal`,
+   `~/.config/gatherdeal` or `%APPDATA%\gatherdeal`). Files the CLI did not
+   create stay, and so does the directory then.
+
+Revocation fails closed: if an access cannot be revoked (for example the
+server is unreachable), uninstall stops before deleting that profile and
+everything after it, reports the access as still valid and exits non-zero
+with `CLI_REVOKE_FAILED`. Run it again later, or revoke the access at
+passport › Security › Sessions & devices and run
+`gatherdeal uninstall --yes --local-only`, which contacts no server, deletes
+the local state anyway and lists the accesses that stay valid
+(`data.accesses_still_valid`). A profile without a credential, or an access
+the server already reports revoked or expired, counts as revoked.
+`GATHERDEAL_TOKEN` is never revoked.
+
+The output reports every step in `data.profiles` (`revoke` and `delete`),
+`data.skills` and `data.config_dir`, each with a `status`: `planned`,
+`revoked`, `already_inactive`, `no_credential`, `deleted`, `kept`, `skipped`
+(with a `reason`), `absent`, `failed` or `not_attempted`. A local step that
+fails stops the run with `CLI_UNINSTALL_INCOMPLETE`.
+
+The CLI never deletes its own executable. Remove it last, as `data.binary`
+says for your install:
+
+| Install | Remove the binary |
+|---|---|
+| npm, global | `npm uninstall -g @gatherdeal/cli` |
+| Release archive | Delete `~/.local/bin/gatherdeal` or `%LOCALAPPDATA%\Programs\gatherdeal\gatherdeal.exe`. |
+| `go install` | Delete `gatherdeal` from `$(go env GOPATH)/bin` (or `GOBIN`). |
+
 ## Read contacts
 
 App API commands follow `gatherdeal <app> <resource> <verb>`. CRM contacts
-live under `crm`; `auth`, `commands`, `agent-context`, `skills`, `update`, and `version`
+live under `crm`; `auth`, `commands`, `agent-context`, `skills`, `update`, `uninstall` and `version`
 stay top-level, as do `outlets list/get`. Use `gatherdeal --help`, `gatherdeal crm --help`, or
 `gatherdeal crm contacts --help` to explore each level. The `commands` JSON
 includes an `app` field for API commands, and `gatherdeal commands crm contacts`
@@ -431,7 +484,7 @@ filtered output keeps the same envelope and schema, including the complete
 | 6 | Conflict or other business error; `CLI_SKILL_CONFLICT` for differing skill files without `--force` (`error.details.paths`: all relative conflicting file paths; `error.details.dir`: absolute install directory). Re-run with `--force` to overwrite only if the person agrees. |
 | 7 | Rate limited; try again later |
 | 8 | Network, TLS or timeout failure, or a server error |
-| 9 | A person must act first: approve the login, confirm a server, choose a credential store, pair WhatsApp, confirm a write, or install an update |
+| 9 | A person must act first: approve the login, confirm a server, choose a credential store, pair WhatsApp, confirm a write or an uninstall, or install an update |
 | 10 | Partial completion (reserved) |
 | 130 | Interrupted |
 
@@ -455,7 +508,9 @@ exactly as printed, and run `gatherdeal auth login --continue` after they
 approve. Never pass `--server` or `--accept-server-risk` unless the person
 typed them, and never paste a token into a chat. Never run `gatherdeal
 update` unless the person asked; it only reports the command to run, which
-you show rather than execute. To set everything up for a person, use the
+you show rather than execute. Never run `gatherdeal uninstall --yes` unless
+the person asked to remove the CLI; show them the plan from
+`gatherdeal uninstall` first. To set everything up for a person, use the
 [Quick start prompt](#hand-it-to-your-ai-agent).
 
 For WhatsApp, use `whatsapp agents create --outlet <id-or-code> --yes --no-wait`.
@@ -499,7 +554,9 @@ no network requests. Identical files are unchanged; differing files cause
 an error before any files are written unless `--force` is supplied. It
 refuses symlinked skill directories and target files. New directories use
 0755 and files use 0644, with each file replaced using a temporary file and
-rename. Other files in the directory are left alone.
+rename. Other files in the directory are left alone. The install location
+is recorded in `skills.json` in the config directory (owner-only, like
+`profiles.json`), so [`gatherdeal uninstall`](#uninstall) can remove it.
 
 The success envelope contains the absolute `dir`, `cli_version`, and a
 `files` array with each relative `path` and `action` (`created`, `updated`,

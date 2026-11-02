@@ -12,6 +12,10 @@ npm install -g @gatherdeal/cli@latest --ignore-scripts
 gatherdeal auth login
 gatherdeal outlets list
 gatherdeal crm contacts list --limit 10
+
+# Optional: let your AI agent use it (Claude Code, Codex and others)
+gatherdeal skills install --target claude --scope user
+gatherdeal skills install --target agents --scope user
 ```
 
 `auth login` prints an approval page address and a code; open the page,
@@ -48,7 +52,8 @@ gatherdeal crm contacts get <contact-id> --with-emails --with-tags
 ```
 
 App API commands use `gatherdeal <app> <resource> <verb>`. Authentication,
-`commands`, `agent-context`, `skills`, `update`, and `version` stay top-level.
+`commands`, `agent-context`, `skills`, `update`, `uninstall` and `version` stay
+top-level.
 
 ```sh
 gatherdeal --help
@@ -95,6 +100,8 @@ index and core commands, as `gatherdeal agent-context` prints them) and one
 fail before any writes unless `--force` is given; symlinked skill files and
 subdirectories are refused. With --target, resolved destinations must stay
 inside the resolved project/home base. Explicit --dir follows ancestor symlinks.
+The install location is recorded in the config directory so
+`gatherdeal uninstall` can remove it.
 Success returns a JSON envelope with the absolute `dir`, `cli_version`, and
 per-file `path` and `action` (`created`, `updated`, or `unchanged`).
 `skills show` prints the skill as plain text. The skill records the CLI
@@ -109,3 +116,20 @@ tells agents to do this when `gatherdeal version` reports a different version.
 installation instructions (exit 9 when an external install is needed).
 All forms are read-only, with no disk cache or self-replacement and no
 `--yes` flag. Use `--version <version>` to select an exact release.
+
+## Uninstall
+
+```sh
+gatherdeal uninstall            # show the plan; changes nothing
+gatherdeal uninstall --yes      # carry it out
+npm uninstall -g @gatherdeal/cli
+```
+
+`uninstall --yes` revokes every profile's access on its server, deletes the
+stored credentials, the agent skills `skills install` wrote (only directories
+that hold exactly the generated skill) and the config directory. If an
+access cannot be revoked, it stops and keeps that profile; revoke the access
+at passport › Security › Sessions & devices and run
+`gatherdeal uninstall --yes --local-only` to delete the local state anyway.
+The CLI never deletes its own binary: remove the package last. See the
+[repository README](https://github.com/gatherdeal/cli#uninstall) for details.
