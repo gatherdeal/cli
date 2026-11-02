@@ -151,8 +151,15 @@ func BuildPlan(h Host, inst Install, target *releasemeta.Manifest, explicit bool
 		return p
 	}
 	p.Action = planAction(h, inst, target)
+	if p.Action.Kind != ActionNone {
+		p.Action.Instructions += " " + SkillRefreshNote
+	}
 	return p
 }
+
+// SkillRefreshNote ends the instructions of every action that installs a
+// release: an installed agent skill records the CLI version it was made for.
+const SkillRefreshNote = "After updating, reinstall any installed agent skill: re-run `gatherdeal skills install` with the same --target and --scope (or --dir) and --force."
 
 func planAction(h Host, inst Install, m *releasemeta.Manifest) Action {
 	v := m.Version

@@ -228,7 +228,8 @@ func TestCheckLatest(t *testing.T) {
 		t.Fatalf("plan %+v", p)
 	}
 	if p.InstallMethod != MethodNPMGlobal || p.Action.Kind != ActionDelegate ||
-		strings.Join(p.Action.Argv, " ") != "npm install -g @gatherdeal/cli@0.1.2 --ignore-scripts" {
+		strings.Join(p.Action.Argv, " ") != "npm install -g @gatherdeal/cli@0.1.2 --ignore-scripts" ||
+		!strings.HasSuffix(p.Action.Instructions, " "+SkillRefreshNote) {
 		t.Fatalf("action %+v", p.Action)
 	}
 	if p.ReleaseURL != "https://github.com/gatherdeal/cli/releases/tag/v0.1.2" {
@@ -250,7 +251,8 @@ func TestCheckRawBinaryConfirmedByItsOwnRelease(t *testing.T) {
 		t.Fatal(err)
 	}
 	if p.InstallMethod != MethodReleaseBinary || p.Action.Kind != ActionManual ||
-		p.Action.DownloadURL != DownloadURL("0.1.2", "gatherdeal_0.1.2_linux_amd64.tar.gz") || p.Action.SHA256 == "" {
+		p.Action.DownloadURL != DownloadURL("0.1.2", "gatherdeal_0.1.2_linux_amd64.tar.gz") || p.Action.SHA256 == "" ||
+		!strings.HasSuffix(p.Action.Instructions, " "+SkillRefreshNote) {
 		t.Fatalf("plan %+v", p)
 	}
 	// Without its own release, the same binary is unknown (manual).
@@ -269,7 +271,7 @@ func TestCheckStates(t *testing.T) {
 	h := withLauncher(testHost("0.1.0", "/usr/local/lib/node_modules/@gatherdeal/cli-linux-x64/bin/gatherdeal"))
 	ctx := context.Background()
 	p, err := newChecker(g, h).Check(ctx, "")
-	if err != nil || p.State != StateUpToDate || p.Action.Kind != ActionNone || p.UpdateAvailable {
+	if err != nil || p.State != StateUpToDate || p.Action.Kind != ActionNone || p.UpdateAvailable || strings.Contains(p.Action.Instructions, SkillRefreshNote) {
 		t.Fatalf("up to date: %+v %v", p, err)
 	}
 	p, err = newChecker(g, h).Check(ctx, "0.0.9")
