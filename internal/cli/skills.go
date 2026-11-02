@@ -10,6 +10,7 @@ import (
 
 	"github.com/gatherdeal/cli/internal/buildinfo"
 	"github.com/gatherdeal/cli/internal/output"
+	"github.com/gatherdeal/cli/internal/store"
 )
 
 // Paths are relative to either the project directory or the user's home.
@@ -224,6 +225,11 @@ func runSkillsInstall(_ context.Context, inv *Invocation) (any, error) {
 			WithDetails(skillConflictDetails{Paths: conflicts, Dir: dir}).
 			WithHint("Re-run with --force to overwrite.")
 	}
+	// Record the location before writing, so uninstall finds it even if a
+	// write fails part way.
+	if err := inv.recordSkillInstall(dir); err != nil {
+		return nil, err
+	}
 	for i, file := range result.Files {
 		if file.Action == "unchanged" {
 			continue
@@ -238,6 +244,41 @@ func runSkillsInstall(_ context.Context, inv *Invocation) (any, error) {
 		}
 	}
 	return result, nil
+}
+
+// recordSkillInstall adds dir, resolved, to the skill locations kept in the
+// config directory (skills.json) for `gatherdeal uninstall`.
+func (inv *Invocation) recordSkillInstall(dir string) error {
+	resolved, err := resolveSkillAncestor(dir)
+	if err != nil {
+		return output.Errorf(output.ExitUsage, output.CodeSkillPathInvalid, "cannot resolve skill path %q", dir).
+			WithDetails(skillPathDetails{Path: dir}).WithCause(err)
+	}
+	in := store.SkillInstall{Path: filepath.Clean(resolved)}
+	if inv.isSet("target") {
+		in.Target, in.Scope = inv.str("target"), inv.str("scope")
+	}
+	root, err := store.ConfigRoot(inv.Env.Getenv)
+	if err != nil {
+		return output.Errorf(output.ExitUnclassified, output.CodeInternal, "%v", err)
+	}
+	t := &target{root: root}
+	unlock, err := store.Lock(root)
+	if err != nil {
+		return storeError(err, t)
+	}
+	defer unlock()
+	installs, err := store.LoadSkillInstalls(root)
+	if err != nil {
+		return storeError(err, t)
+	}
+	if err := installs.Add(in); err != nil {
+		return output.Errorf(output.ExitUnclassified, output.CodeInternal, "cannot record the skill location: %v", err)
+	}
+	if err := installs.Save(); err != nil {
+		return storeError(err, t)
+	}
+	return nil
 }
 
 func writeSkillFile(path, content string) error {
