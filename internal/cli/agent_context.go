@@ -107,10 +107,17 @@ Rules
   meta.context.request.outlet_ids is the requested selection; [] means the
   authorized set. Missing binding means unknown (including GATHERDEAL_TOKEN).
   No context means no authenticated context was established.
-- Only run gatherdeal skills install when the person asks for it.
+- Only run gatherdeal skills install when the person asks for it, or to
+  refresh an installed skill as below.
+- Skill freshness: an installed skill records the CLI version it was made
+  for in its metadata (cli_version). If ` + "`gatherdeal version`" + ` reports a
+  different version (data.version), reinstall the skill before relying on
+  it: run gatherdeal skills install with the same --target and --scope (or
+  --dir) it was installed with, plus --force.
 - With --target, resolved paths must stay inside the resolved project/home base.
   Explicit --dir follows ancestor symlinks.
-- On CLI_SKILL_CONFLICT, show the person the paths and only use --force if they agree.
+- On CLI_SKILL_CONFLICT from any other install, show the person the paths
+  and only use --force if they agree.
 - Never pass --server or --accept-server-risk unless the person typed that
   exact flag and server themselves. The default server is the right one.
 - Never print, log or paste a token into chat, files or commits. The CLI only

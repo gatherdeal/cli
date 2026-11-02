@@ -53,7 +53,7 @@ func TestSkillFrontmatterAndShow(t *testing.T) {
 	if front.Metadata.CLIVersion != buildinfo.CurrentVersion() || front.Metadata.SkillSchema != 1 {
 		t.Fatalf("metadata %+v", front.Metadata)
 	}
-	if !strings.Contains(parts[2], AgentContext) || !strings.Contains(parts[2], "references/crm.md") || !strings.Contains(parts[2], "gatherdeal skills install ... --force") {
+	if !strings.Contains(parts[2], AgentContext) || !strings.Contains(parts[2], "references/crm.md") || !strings.Contains(parts[2], "Skill freshness") {
 		t.Fatal("missing shared guidance or skill instructions")
 	}
 	te := newTestEnv(t, nil)
@@ -450,7 +450,7 @@ func TestAgentContextMatchesSkill(t *testing.T) {
 		files[f.Path] = f.Content
 	}
 	general := newTestEnv(t, nil).run("agent-context")
-	if general.exit != 0 || !strings.HasPrefix(general.stdout, AgentContext) || !strings.Contains(files["SKILL.md"], "---\n\n"+general.stdout+"\n") {
+	if general.exit != 0 || !strings.HasPrefix(general.stdout, AgentContext) || !strings.HasSuffix(files["SKILL.md"], "---\n\n"+general.stdout) {
 		t.Fatalf("agent-context differs from SKILL.md:\n%s", general.stdout)
 	}
 	apps := skillApps(commandTree(Commands()))

@@ -74,10 +74,7 @@ func skillMarkdownFor(root *commandNode) string {
 		names[i] = app.path[0]
 	}
 	return fmt.Sprintf("---\nname: gatherdeal\ndescription: Reads and manages GatherDeal business data through the gatherdeal CLI, within the organization and outlets a person approved, in the apps %s. It is used when a person asks about their GatherDeal data, wants to change it, or wants to log the CLI in.\nmetadata:\n  cli_version: %q\n  skill_schema: 1\n---\n\n", strings.Join(names, ", "), buildinfo.CurrentVersion()) +
-		agentContext(root) + `
-This skill is tied to the CLI version in its frontmatter. After upgrading
-the CLI, re-run ` + "`gatherdeal skills install ... --force`" + ` with the same location.
-`
+		agentContext(root)
 }
 
 func runSkillsShow(context.Context, *Invocation) (any, error) { return skillMarkdown(), nil }
