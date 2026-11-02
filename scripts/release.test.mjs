@@ -6,7 +6,8 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'nod
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { compareAssets } from './release-github.mjs';
-import { checkMetadata, checkProvenance, matchesStatement, lookup, publishInOrder } from './release-npm.mjs';
+import { checkMetadata, checkProvenance, matchesStatement, lookup, NotReady, notYetInstallable, publishAll, untilReady }
+  from './release-npm.mjs';
 
 const pkg = { name: '@gatherdeal/cli', version: '1.0.0' };
 const bytes = Buffer.from('packed package');
@@ -150,29 +151,90 @@ test('full retry restores original run artifact or release, never writes remotel
   for (const result of [artifact, fallback, lost]) assert.deepEqual(result.writes, []);
 });
 
-test('partial npm failure resumes without republishing and keeps launcher last', async () => {
-  const published = new Set();
-  const calls = [];
-  let fail = true;
+// A fake registry: versions become visible `lag` lookups after publishing.
+function registry({ existing = [], lag = {}, failPublish = [], verify } = {}) {
+  const visible = new Map(existing.map(name => [name, 0]));
+  const events = [];
+  let clock = 0;
   const operations = {
-    pack: name => ({ pkg: { name, version: '1.0.0' } }),
-    find: async name => published.has(name) ? { name } : null,
-    publish: async ({ pkg }) => {
-      calls.push(pkg.name);
-      if (pkg.name === 'platform-b' && fail) throw Error('registry unavailable');
-      published.add(pkg.name);
+    pack: async dir => ({ pkg: { name: dir, version: '1.0.0' } }),
+    find: async name => {
+      if (!visible.has(name)) return null;
+      const remaining = visible.get(name);
+      visible.set(name, remaining - 1);
+      return remaining > 0 ? null : { name };
     },
-    verify: async (meta, { pkg }) => assert.equal(meta.name, pkg.name),
+    publish: async ({ pkg }) => {
+      events.push(`publish ${pkg.name}`);
+      await Promise.resolve();
+      if (failPublish.includes(pkg.name)) throw Error('registry unavailable');
+      visible.set(pkg.name, lag[pkg.name] ?? 0);
+    },
+    verify: verify ?? (async (meta, { pkg }) => {
+      assert.equal(meta.name, pkg.name);
+      events.push(`verified ${pkg.name}`);
+    }),
   };
-  const dirs = ['platform-a', 'platform-b', 'launcher'];
-  await assert.rejects(publishInOrder(dirs, operations));
-  assert.deepEqual([...published], ['platform-a']);
-  fail = false;
-  await publishInOrder(dirs, operations);
-  assert.deepEqual(calls, ['platform-a', 'platform-b', 'platform-b', 'launcher']);
-  calls.length = 0;
-  await publishInOrder(dirs, operations);
-  assert.deepEqual(calls, []);
-  await assert.rejects(publishInOrder(dirs, { ...operations, verify: async () => { throw Error('mismatch'); } }));
-  assert.deepEqual(calls, []);
+  const timing = { sleep: async ms => { clock += ms; }, now: () => clock, log: () => {} };
+  return { operations, timing, events, elapsed: () => clock };
+}
+const platforms = ['platform-a', 'platform-b', 'platform-c'];
+
+test('platform packages publish in parallel, launcher last after all verify', async () => {
+  const r = registry({ lag: { 'platform-a': 1 } });
+  await publishAll(platforms, 'launcher', r.operations, r.timing);
+  assert.deepEqual(r.events.slice(0, 3), platforms.map(p => `publish ${p}`));
+  assert.deepEqual(r.events.slice(-2), ['publish launcher', 'verified launcher']);
+  for (const p of platforms) assert.ok(r.events.indexOf(`verified ${p}`) < r.events.indexOf('publish launcher'));
+});
+test('visibility lag within the budget is waited out with backoff', async () => {
+  const r = registry({ lag: { 'platform-b': 4, launcher: 2 } });
+  await publishAll(platforms, 'launcher', r.operations, r.timing);
+  assert.equal(r.events.filter(e => e.startsWith('publish')).length, 4);
+  assert.equal(r.elapsed(), (5_000 + 10_000 + 20_000 + 30_000) + (5_000 + 10_000));
+});
+test('lag beyond the budget fails, says a rerun is safe, and skips the launcher', async () => {
+  const r = registry({ lag: { 'platform-c': Infinity } });
+  await assert.rejects(publishAll(platforms, 'launcher', r.operations, r.timing),
+    e => /platform-c@1.0.0: published version is not yet visible after 600s; rerunning this job is safe/.test(e.message));
+  assert.ok(r.elapsed() <= 600_000);
+  assert.ok(!r.events.includes('publish launcher'));
+  assert.ok(r.events.includes('verified platform-a') && r.events.includes('verified platform-b'));
+});
+test('a definite mismatch fails without retrying', async () => {
+  let attempts = 0;
+  const r = registry({ existing: ['platform-a'], verify: async () => {
+    attempts++;
+    throw Error('immutable npm tarball differs');
+  } });
+  await assert.rejects(publishAll(['platform-a'], 'launcher', r.operations, r.timing), /tarball differs/);
+  assert.equal(attempts, 1);
+  assert.equal(r.elapsed(), 0);
+  assert.deepEqual(r.events, []);
+});
+test('one failing platform lets the others finish and never publishes the launcher', async () => {
+  const r = registry({ failPublish: ['platform-a'], lag: { 'platform-c': 2 } });
+  await assert.rejects(publishAll(platforms, 'launcher', r.operations, r.timing),
+    e => e instanceof AggregateError && e.errors.length === 1 && /platform-a@1.0.0: registry unavailable/.test(e.message));
+  assert.ok(r.events.includes('verified platform-b') && r.events.includes('verified platform-c'));
+  assert.ok(!r.events.includes('publish launcher'));
+});
+test('a rerun verifies existing versions and publishes only the absent ones', async () => {
+  const r = registry({ existing: ['platform-a', 'platform-c'] });
+  await publishAll(platforms, 'launcher', r.operations, r.timing);
+  assert.deepEqual(r.events.filter(e => e.startsWith('publish')), ['publish platform-b', 'publish launcher']);
+  assert.equal(r.events.filter(e => e.startsWith('verified')).length, 4);
+});
+test('only not-yet-visible conditions are retried', async () => {
+  assert.equal(notYetInstallable('npm error code ETARGET\nnpm error notarget No matching version'), true);
+  assert.equal(notYetInstallable('npm error code E404\nnpm error 404 Not Found'), true);
+  assert.equal(notYetInstallable('npm error code EINTEGRITY'), false);
+  assert.equal(notYetInstallable(undefined), false);
+  assert.throws(() => checkProvenance({ invalid: [], missing: ['attestations'] }, pkg, context, bytes), NotReady);
+  assert.throws(() => checkProvenance({ invalid: ['bad signature'], missing: ['attestations'] }, pkg, context, bytes),
+    e => !(e instanceof NotReady));
+  const timing = { sleep: async () => {}, now: () => 0, log: () => {} };
+  let calls = 0;
+  await assert.rejects(untilReady(async () => { calls++; throw Error('differs'); }, 'x', timing), /differs/);
+  assert.equal(calls, 1);
 });

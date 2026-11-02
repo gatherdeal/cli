@@ -175,8 +175,10 @@ jobs:
       # Trusted publishing (OIDC). A package that does not exist on npm yet
       # cannot have a trusted publisher, so its first publish uses the
       # release environment's NPM_TOKEN secret; npm prefers OIDC whenever it
-      # is configured. Every existing version must match the packed bytes and
-      # verified provenance; launcher is last.
+      # is configured. Platform packages publish in parallel; every version,
+      # new or existing, must match the packed bytes and verified provenance,
+      # and the script waits for the registry to serve new versions. The
+      # launcher is last, after every platform package verifies.
       - name: publish missing npm packages and verify all versions
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
