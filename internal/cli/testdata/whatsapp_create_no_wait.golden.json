@@ -1,0 +1,49 @@
+{
+  "data": {
+    "action": {
+      "instruction": "A person must open WhatsApp → Linked devices → Link with phone number instead and enter the pairing code. Never request a new code while the person is typing it.",
+      "type": "pair_whatsapp"
+    },
+    "agent_id": "55555555-5555-5555-5555-555555555555",
+    "expires_at": "2026-10-24T10:10:00Z",
+    "pairing_code": "ABCD-EFGH",
+    "pairing_url": "https://passport.gatherdeal.ai/whatsapp/pairing/55555555-5555-5555-5555-555555555555?org=acme",
+    "status": "pending"
+  },
+  "error": {
+    "code": "CLI_PAIRING_PENDING",
+    "message": "a person must pair this WhatsApp API agent",
+    "retryable": false
+  },
+  "exit_code": 9,
+  "meta": {
+    "context": {
+      "binding": {
+        "organization": {
+          "code": "acme",
+          "id": "22222222-2222-2222-2222-222222222222",
+          "name": "Acme Sdn Bhd"
+        },
+        "principal_id": "44444444-4444-4444-4444-444444444444"
+      },
+      "issuer": "https://api.gatherdeal.com/oidc",
+      "profile": "default",
+      "request": {
+        "outlet_ids": [
+          "33333333-3333-3333-3333-333333333333"
+        ]
+      },
+      "server": "https://api.gatherdeal.ai"
+    },
+    "correlation_id": "corr-test",
+    "credential_expires_at": "2030-01-01T00:00:00Z",
+    "profile": "default",
+    "server": "https://api.gatherdeal.ai",
+    "write": {
+      "dry_run": false,
+      "idempotency_key": "create-one"
+    }
+  },
+  "schema_version": 1,
+  "status": "error"
+}

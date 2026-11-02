@@ -1,0 +1,19 @@
+{
+  "description": "A retryable problem carries its retry hint.",
+  "response": {
+    "status": 503,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "Retry-After": "30",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/UNAVAILABLE\",\"title\":\"The service is temporarily unavailable. Try again later.\",\"status\":503,\"instance\":\"urn:gatherdeal:request:corr-1\",\"code\":\"UNAVAILABLE\",\"retryable\":true,\"correlation_id\":\"corr-1\",\"retry_after_ms\":30000}"
+  },
+  "expect": {
+    "kind": "problem",
+    "status": 503,
+    "code": "UNAVAILABLE",
+    "retryable": true,
+    "retry_after_ms": 30000
+  }
+}

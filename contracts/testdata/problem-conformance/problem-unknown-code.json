@@ -1,0 +1,17 @@
+{
+  "description": "A code the client does not know is still a problem; clients keep the code and the raw details.",
+  "response": {
+    "status": 422,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "Content-Language": "ms",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/FUTURE_SERVICE_NEW_CONDITION\",\"title\":\"Keadaan baharu.\",\"status\":422,\"instance\":\"urn:gatherdeal:request:corr-1\",\"code\":\"FUTURE_SERVICE_NEW_CONDITION\",\"retryable\":false,\"correlation_id\":\"corr-1\",\"details\":{\"since\":\"2030-01-01\"}}"
+  },
+  "expect": {
+    "kind": "problem",
+    "status": 422,
+    "code": "FUTURE_SERVICE_NEW_CONDITION"
+  }
+}

@@ -1,0 +1,57 @@
+# GoReleaser builds the archives and checksums.txt only. The release
+# workflow (.github/workflows/release.yml) then writes release.json, signs
+# it and checksums.txt with Sigstore, verifies and smoke-tests the result,
+# drafts the GitHub release and publishes it and npm after the smoke matrix.
+# No secrets are referenced here.
+version: 2
+
+project_name: gatherdeal
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: gatherdeal
+    main: ./cmd/gatherdeal
+    binary: gatherdeal
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/gatherdeal/cli/internal/buildinfo.Version={{ .Version }}
+      - -X github.com/gatherdeal/cli/internal/buildinfo.Commit={{ .FullCommit }}
+      - -X github.com/gatherdeal/cli/internal/buildinfo.Date={{ .CommitDate }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE
+      - NOTICE
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  use: git
+  sort: asc
+
+release:
+  # The workflow creates the release with gh after signing and verifying.
+  disable: true

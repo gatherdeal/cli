@@ -1,0 +1,187 @@
+name: release
+
+# The release identity: this file, on a v* tag push, in this repository.
+# `gatherdeal update` and cmd/releasecheck accept a release only when its
+# release.json is Sigstore-signed by exactly
+#   https://github.com/gatherdeal/cli/.github/workflows/release.yml@refs/tags/v<version>
+# Renaming or moving this workflow needs a transition release first.
+on:
+  push:
+    tags: ["v*"]
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build or restore verified assets
+    runs-on: ubuntu-24.04
+    # Protected environment: a maintainer approves before anything is signed.
+    environment: release
+    permissions:
+      contents: read
+      actions: read # restore the original artifact on a full rerun
+      id-token: write # Sigstore keyless signing and attestations
+      attestations: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - id: version
+        name: version from the tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if ! [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "tag $GITHUB_REF_NAME is not v<semver>" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$version" == *-* ]]; then echo "prerelease=true"; else echo "prerelease=false"; fi >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - id: restore
+        name: restore original assets on retries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release-github.mjs restore
+      - name: embedded Sigstore trusted root is current
+        if: steps.restore.outputs.restored != 'true'
+        run: go run ./cmd/releasecheck trusted-root
+      - uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        if: steps.restore.outputs.restored != 'true'
+        with:
+          distribution: goreleaser
+          version: v2.19.0
+          args: release --clean --skip=publish,announce
+      - name: release.json
+        if: steps.restore.outputs.restored != 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: go run ./cmd/releasecheck manifest -dist dist -version "$VERSION"
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        if: steps.restore.outputs.restored != 'true'
+        with:
+          cosign-release: v3.1.4
+      - name: sign release.json and checksums.txt (Sigstore keyless)
+        if: steps.restore.outputs.restored != 'true'
+        run: |
+          for f in release.json checksums.txt; do
+            cosign sign-blob --yes --bundle "dist/$f.sigstore.json" "dist/$f"
+          done
+      - name: collect the release assets
+        if: steps.restore.outputs.restored != 'true'
+        run: |
+          mkdir assets
+          cp dist/*.tar.gz dist/*.zip dist/checksums.txt dist/checksums.txt.sigstore.json \
+             dist/release.json dist/release.json.sigstore.json assets/
+      - name: verify as clients will, and run the candidate
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          go run ./cmd/releasecheck extract -dir assets -version "$VERSION" -out verified
+          go run ./cmd/releasecheck verify -dir assets -version "$VERSION" -exec
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        if: steps.restore.outputs.restored != 'true'
+        with:
+          subject-path: |
+            assets/*.tar.gz
+            assets/*.zip
+            assets/release.json
+            assets/checksums.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.restore.outputs.upload == 'true'
+        with:
+          name: release-assets
+          path: assets/
+          if-no-files-found: error
+          retention-days: 90
+
+  smoke:
+    name: smoke test (${{ matrix.runner }})
+    needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel, windows-2025, windows-11-arm]
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-assets
+          path: assets
+      # The same bytes as the draft release: verify the signatures, this
+      # runner's archive and binary, then execute the candidate.
+      - name: verify and run the candidate
+        shell: bash
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: go run ./cmd/releasecheck verify -dir assets -version "$VERSION" -exec
+
+  publish:
+    name: publish release and npm
+    needs: [build, smoke]
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      contents: write # publish the draft
+      id-token: write # npm trusted publishing with provenance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-assets
+          path: assets
+      - name: npm packages from the verified binaries
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          go run ./cmd/releasecheck extract -dir assets -version "$VERSION" -out dist
+          node npm/scripts/assemble.mjs "$VERSION"
+      - name: create or reconcile the draft (never replace assets)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release-github.mjs draft
+      # Trusted publishing (OIDC). A package that does not exist on npm yet
+      # cannot have a trusted publisher, so its first publish uses the
+      # release environment's NPM_TOKEN secret; npm prefers OIDC whenever it
+      # is configured. Every existing version must match the packed bytes and
+      # verified provenance; launcher is last.
+      - name: publish missing npm packages and verify all versions
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: node scripts/release-npm.mjs
+      - name: make the complete GitHub release public
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release-github.mjs finalize

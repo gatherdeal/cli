@@ -1,0 +1,16 @@
+{
+  "description": "A record member that is not an object is still a problem, without a record.",
+  "response": {
+    "status": 422,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/INFERENCE_INSUFFICIENT_CREDITS\",\"title\":\"Insufficient AI credits for this request.\",\"status\":422,\"instance\":\"urn:gatherdeal:request:corr-1\",\"code\":\"INFERENCE_INSUFFICIENT_CREDITS\",\"retryable\":false,\"correlation_id\":\"corr-1\",\"record\":\"019a2b3c-4d5e-7f60-8a9b-0c1d2e3f4a5b\"}"
+  },
+  "expect": {
+    "kind": "problem",
+    "status": 422,
+    "code": "INFERENCE_INSUFFICIENT_CREDITS"
+  }
+}

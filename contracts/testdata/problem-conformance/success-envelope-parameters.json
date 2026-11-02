@@ -1,0 +1,15 @@
+{
+  "description": "A 2xx application/json success envelope with media-type parameters is a success.",
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"status\":\"success\",\"contact\":{\"id\":\"c1\"}}"
+  },
+  "expect": {
+    "kind": "success",
+    "status": 200
+  }
+}

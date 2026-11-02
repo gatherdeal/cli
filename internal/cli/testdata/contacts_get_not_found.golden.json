@@ -1,0 +1,50 @@
+{
+  "data": null,
+  "error": {
+    "code": "CRM_CONTACT_NOT_FOUND",
+    "correlation_id": "corr-test",
+    "details": {
+      "contact_id": "55555555-5555-5555-5555-555555555555"
+    },
+    "http_status": 404,
+    "message": "Contact not found.",
+    "problem": {
+      "code": "CRM_CONTACT_NOT_FOUND",
+      "correlation_id": "corr-test",
+      "details": {
+        "contact_id": "55555555-5555-5555-5555-555555555555"
+      },
+      "retryable": false,
+      "status": 404,
+      "title": "Contact not found.",
+      "type": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_NOT_FOUND"
+    },
+    "retryable": false
+  },
+  "exit_code": 5,
+  "hint": "The contact does not exist or is outside the outlets this access may read.",
+  "meta": {
+    "context": {
+      "binding": {
+        "organization": {
+          "code": "acme",
+          "id": "22222222-2222-2222-2222-222222222222",
+          "name": "Acme Sdn Bhd"
+        },
+        "principal_id": "44444444-4444-4444-4444-444444444444"
+      },
+      "issuer": "https://api.gatherdeal.com/oidc",
+      "profile": "default",
+      "request": {
+        "outlet_ids": []
+      },
+      "server": "https://api.gatherdeal.ai"
+    },
+    "correlation_id": "corr-test",
+    "credential_expires_at": "2030-01-01T00:00:00Z",
+    "profile": "default",
+    "server": "https://api.gatherdeal.ai"
+  },
+  "schema_version": 1,
+  "status": "error"
+}

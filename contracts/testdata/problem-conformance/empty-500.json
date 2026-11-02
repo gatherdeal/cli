@@ -1,0 +1,14 @@
+{
+  "description": "A non-2xx response without a body or Content-Type is a status-only error.",
+  "response": {
+    "status": 500,
+    "headers": {
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": ""
+  },
+  "expect": {
+    "kind": "status",
+    "status": 500
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "description": "A problem document without a code is a protocol error.",
+  "response": {
+    "status": 422,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"about:blank\",\"title\":\"Unprocessable\",\"status\":422}"
+  },
+  "expect": {
+    "kind": "protocol",
+    "status": 422
+  }
+}

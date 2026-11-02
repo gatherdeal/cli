@@ -1,0 +1,45 @@
+{
+  "data": [
+    {
+      "address": {
+        "city": "Kuala Lumpur"
+      },
+      "business_hours_revision": 0,
+      "code": "HQ",
+      "currency": "MYR",
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "Head office"
+    }
+  ],
+  "exit_code": 0,
+  "meta": {
+    "context": {
+      "binding": {
+        "organization": {
+          "code": "acme",
+          "id": "22222222-2222-2222-2222-222222222222",
+          "name": "Acme Sdn Bhd"
+        },
+        "principal_id": "44444444-4444-4444-4444-444444444444"
+      },
+      "issuer": "https://api.gatherdeal.com/oidc",
+      "profile": "default",
+      "request": {
+        "outlet_ids": []
+      },
+      "server": "https://api.gatherdeal.ai"
+    },
+    "correlation_id": "corr-test",
+    "credential_expires_at": "2030-01-01T00:00:00Z",
+    "page_info": {
+      "has_next_page": false,
+      "has_prev_page": false,
+      "page": 1,
+      "page_size": 1
+    },
+    "profile": "default",
+    "server": "https://api.gatherdeal.ai"
+  },
+  "schema_version": 1,
+  "status": "success"
+}

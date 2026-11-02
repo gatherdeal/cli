@@ -1,0 +1,22 @@
+{
+  "name": "@gatherdeal/cli-linux-arm64",
+  "version": "0.0.0",
+  "description": "The gatherdeal CLI binary for linux-arm64. Install @gatherdeal/cli instead.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gatherdeal/cli.git"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "files": [
+    "bin/gatherdeal",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "preferUnplugged": true
+}

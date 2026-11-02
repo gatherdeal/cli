@@ -1,0 +1,15 @@
+{
+  "description": "A problem document with a 2xx status is a protocol error.",
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/NOT_FOUND\",\"title\":\"The requested resource was not found.\",\"status\":404,\"instance\":\"urn:gatherdeal:request:corr-1\",\"code\":\"NOT_FOUND\",\"retryable\":false,\"correlation_id\":\"corr-1\"}"
+  },
+  "expect": {
+    "kind": "protocol",
+    "status": 200
+  }
+}

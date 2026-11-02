@@ -1,0 +1,2682 @@
+{
+  "format_version": 1,
+  "bundles": [
+    {
+      "service": "crm",
+      "version": "v1",
+      "server": "https://api.gatherdeal.ai",
+      "service_path": "/crm",
+      "contract": "contracts/crm/v1/openapi.json",
+      "go_package": "internal/generated/crm/v1",
+      "digest": "sha256:28582ece8c019992563a3da5dee11082019f6a21ccaf70dbf57e33db7358dc3b",
+      "source_commit": "ccbf775379735be32fe07efcd9d643513bb527f0",
+      "utilities_version": "v0.0.0-20261102024059-937a84032c54",
+      "operations": [
+        {
+          "public_id": "crm.contacts.get",
+          "command": "crm contacts get",
+          "tool": "crm_contacts_get",
+          "method": "GET",
+          "path": "/v1/contacts/:id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "crm.contact.read"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "delegated_expansions": [
+            "with_attributes",
+            "with_emails",
+            "with_phones",
+            "with_tags"
+          ],
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchContactByID",
+          "input_type": "FetchContactByIDInput",
+          "output_type": "FetchContactByIDOutput"
+        },
+        {
+          "public_id": "crm.contacts.list",
+          "command": "crm contacts list",
+          "tool": "crm_contacts_list",
+          "method": "GET",
+          "path": "/v1/contacts",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "crm.contact.read"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "delegated_edge_filters": [
+            "tags"
+          ],
+          "delegated_expansions": [
+            "with_attributes",
+            "with_emails",
+            "with_phones",
+            "with_tags"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "contacts",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchContacts",
+          "input_type": "FetchContactsInput",
+          "output_type": "FetchContactsOutput"
+        }
+      ],
+      "errors": [
+        {
+          "code": "BAD_REQUEST",
+          "type": "https://docs.gatherdeal.ai/errors/BAD_REQUEST",
+          "status": 400,
+          "retryable": false,
+          "title": "The request is invalid.",
+          "schema": "#/components/schemas/BadRequestProblem"
+        },
+        {
+          "code": "CLIENT_CLOSED_REQUEST",
+          "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
+          "status": 499,
+          "retryable": false,
+          "title": "The client closed the request.",
+          "schema": "#/components/schemas/ClientClosedRequestProblem"
+        },
+        {
+          "code": "CLIENT_UPGRADE_REQUIRED",
+          "type": "https://docs.gatherdeal.ai/errors/CLIENT_UPGRADE_REQUIRED",
+          "status": 426,
+          "retryable": false,
+          "title": "This client version is no longer supported. Update the client to continue.",
+          "schema": "#/components/schemas/ClientUpgradeRequiredProblem"
+        },
+        {
+          "code": "CRM_CONTACT_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Contact not found.",
+          "schema": "#/components/schemas/CRMContactNotFoundProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The credential audience does not match this resource.",
+          "schema": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+          "status": 401,
+          "retryable": false,
+          "title": "Delegated access credentials must be sent in the Authorization header.",
+          "schema": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access does not allow this operation.",
+          "schema": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This expansion is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+          "status": 403,
+          "retryable": false,
+          "title": "The organization is not entitled to delegated access through MCP.",
+          "schema": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This filter is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "Delegated access cannot impersonate.",
+          "schema": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_INACTIVE",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_INACTIVE",
+          "status": 401,
+          "retryable": false,
+          "title": "The delegated access is no longer active.",
+          "schema": "#/components/schemas/DelegatedAccessInactiveProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This credential kind is not available on this resource.",
+          "schema": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The selected organization does not match the delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "The selected outlet is outside the delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PERMISSION_DENIED",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access lacks a required permission.",
+          "schema": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access's user is no longer eligible in its organization.",
+          "schema": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This route is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_TARGET_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The credential target does not match this service.",
+          "schema": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_UNSUPPORTED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_UNSUPPORTED",
+          "status": 401,
+          "retryable": false,
+          "title": "The caller does not support delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+        },
+        {
+          "code": "FORBIDDEN",
+          "type": "https://docs.gatherdeal.ai/errors/FORBIDDEN",
+          "status": 403,
+          "retryable": false,
+          "title": "You do not have permission to perform this action.",
+          "schema": "#/components/schemas/ForbiddenProblem"
+        },
+        {
+          "code": "INTERNAL_ERROR",
+          "type": "https://docs.gatherdeal.ai/errors/INTERNAL_ERROR",
+          "status": 500,
+          "retryable": false,
+          "title": "Internal server error.",
+          "schema": "#/components/schemas/InternalErrorProblem"
+        },
+        {
+          "code": "PAGINATION_CURSOR_INVALID",
+          "type": "https://docs.gatherdeal.ai/errors/PAGINATION_CURSOR_INVALID",
+          "status": 400,
+          "retryable": false,
+          "title": "The pagination cursor is invalid.",
+          "schema": "#/components/schemas/PaginationCursorInvalidProblem"
+        },
+        {
+          "code": "PAGINATION_PARAMS_INVALID",
+          "type": "https://docs.gatherdeal.ai/errors/PAGINATION_PARAMS_INVALID",
+          "status": 400,
+          "retryable": false,
+          "title": "The pagination parameters are invalid.",
+          "schema": "#/components/schemas/PaginationParamsInvalidProblem"
+        },
+        {
+          "code": "UNAUTHORIZED",
+          "type": "https://docs.gatherdeal.ai/errors/UNAUTHORIZED",
+          "status": 401,
+          "retryable": false,
+          "title": "Authentication is required.",
+          "schema": "#/components/schemas/UnauthorizedProblem"
+        },
+        {
+          "code": "VALIDATION_FAILED",
+          "type": "https://docs.gatherdeal.ai/errors/VALIDATION_FAILED",
+          "status": 422,
+          "retryable": false,
+          "title": "Some fields are invalid.",
+          "schema": "#/components/schemas/ValidationFailedProblem"
+        }
+      ]
+    },
+    {
+      "service": "identity",
+      "version": "v1",
+      "server": "https://api.gatherdeal.ai",
+      "service_path": "/identity",
+      "contract": "contracts/identity/v1/openapi.json",
+      "go_package": "internal/generated/identity/v1",
+      "digest": "sha256:968f3d518f34cd4d0a16d728bab321dcc6cc020b2acd6b0af20a2e407f4328a3",
+      "source_commit": "4d2e20b01afd0a2f5ab5fc56468fb43cdd68669d",
+      "utilities_version": "v0.0.0-20261102024059-937a84032c54",
+      "operations": [
+        {
+          "public_id": "identity.outlets.list",
+          "command": "identity outlets list",
+          "tool": "identity_outlets_list",
+          "method": "GET",
+          "path": "/v1/outlets",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "identity.outlet.read"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "delegated_expansions": [
+            "with_organization",
+            "with_owner"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "outlets",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchOutlets",
+          "input_type": "FetchOutletsInput",
+          "output_type": "FetchOutletsOutput"
+        }
+      ],
+      "errors": [
+        {
+          "code": "BAD_REQUEST",
+          "type": "https://docs.gatherdeal.ai/errors/BAD_REQUEST",
+          "status": 400,
+          "retryable": false,
+          "title": "The request is invalid.",
+          "schema": "#/components/schemas/BadRequestProblem"
+        },
+        {
+          "code": "CLIENT_CLOSED_REQUEST",
+          "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
+          "status": 499,
+          "retryable": false,
+          "title": "The client closed the request.",
+          "schema": "#/components/schemas/ClientClosedRequestProblem"
+        },
+        {
+          "code": "CLIENT_UPGRADE_REQUIRED",
+          "type": "https://docs.gatherdeal.ai/errors/CLIENT_UPGRADE_REQUIRED",
+          "status": 426,
+          "retryable": false,
+          "title": "This client version is no longer supported. Update the client to continue.",
+          "schema": "#/components/schemas/ClientUpgradeRequiredProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The credential audience does not match this resource.",
+          "schema": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+          "status": 401,
+          "retryable": false,
+          "title": "Delegated access credentials must be sent in the Authorization header.",
+          "schema": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access does not allow this operation.",
+          "schema": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This expansion is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+          "status": 403,
+          "retryable": false,
+          "title": "The organization is not entitled to delegated access through MCP.",
+          "schema": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This filter is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "Delegated access cannot impersonate.",
+          "schema": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_INACTIVE",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_INACTIVE",
+          "status": 401,
+          "retryable": false,
+          "title": "The delegated access is no longer active.",
+          "schema": "#/components/schemas/DelegatedAccessInactiveProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This credential kind is not available on this resource.",
+          "schema": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The selected organization does not match the delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "The selected outlet is outside the delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PERMISSION_DENIED",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access lacks a required permission.",
+          "schema": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access's user is no longer eligible in its organization.",
+          "schema": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This route is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_TARGET_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The credential target does not match this service.",
+          "schema": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_UNSUPPORTED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_UNSUPPORTED",
+          "status": 401,
+          "retryable": false,
+          "title": "The caller does not support delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+        },
+        {
+          "code": "FORBIDDEN",
+          "type": "https://docs.gatherdeal.ai/errors/FORBIDDEN",
+          "status": 403,
+          "retryable": false,
+          "title": "You do not have permission to perform this action.",
+          "schema": "#/components/schemas/ForbiddenProblem"
+        },
+        {
+          "code": "INTERNAL_ERROR",
+          "type": "https://docs.gatherdeal.ai/errors/INTERNAL_ERROR",
+          "status": 500,
+          "retryable": false,
+          "title": "Internal server error.",
+          "schema": "#/components/schemas/InternalErrorProblem"
+        },
+        {
+          "code": "PAGINATION_CURSOR_INVALID",
+          "type": "https://docs.gatherdeal.ai/errors/PAGINATION_CURSOR_INVALID",
+          "status": 400,
+          "retryable": false,
+          "title": "The pagination cursor is invalid.",
+          "schema": "#/components/schemas/PaginationCursorInvalidProblem"
+        },
+        {
+          "code": "PAGINATION_PARAMS_INVALID",
+          "type": "https://docs.gatherdeal.ai/errors/PAGINATION_PARAMS_INVALID",
+          "status": 400,
+          "retryable": false,
+          "title": "The pagination parameters are invalid.",
+          "schema": "#/components/schemas/PaginationParamsInvalidProblem"
+        },
+        {
+          "code": "UNAUTHORIZED",
+          "type": "https://docs.gatherdeal.ai/errors/UNAUTHORIZED",
+          "status": 401,
+          "retryable": false,
+          "title": "Authentication is required.",
+          "schema": "#/components/schemas/UnauthorizedProblem"
+        },
+        {
+          "code": "VALIDATION_FAILED",
+          "type": "https://docs.gatherdeal.ai/errors/VALIDATION_FAILED",
+          "status": 422,
+          "retryable": false,
+          "title": "Some fields are invalid.",
+          "schema": "#/components/schemas/ValidationFailedProblem"
+        }
+      ]
+    },
+    {
+      "service": "whatsapp",
+      "version": "v1",
+      "server": "https://api.gatherdeal.ai",
+      "service_path": "/whatsapp",
+      "contract": "contracts/whatsapp/v1/openapi.json",
+      "go_package": "internal/generated/whatsapp/v1",
+      "digest": "sha256:fb9ffcf1d9d955a2fe35949cdc4705f30bf3ea2dcf56cddbd370978fb6459619",
+      "source_commit": "2e36d0ea5c1ce4d6932117008a0d0884dbaf4db0",
+      "utilities_version": "v0.0.0-20261102024059-937a84032c54",
+      "operations": [
+        {
+          "public_id": "whatsapp.agents.create",
+          "command": "whatsapp agents create",
+          "tool": "whatsapp_agents_create",
+          "method": "POST",
+          "path": "/v1/agents",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "whatsapp.agent.create"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "UNAVAILABLE",
+              "status": 503,
+              "retryable": true
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_OUTLET_INVALID",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_SLOT_LIMIT_REACHED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_REGISTRATION_QUEUE_FULL",
+              "status": 503,
+              "retryable": true
+            }
+          ],
+          "go_method": "CreateAgent",
+          "input_type": "CreateAgentInput",
+          "output_type": "CreateAgentOutput"
+        },
+        {
+          "public_id": "whatsapp.agents.delete",
+          "command": "whatsapp agents delete",
+          "tool": "whatsapp_agents_delete",
+          "method": "DELETE",
+          "path": "/v1/agents/:agent_id",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "whatsapp.agent.delete"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "DeleteAgent",
+          "input_type": "DeleteAgentInput",
+          "output_type": "DeleteAgentOutput"
+        },
+        {
+          "public_id": "whatsapp.agents.get",
+          "command": "whatsapp agents get",
+          "tool": "whatsapp_agents_get",
+          "method": "GET",
+          "path": "/v1/agents/:agent_id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "whatsapp.agent.read"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchAgent",
+          "input_type": "FetchAgentInput",
+          "output_type": "FetchAgentOutput"
+        },
+        {
+          "public_id": "whatsapp.agents.list",
+          "command": "whatsapp agents list",
+          "tool": "whatsapp_agents_list",
+          "method": "GET",
+          "path": "/v1/agents",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "whatsapp.agent.read"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "agents",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchAgents",
+          "input_type": "FetchAgentsInput",
+          "output_type": "FetchAgentsOutput"
+        },
+        {
+          "public_id": "whatsapp.agents.pairing",
+          "command": "whatsapp agents pairing",
+          "tool": "whatsapp_agents_pairing",
+          "method": "GET",
+          "path": "/v1/agents/:agent_id/pairing",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "whatsapp.agent.create"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchAgentPairing",
+          "input_type": "FetchAgentPairingInput",
+          "output_type": "FetchAgentPairingOutput"
+        },
+        {
+          "public_id": "whatsapp.agents.update",
+          "command": "whatsapp agents update",
+          "tool": "whatsapp_agents_update",
+          "method": "PATCH",
+          "path": "/v1/agents/:agent_id",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "whatsapp.agent.update"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PRECONDITION_FAILED",
+              "status": 412,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "UNAVAILABLE",
+              "status": 503,
+              "retryable": true
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_OUTLET_INVALID",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_SYSTEM_AGENT_UNASSIGNABLE",
+              "status": 409,
+              "retryable": false
+            }
+          ],
+          "go_method": "UpdateAgent",
+          "input_type": "UpdateAgentInput",
+          "output_type": "UpdateAgentOutput"
+        },
+        {
+          "public_id": "whatsapp.messages.create",
+          "command": "whatsapp messages create",
+          "tool": "whatsapp_messages_create",
+          "method": "POST",
+          "path": "/v1/messages",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "external",
+            "risks": [
+              "external_communication"
+            ]
+          },
+          "permissions": [
+            "whatsapp.message.create"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_NOT_READY",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_PENDING_MESSAGES_LIMIT_REACHED",
+              "status": 429,
+              "retryable": true
+            },
+            {
+              "code": "WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_SENDER_AGENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_SYSTEM_AGENT_UNAVAILABLE",
+              "status": 503,
+              "retryable": true
+            }
+          ],
+          "go_method": "CreateMessage",
+          "input_type": "CreateMessageInput",
+          "output_type": "CreateMessageOutput"
+        },
+        {
+          "public_id": "whatsapp.messages.get",
+          "command": "whatsapp messages get",
+          "tool": "whatsapp_messages_get",
+          "method": "GET",
+          "path": "/v1/messages/:message_id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "whatsapp.message.read"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_MESSAGE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchMessage",
+          "input_type": "FetchMessageInput",
+          "output_type": "FetchMessageOutput"
+        },
+        {
+          "public_id": "whatsapp.messages.list",
+          "command": "whatsapp messages list",
+          "tool": "whatsapp_messages_list",
+          "method": "GET",
+          "path": "/v1/messages",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": [
+            "whatsapp.message.read"
+          ],
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "messages",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchMessages",
+          "input_type": "FetchMessagesInput",
+          "output_type": "FetchMessagesOutput"
+        }
+      ],
+      "errors": [
+        {
+          "code": "BAD_REQUEST",
+          "type": "https://docs.gatherdeal.ai/errors/BAD_REQUEST",
+          "status": 400,
+          "retryable": false,
+          "title": "The request is invalid.",
+          "schema": "#/components/schemas/BadRequestProblem"
+        },
+        {
+          "code": "CLIENT_CLOSED_REQUEST",
+          "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
+          "status": 499,
+          "retryable": false,
+          "title": "The client closed the request.",
+          "schema": "#/components/schemas/ClientClosedRequestProblem"
+        },
+        {
+          "code": "CLIENT_UPGRADE_REQUIRED",
+          "type": "https://docs.gatherdeal.ai/errors/CLIENT_UPGRADE_REQUIRED",
+          "status": 426,
+          "retryable": false,
+          "title": "This client version is no longer supported. Update the client to continue.",
+          "schema": "#/components/schemas/ClientUpgradeRequiredProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The credential audience does not match this resource.",
+          "schema": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+          "status": 401,
+          "retryable": false,
+          "title": "Delegated access credentials must be sent in the Authorization header.",
+          "schema": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access does not allow this operation.",
+          "schema": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This expansion is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+          "status": 403,
+          "retryable": false,
+          "title": "The organization is not entitled to delegated access through MCP.",
+          "schema": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This filter is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "Delegated access cannot impersonate.",
+          "schema": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_INACTIVE",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_INACTIVE",
+          "status": 401,
+          "retryable": false,
+          "title": "The delegated access is no longer active.",
+          "schema": "#/components/schemas/DelegatedAccessInactiveProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This credential kind is not available on this resource.",
+          "schema": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The selected organization does not match the delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "The selected outlet is outside the delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PERMISSION_DENIED",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access lacks a required permission.",
+          "schema": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+          "status": 403,
+          "retryable": false,
+          "title": "The delegated access's user is no longer eligible in its organization.",
+          "schema": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This route is not available to delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_TARGET_MISMATCH",
+          "status": 403,
+          "retryable": false,
+          "title": "The credential target does not match this service.",
+          "schema": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_UNSUPPORTED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_UNSUPPORTED",
+          "status": 401,
+          "retryable": false,
+          "title": "The caller does not support delegated access.",
+          "schema": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+        },
+        {
+          "code": "FORBIDDEN",
+          "type": "https://docs.gatherdeal.ai/errors/FORBIDDEN",
+          "status": 403,
+          "retryable": false,
+          "title": "You do not have permission to perform this action.",
+          "schema": "#/components/schemas/ForbiddenProblem"
+        },
+        {
+          "code": "IDEMPOTENCY_KEY_CONFLICT",
+          "type": "https://docs.gatherdeal.ai/errors/IDEMPOTENCY_KEY_CONFLICT",
+          "status": 409,
+          "retryable": false,
+          "title": "The idempotency key is already bound to a different request.",
+          "schema": "#/components/schemas/IdempotencyKeyConflictProblem"
+        },
+        {
+          "code": "IDEMPOTENCY_KEY_REQUIRED",
+          "type": "https://docs.gatherdeal.ai/errors/IDEMPOTENCY_KEY_REQUIRED",
+          "status": 400,
+          "retryable": false,
+          "title": "A valid Idempotency-Key header is required.",
+          "schema": "#/components/schemas/IdempotencyKeyRequiredProblem"
+        },
+        {
+          "code": "INTERNAL_ERROR",
+          "type": "https://docs.gatherdeal.ai/errors/INTERNAL_ERROR",
+          "status": 500,
+          "retryable": false,
+          "title": "Internal server error.",
+          "schema": "#/components/schemas/InternalErrorProblem"
+        },
+        {
+          "code": "PAGINATION_CURSOR_INVALID",
+          "type": "https://docs.gatherdeal.ai/errors/PAGINATION_CURSOR_INVALID",
+          "status": 400,
+          "retryable": false,
+          "title": "The pagination cursor is invalid.",
+          "schema": "#/components/schemas/PaginationCursorInvalidProblem"
+        },
+        {
+          "code": "PAGINATION_PARAMS_INVALID",
+          "type": "https://docs.gatherdeal.ai/errors/PAGINATION_PARAMS_INVALID",
+          "status": 400,
+          "retryable": false,
+          "title": "The pagination parameters are invalid.",
+          "schema": "#/components/schemas/PaginationParamsInvalidProblem"
+        },
+        {
+          "code": "PRECONDITION_FAILED",
+          "type": "https://docs.gatherdeal.ai/errors/PRECONDITION_FAILED",
+          "status": 412,
+          "retryable": false,
+          "title": "A precondition of the request was not met.",
+          "schema": "#/components/schemas/PreconditionFailedProblem"
+        },
+        {
+          "code": "UNAUTHORIZED",
+          "type": "https://docs.gatherdeal.ai/errors/UNAUTHORIZED",
+          "status": 401,
+          "retryable": false,
+          "title": "Authentication is required.",
+          "schema": "#/components/schemas/UnauthorizedProblem"
+        },
+        {
+          "code": "UNAVAILABLE",
+          "type": "https://docs.gatherdeal.ai/errors/UNAVAILABLE",
+          "status": 503,
+          "retryable": true,
+          "title": "The service is temporarily unavailable. Try again later.",
+          "schema": "#/components/schemas/UnavailableProblem"
+        },
+        {
+          "code": "VALIDATION_FAILED",
+          "type": "https://docs.gatherdeal.ai/errors/VALIDATION_FAILED",
+          "status": 422,
+          "retryable": false,
+          "title": "Some fields are invalid.",
+          "schema": "#/components/schemas/ValidationFailedProblem"
+        },
+        {
+          "code": "WHATSAPP_AGENT_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_AGENT_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Agent not found.",
+          "schema": "#/components/schemas/WhatsAppAgentNotFoundProblem"
+        },
+        {
+          "code": "WHATSAPP_AGENT_NOT_READY",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_AGENT_NOT_READY",
+          "status": 409,
+          "retryable": false,
+          "title": "The agent must complete pairing before sending messages.",
+          "schema": "#/components/schemas/WhatsAppAgentNotReadyProblem"
+        },
+        {
+          "code": "WHATSAPP_AGENT_OUTLET_INVALID",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_AGENT_OUTLET_INVALID",
+          "status": 422,
+          "retryable": false,
+          "title": "Outlet must belong to the agent organization.",
+          "schema": "#/components/schemas/WhatsAppAgentOutletInvalidProblem"
+        },
+        {
+          "code": "WHATSAPP_AGENT_PENDING_MESSAGES_LIMIT_REACHED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_AGENT_PENDING_MESSAGES_LIMIT_REACHED",
+          "status": 429,
+          "retryable": true,
+          "title": "Too many messages are pending for this agent.",
+          "schema": "#/components/schemas/WhatsAppAgentPendingMessagesLimitReachedProblem"
+        },
+        {
+          "code": "WHATSAPP_AGENT_SLOT_LIMIT_REACHED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_AGENT_SLOT_LIMIT_REACHED",
+          "status": 422,
+          "retryable": false,
+          "title": "Your organization has no available WhatsApp API agent slot.",
+          "schema": "#/components/schemas/WhatsAppAgentSlotLimitReachedProblem"
+        },
+        {
+          "code": "WHATSAPP_MESSAGE_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_MESSAGE_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Message not found.",
+          "schema": "#/components/schemas/WhatsAppMessageNotFoundProblem"
+        },
+        {
+          "code": "WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED",
+          "status": 409,
+          "retryable": false,
+          "title": "This agent cannot send messages through the API. Create and pair a new agent.",
+          "schema": "#/components/schemas/WhatsAppMessageRuntimeUnsupportedProblem"
+        },
+        {
+          "code": "WHATSAPP_REGISTRATION_QUEUE_FULL",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_REGISTRATION_QUEUE_FULL",
+          "status": 503,
+          "retryable": true,
+          "title": "Too many registrations are waiting for capacity. Try again later.",
+          "schema": "#/components/schemas/WhatsAppRegistrationQueueFullProblem"
+        },
+        {
+          "code": "WHATSAPP_SENDER_AGENT_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_SENDER_AGENT_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "No agent is available to send this message.",
+          "schema": "#/components/schemas/WhatsAppSenderAgentNotFoundProblem"
+        },
+        {
+          "code": "WHATSAPP_SYSTEM_AGENT_UNASSIGNABLE",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_SYSTEM_AGENT_UNASSIGNABLE",
+          "status": 409,
+          "retryable": false,
+          "title": "This agent cannot be assigned to an organization or outlet.",
+          "schema": "#/components/schemas/WhatsAppSystemAgentUnassignableProblem"
+        },
+        {
+          "code": "WHATSAPP_SYSTEM_AGENT_UNAVAILABLE",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_SYSTEM_AGENT_UNAVAILABLE",
+          "status": 503,
+          "retryable": true,
+          "title": "Message sending is temporarily unavailable. Try again later.",
+          "schema": "#/components/schemas/WhatsAppSystemAgentUnavailableProblem"
+        }
+      ]
+    }
+  ]
+}

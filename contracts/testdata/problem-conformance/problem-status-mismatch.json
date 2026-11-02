@@ -1,0 +1,15 @@
+{
+  "description": "A problem whose status member differs from the status line is a protocol error.",
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/CONFLICT\",\"title\":\"The request conflicts with the current state of the resource.\",\"status\":409,\"instance\":\"urn:gatherdeal:request:corr-1\",\"code\":\"CONFLICT\",\"retryable\":false,\"correlation_id\":\"corr-1\"}"
+  },
+  "expect": {
+    "kind": "protocol",
+    "status": 404
+  }
+}

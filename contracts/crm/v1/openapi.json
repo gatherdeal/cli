@@ -1,0 +1,3934 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GatherDeal crm public API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.gatherdeal.ai/crm",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/v1/contacts": {
+      "get": {
+        "operationId": "fetchContacts",
+        "summary": "Fetch Contacts",
+        "tags": [
+          "contacts"
+        ],
+        "x-filter-fields": [
+          {
+            "name": "is_verified",
+            "kind": "bool",
+            "ops": [
+              "EQ"
+            ]
+          },
+          {
+            "name": "kind",
+            "kind": "enum",
+            "ops": [
+              "EQ",
+              "NEQ",
+              "IN",
+              "NOT_IN"
+            ],
+            "enumValues": [
+              "personal",
+              "company"
+            ]
+          },
+          {
+            "name": "name",
+            "kind": "string",
+            "ops": [
+              "EQ",
+              "NEQ",
+              "IN",
+              "NOT_IN",
+              "CONTAINS",
+              "STARTS_WITH",
+              "ENDS_WITH",
+              "EQ_FOLD",
+              "CONTAINS_FOLD",
+              "STARTS_WITH_FOLD",
+              "ENDS_WITH_FOLD"
+            ]
+          },
+          {
+            "name": "remark",
+            "kind": "string",
+            "optional": true,
+            "ops": [
+              "EQ",
+              "NEQ",
+              "IN",
+              "NOT_IN",
+              "CONTAINS",
+              "STARTS_WITH",
+              "ENDS_WITH",
+              "EQ_FOLD",
+              "CONTAINS_FOLD",
+              "STARTS_WITH_FOLD",
+              "ENDS_WITH_FOLD",
+              "IS_NULL",
+              "IS_NOT_NULL"
+            ]
+          }
+        ],
+        "x-gd-public-id": "crm.contacts.list",
+        "x-gd-effect": {
+          "mutation": "none",
+          "interaction": "closed",
+          "risks": []
+        },
+        "x-required-permissions": [
+          "crm.contact.read"
+        ],
+        "x-gd-idempotency": "safe",
+        "x-gd-outlet-scope": "filtered",
+        "x-gd-delegated-edge-filters": [
+          "tags"
+        ],
+        "x-gd-delegated-expansions": [
+          "with_attributes",
+          "with_emails",
+          "with_phones",
+          "with_tags"
+        ],
+        "x-gd-pagination": {
+          "style": "adaptive",
+          "page_param": "p",
+          "page_size_param": "count",
+          "after_param": "after",
+          "before_param": "before",
+          "total_param": "total",
+          "default_page_size": 20,
+          "max_page_size": 100,
+          "max_offset": 10000,
+          "result_field": "contacts",
+          "items_field": "data",
+          "page_field": "page",
+          "page_size_field": "page_size",
+          "has_next_page_field": "has_next_page",
+          "has_prev_page_field": "has_prev_page",
+          "next_cursor_field": "next_cursor",
+          "prev_cursor_field": "prev_cursor",
+          "total_items_field": "total_items",
+          "total_pages_field": "total_pages"
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "exclude_id",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ContactKind"
+            }
+          },
+          {
+            "name": "is_verified",
+            "in": "query",
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "phone_exact",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "phone",
+              "pattern": "^(?:\\+[1-9][0-9]+|(?:\\([1-9][0-9]*\\)|\\+[1-9][0-9]*[ -])(?:[ .-]*(?:[0-9]+|\\([ .-]*[0-9][0-9 .-]*\\)))+[ .-]*)$",
+              "examples": [
+                "+60 123456789",
+                "+60 12-345 6789",
+                "(60)123456789"
+              ],
+              "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+            }
+          },
+          {
+            "name": "has_phone",
+            "in": "query",
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "start_time",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end_time",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "tag_id",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "tag_id_conjunction",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Conjunction"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Free-text search query matched against searchable fields.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s",
+            "in": "query",
+            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "schema": {
+              "type": "string",
+              "pattern": "^(-?(?:create_at|name))(,-?(?:create_at|name))*$"
+            }
+          },
+          {
+            "name": "o",
+            "in": "query",
+            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter is the client-supplied filter group. Query and form parameters\nuse unpadded base64url-encoded JSON; JSON bodies use an object.",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Group"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "name": "p",
+            "in": "query",
+            "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque cursor: the page after this position. Pass a previous response's\nnext_cursor.",
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "description": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor.",
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          {
+            "name": "total",
+            "in": "query",
+            "description": "Whether to count matching rows. Default: exact in page mode, none in\ncursor mode.",
+            "schema": {
+              "$ref": "#/components/schemas/TotalMode"
+            }
+          },
+          {
+            "name": "with_phones",
+            "in": "query",
+            "description": "Include each contact's primary phone.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "with_emails",
+            "in": "query",
+            "description": "Include each contact's primary email.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "with_tags",
+            "in": "query",
+            "description": "Include each contact's tags and assignment details.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "with_attributes",
+            "in": "query",
+            "description": "Include each contact's attributes.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope (`status: \"success\"`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchContactsOutputEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: problem document (BAD_REQUEST, PAGINATION_CURSOR_INVALID, PAGINATION_PARAMS_INVALID)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PaginationCursorInvalidProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PaginationParamsInvalidProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem",
+                      "PAGINATION_CURSOR_INVALID": "#/components/schemas/PaginationCursorInvalidProblem",
+                      "PAGINATION_PARAMS_INVALID": "#/components/schemas/PaginationParamsInvalidProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: problem document (DELEGATED_ACCESS_CREDENTIAL_LOCATION, DELEGATED_ACCESS_INACTIVE, DELEGATED_ACCESS_UNSUPPORTED, UNAUTHORIZED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_CREDENTIAL_LOCATION": "#/components/schemas/DelegatedAccessCredentialLocationProblem",
+                      "DELEGATED_ACCESS_INACTIVE": "#/components/schemas/DelegatedAccessInactiveProblem",
+                      "DELEGATED_ACCESS_UNSUPPORTED": "#/components/schemas/DelegatedAccessUnsupportedProblem",
+                      "UNAUTHORIZED": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_AUDIENCE_MISMATCH": "#/components/schemas/DelegatedAccessAudienceMismatchProblem",
+                      "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem",
+                      "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem",
+                      "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem",
+                      "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
+                      "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
+                      "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
+                      "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
+                      "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
+                      "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
+                      "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
+                      "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Upgrade Required: problem document (CLIENT_UPGRADE_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Upgrade": {
+                "$ref": "#/components/headers/Upgrade"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "499": {
+            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/InternalErrorProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "INTERNAL_ERROR": "#/components/schemas/InternalErrorProblem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/contacts/{id}": {
+      "get": {
+        "operationId": "fetchContactByID",
+        "summary": "Fetch Contact By ID",
+        "tags": [
+          "contacts"
+        ],
+        "x-gd-public-id": "crm.contacts.get",
+        "x-gd-effect": {
+          "mutation": "none",
+          "interaction": "closed",
+          "risks": []
+        },
+        "x-required-permissions": [
+          "crm.contact.read"
+        ],
+        "x-gd-idempotency": "safe",
+        "x-gd-outlet-scope": "filtered",
+        "x-gd-delegated-expansions": [
+          "with_attributes",
+          "with_emails",
+          "with_phones",
+          "with_tags"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "with_phones",
+            "in": "query",
+            "description": "Include the contact's primary phone.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "with_emails",
+            "in": "query",
+            "description": "Include the contact's primary email.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "with_tags",
+            "in": "query",
+            "description": "Include the contact's tags and assignment details.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "with_attributes",
+            "in": "query",
+            "description": "Include the contact's attributes.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope (`status: \"success\"`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchContactByIDOutputEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: problem document (BAD_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: problem document (DELEGATED_ACCESS_CREDENTIAL_LOCATION, DELEGATED_ACCESS_INACTIVE, DELEGATED_ACCESS_UNSUPPORTED, UNAUTHORIZED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_CREDENTIAL_LOCATION": "#/components/schemas/DelegatedAccessCredentialLocationProblem",
+                      "DELEGATED_ACCESS_INACTIVE": "#/components/schemas/DelegatedAccessInactiveProblem",
+                      "DELEGATED_ACCESS_UNSUPPORTED": "#/components/schemas/DelegatedAccessUnsupportedProblem",
+                      "UNAUTHORIZED": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_AUDIENCE_MISMATCH": "#/components/schemas/DelegatedAccessAudienceMismatchProblem",
+                      "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem",
+                      "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem",
+                      "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem",
+                      "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
+                      "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
+                      "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
+                      "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
+                      "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
+                      "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
+                      "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
+                      "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found: problem document (CRM_CONTACT_NOT_FOUND)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CRMContactNotFoundProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CRM_CONTACT_NOT_FOUND": "#/components/schemas/CRMContactNotFoundProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Upgrade Required: problem document (CLIENT_UPGRADE_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Upgrade": {
+                "$ref": "#/components/headers/Upgrade"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "499": {
+            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/InternalErrorProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "INTERNAL_ERROR": "#/components/schemas/InternalErrorProblem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuditAgent": {
+        "type": "object",
+        "description": "Identifies the AI agent run that made the change using opaque identifiers.\nIncludes the approving user, if any.",
+        "properties": {
+          "agent_key": {
+            "type": "string"
+          },
+          "staff_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "execution_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "turn_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "turn_seq": {
+            "type": "integer"
+          },
+          "step_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "approved_by_user_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "agent_key",
+          "execution_id",
+          "turn_id",
+          "turn_seq",
+          "step_id"
+        ]
+      },
+      "BadRequestProblem": {
+        "type": "object",
+        "description": "BAD_REQUEST (400): The request is invalid.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/BAD_REQUEST",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The request is invalid.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 400
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "BAD_REQUEST"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
+      "CRMContactNotFoundProblem": {
+        "type": "object",
+        "description": "CRM_CONTACT_NOT_FOUND (404): Contact not found.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_NOT_FOUND",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Contact not found.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 404
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CRM_CONTACT_NOT_FOUND"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
+      "ClientClosedRequestProblem": {
+        "type": "object",
+        "description": "CLIENT_CLOSED_REQUEST (499): The client closed the request.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The client closed the request.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 499
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CLIENT_CLOSED_REQUEST"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
+      "ClientUpgradeRequiredDetails": {
+        "type": "object",
+        "description": "ClientUpgradeRequiredDetails are the details of CLIENT_UPGRADE_REQUIRED.",
+        "properties": {
+          "client": {
+            "type": "string",
+            "description": "Client is the user-agent product name, e.g. \"gatherdeal-cli\"."
+          },
+          "min_version": {
+            "type": "string",
+            "description": "MinVersion is the minimum accepted version (SemVer)."
+          },
+          "current_version": {
+            "type": "string",
+            "description": "CurrentVersion is the version the request presented."
+          }
+        },
+        "required": [
+          "client",
+          "min_version",
+          "current_version"
+        ]
+      },
+      "ClientUpgradeRequiredProblem": {
+        "type": "object",
+        "description": "CLIENT_UPGRADE_REQUIRED (426): This client version is no longer supported. Update the client to continue.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CLIENT_UPGRADE_REQUIRED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This client version is no longer supported. Update the client to continue.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 426
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CLIENT_UPGRADE_REQUIRED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/ClientUpgradeRequiredDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "Company": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "incorporation_country": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 3166-1 alpha-2"
+          }
+        }
+      },
+      "Conjunction": {
+        "type": "string",
+        "enum": [
+          "AND",
+          "OR"
+        ],
+        "description": "Conjunction represents a logical operator used to combine filter Rule values."
+      },
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "delete_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outlet_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "create_by_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ContactKind"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_image": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "preferred_language": {
+            "type": "string"
+          },
+          "customer_code": {
+            "type": "string"
+          },
+          "is_verified": {
+            "type": "boolean"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referrer_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ContactTagBrief"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "phones": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ContactPhone"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "emails": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ContactEmail"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ContactAttributeAssociation"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "person": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Person"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "company": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Company"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ContactAttribute": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "namespace": {
+            "$ref": "#/components/schemas/ContactAttributeNamespace"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ContactAttributeKind"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_enabled": {
+            "type": "boolean"
+          },
+          "is_required": {
+            "type": "boolean"
+          },
+          "is_unique": {
+            "type": "boolean"
+          },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ContactAttributeAssociation"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ContactAttributeAssociation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contact_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attribute_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contact": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Contact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attribute": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ContactAttribute"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ContactAttributeKind": {
+        "type": "string",
+        "enum": [
+          "text",
+          "number",
+          "select"
+        ],
+        "description": "ContactAttributeKind is the storage shape of an attribute value."
+      },
+      "ContactAttributeNamespace": {
+        "type": "string",
+        "enum": [
+          "system",
+          "custom"
+        ],
+        "description": "ContactAttributeNamespace partitions attributes between built-in\nsystem attributes and tenant-defined custom attributes."
+      },
+      "ContactEmail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "email": {
+            "type": "string"
+          },
+          "is_primary": {
+            "type": "boolean"
+          },
+          "contact_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contact": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Contact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ContactKind": {
+        "type": "string",
+        "enum": [
+          "personal",
+          "company"
+        ],
+        "description": "ContactKind represents the kind of contact (personal vs company)."
+      },
+      "ContactPhone": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "phone",
+            "pattern": "^(?:\\+[1-9][0-9]+|(?:\\([1-9][0-9]*\\)|\\+[1-9][0-9]*[ -])(?:[ .-]*(?:[0-9]+|\\([ .-]*[0-9][0-9 .-]*\\)))+[ .-]*)$",
+            "examples": [
+              "+60 123456789",
+              "+60 12-345 6789",
+              "(60)123456789"
+            ],
+            "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+          },
+          "is_primary": {
+            "type": "boolean"
+          },
+          "contact_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contact": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Contact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ContactTagBrief": {
+        "type": "object",
+        "description": "A tag's identifier, name, and assignment time, included when with_tags=true.\nAgent details are set when an AI agent made the assignment.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "agent": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuditAgent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "DelegatedAccessAudienceMismatchProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_AUDIENCE_MISMATCH (403): The credential audience does not match this resource.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The credential audience does not match this resource.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_AUDIENCE_MISMATCH"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessCredentialLocationProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_CREDENTIAL_LOCATION (401): Delegated access credentials must be sent in the Authorization header.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Delegated access credentials must be sent in the Authorization header.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 401
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_CREDENTIAL_LOCATION"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessDeniedDetails": {
+        "type": "object",
+        "description": "DelegatedAccessDeniedDetails are the details of a delegated-access refusal.",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/DelegatedAccessDenyReason"
+          },
+          "missing_permissions": {
+            "type": "array",
+            "description": "MissingPermissions lists the permission keys the access lacks (reason\nmissing_permissions).",
+            "items": {
+              "$ref": "#/components/schemas/PermissionKey"
+            }
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DelegatedAccessDenyReason": {
+        "type": "string",
+        "enum": [
+          "kind_not_allowed",
+          "audience_mismatch",
+          "target_mismatch",
+          "feature_not_entitled",
+          "route_not_allowed",
+          "missing_permissions",
+          "effect_not_allowed",
+          "outlet_not_allowed",
+          "organization_mismatch",
+          "filter_not_allowed",
+          "expansion_not_allowed",
+          "impersonation_not_allowed",
+          "credential_location",
+          "principal_inactive"
+        ],
+        "description": "DelegatedAccessDenyReason names why the delegated-access gate refused a\nrequest. It is the wire reason of every 403 DELEGATED_ACCESS_* code (and of\nthe 401 DELEGATED_ACCESS_CREDENTIAL_LOCATION)."
+      },
+      "DelegatedAccessEffectNotAllowedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED (403): The delegated access does not allow this operation.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The delegated access does not allow this operation.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessExpansionNotAllowedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED (403): This expansion is not available to delegated access.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This expansion is not available to delegated access.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessFeatureNotEntitledProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED (403): The organization is not entitled to delegated access through MCP.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The organization is not entitled to delegated access through MCP.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessFilterNotAllowedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED (403): This filter is not available to delegated access.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This filter is not available to delegated access.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessImpersonationNotAllowedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED (403): Delegated access cannot impersonate.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Delegated access cannot impersonate.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessInactiveDetails": {
+        "type": "object",
+        "description": "DelegatedAccessInactiveDetails are the details of DELEGATED_ACCESS_INACTIVE.",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/DelegatedAccessInactiveReason"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "DelegatedAccessInactiveProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_INACTIVE (401): The delegated access is no longer active.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_INACTIVE",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The delegated access is no longer active.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 401
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_INACTIVE"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessInactiveDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessInactiveReason": {
+        "type": "string",
+        "enum": [
+          "expired",
+          "idle",
+          "revoked"
+        ],
+        "description": "DelegatedAccessInactiveReason names why the server reports a delegated\ncredential inactive."
+      },
+      "DelegatedAccessKindNotAllowedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_KIND_NOT_ALLOWED (403): This credential kind is not available on this resource.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This credential kind is not available on this resource.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_KIND_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessOrganizationMismatchProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH (403): The selected organization does not match the delegated access.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The selected organization does not match the delegated access.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessOutletNotAllowedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED (403): The selected outlet is outside the delegated access.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The selected outlet is outside the delegated access.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessPermissionDeniedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_PERMISSION_DENIED (403): The delegated access lacks a required permission.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PERMISSION_DENIED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The delegated access lacks a required permission.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_PERMISSION_DENIED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessPrincipalInactiveProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE (403): The delegated access's user is no longer eligible in its organization.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The delegated access's user is no longer eligible in its organization.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessRouteNotAllowedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED (403): This route is not available to delegated access.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This route is not available to delegated access.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessTargetMismatchProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_TARGET_MISMATCH (403): The credential target does not match this service.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_TARGET_MISMATCH",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The credential target does not match this service.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_TARGET_MISMATCH"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessUnsupportedDetails": {
+        "type": "object",
+        "description": "DelegatedAccessUnsupportedDetails are the details of\nDELEGATED_ACCESS_UNSUPPORTED: ContractVersion is the minimum\ndelegated_access_contract_version the server requires.",
+        "properties": {
+          "contract_version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "contract_version"
+        ]
+      },
+      "DelegatedAccessUnsupportedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_UNSUPPORTED (401): The caller does not support delegated access.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_UNSUPPORTED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The caller does not support delegated access.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 401
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_UNSUPPORTED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessUnsupportedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "FetchContactByIDOutput": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Contact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "FetchContactByIDOutputEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FetchContactByIDOutput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "success"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        ]
+      },
+      "FetchContactsOutput": {
+        "type": "object",
+        "properties": {
+          "contacts": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ListPageContact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "FetchContactsOutputEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FetchContactsOutput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "success"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        ]
+      },
+      "ForbiddenProblem": {
+        "type": "object",
+        "description": "FORBIDDEN (403): You do not have permission to perform this action.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/FORBIDDEN",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"You do not have permission to perform this action.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "FORBIDDEN"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
+      "Group": {
+        "type": "object",
+        "description": "Group represents a recursive filter expression composed of Rule values\nand nested Group values combined by a Conjunction.\nWhen Group.Negated is true the entire group predicate is logically inverted.\n\nWhen Group.Edge is set, the group's rules and subgroups are evaluated\nagainst the named edge relation rather than the current entity. In that case\nGroup.Quantifier selects the quantifier (some/every/none) that governs\nhow the inner predicate applies across the related rows, and the rules'\nfield names are resolved against the target entity's registry rather than\nthe current one.",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Group"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Rule"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "conjunction": {
+            "$ref": "#/components/schemas/Conjunction"
+          },
+          "edge": {
+            "type": "string"
+          },
+          "quantifier": {
+            "$ref": "#/components/schemas/Quantifier"
+          },
+          "negated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "InternalErrorProblem": {
+        "type": "object",
+        "description": "INTERNAL_ERROR (500): Internal server error.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/INTERNAL_ERROR",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Internal server error.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 500
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "INTERNAL_ERROR"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
+      "ListPageContact": {
+        "type": "object",
+        "description": "ListPage is one page of a list in either mode.",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Contact"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "page_size": {
+            "type": "integer"
+          },
+          "has_next_page": {
+            "type": "boolean"
+          },
+          "has_prev_page": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "type": "string"
+          },
+          "prev_cursor": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "total_items": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "total_pages": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "page_size",
+          "has_next_page",
+          "has_prev_page"
+        ]
+      },
+      "Operator": {
+        "type": "string",
+        "enum": [
+          "EQ",
+          "NEQ",
+          "GT",
+          "GTE",
+          "LT",
+          "LTE",
+          "BETWEEN",
+          "IN",
+          "NOT_IN",
+          "CONTAINS",
+          "STARTS_WITH",
+          "ENDS_WITH",
+          "EQ_FOLD",
+          "CONTAINS_FOLD",
+          "STARTS_WITH_FOLD",
+          "ENDS_WITH_FOLD",
+          "IS_NULL",
+          "IS_NOT_NULL",
+          "DWITHIN"
+        ],
+        "description": "Operator represents a comparison operator used in a filter Rule."
+      },
+      "PaginationCursorInvalidDetails": {
+        "type": "object",
+        "description": "PaginationCursorInvalidDetails are the details of PAGINATION_CURSOR_INVALID.",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/PaginationCursorReason"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "PaginationCursorInvalidProblem": {
+        "type": "object",
+        "description": "PAGINATION_CURSOR_INVALID (400): The pagination cursor is invalid.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/PAGINATION_CURSOR_INVALID",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The pagination cursor is invalid.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 400
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "PAGINATION_CURSOR_INVALID"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/PaginationCursorInvalidDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "PaginationCursorReason": {
+        "type": "string",
+        "enum": [
+          "malformed",
+          "version",
+          "sort_mismatch",
+          "query_mismatch"
+        ],
+        "description": "PaginationCursorReason refines PAGINATION_CURSOR_INVALID."
+      },
+      "PaginationParamsInvalidDetails": {
+        "type": "object",
+        "description": "PaginationParamsInvalidDetails are the details of PAGINATION_PARAMS_INVALID.",
+        "properties": {
+          "reason": {
+            "$ref": "#/components/schemas/PaginationParamsReason"
+          },
+          "max_offset": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "MaxOffset is the offset cap, set with reason offset_too_large."
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "PaginationParamsInvalidProblem": {
+        "type": "object",
+        "description": "PAGINATION_PARAMS_INVALID (400): The pagination parameters are invalid.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/PAGINATION_PARAMS_INVALID",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The pagination parameters are invalid.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 400
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "PAGINATION_PARAMS_INVALID"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/PaginationParamsInvalidDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "PaginationParamsReason": {
+        "type": "string",
+        "enum": [
+          "selector_conflict",
+          "offset_too_large",
+          "sort_unknown",
+          "sort_not_seekable",
+          "total_invalid"
+        ],
+        "description": "PaginationParamsReason refines PAGINATION_PARAMS_INVALID."
+      },
+      "PermissionKey": {
+        "type": "string",
+        "enum": [
+          "crm.contact.read",
+          "identity.outlet.read",
+          "whatsapp.agent.create",
+          "whatsapp.agent.delete",
+          "whatsapp.agent.read",
+          "whatsapp.agent.update",
+          "whatsapp.message.create",
+          "whatsapp.message.read"
+        ],
+        "description": "Key identifies a cataloged service permission\n(\"<service>.<resource>.<action>\")."
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "birthday": {
+            "type": "string"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/PersonGender"
+          },
+          "nationality": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 3166-1 alpha-2"
+          },
+          "citizenship_country": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 3166-1 alpha-2"
+          },
+          "ethnicity": {
+            "type": "string"
+          }
+        }
+      },
+      "PersonGender": {
+        "type": "string",
+        "enum": [
+          "male",
+          "female",
+          "non_binary",
+          "other",
+          "prefer_not_to_say"
+        ],
+        "description": "PersonGender records the contact's reported gender."
+      },
+      "ProblemParameter": {
+        "type": "object",
+        "properties": {
+          "in": {
+            "type": "string",
+            "enum": [
+              "query",
+              "path",
+              "header"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "in",
+          "name"
+        ]
+      },
+      "ProblemRecord": {
+        "type": "object",
+        "description": "The durable record created by the failed call, present when the response identifies one. Never localized; never on item problems.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "inference_request"
+            ],
+            "description": "The record kind: the owning table or operation, which names the read that resolves id. Clients keep or ignore a kind they do not know."
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The record id, canonical lowercase UUID text."
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ]
+      },
+      "ProblemViolation": {
+        "description": "One field violation: exactly one of pointer and parameter locates it.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ProblemViolationAtPointer"
+          },
+          {
+            "$ref": "#/components/schemas/ProblemViolationAtParameter"
+          }
+        ]
+      },
+      "ProblemViolationAtParameter": {
+        "type": "object",
+        "description": "A violation located in a query, path or header parameter.",
+        "properties": {
+          "parameter": {
+            "$ref": "#/components/schemas/ProblemParameter"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/ProblemViolationRule"
+          },
+          "params": {
+            "$ref": "#/components/schemas/ProblemViolationParams"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized text rendered from the platform template for rule."
+          }
+        },
+        "required": [
+          "parameter",
+          "rule",
+          "detail"
+        ],
+        "not": {
+          "required": [
+            "pointer"
+          ]
+        }
+      },
+      "ProblemViolationAtPointer": {
+        "type": "object",
+        "description": "A violation located in the request body.",
+        "properties": {
+          "pointer": {
+            "type": "string",
+            "pattern": "^#(/.*)?$",
+            "description": "RFC 6901 JSON Pointer in URI fragment form into the request body (\"#\" is the root)."
+          },
+          "rule": {
+            "$ref": "#/components/schemas/ProblemViolationRule"
+          },
+          "params": {
+            "$ref": "#/components/schemas/ProblemViolationParams"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized text rendered from the platform template for rule."
+          }
+        },
+        "required": [
+          "pointer",
+          "rule",
+          "detail"
+        ],
+        "not": {
+          "required": [
+            "parameter"
+          ]
+        }
+      },
+      "ProblemViolationParams": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "number",
+            "description": "Lower bound of a number (min) or item count (min_items)."
+          },
+          "max": {
+            "type": "number",
+            "description": "Upper bound of a number (max) or item count (max_items)."
+          },
+          "min_length": {
+            "type": "integer"
+          },
+          "max_length": {
+            "type": "integer"
+          },
+          "allowed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "format": {
+            "type": "string"
+          }
+        }
+      },
+      "ProblemViolationRule": {
+        "type": "string",
+        "enum": [
+          "required",
+          "type",
+          "format",
+          "min",
+          "max",
+          "min_length",
+          "max_length",
+          "min_items",
+          "max_items",
+          "enum",
+          "pattern",
+          "unique",
+          "unknown_field",
+          "invalid"
+        ],
+        "description": "The violated rule; params carries its parameters."
+      },
+      "Quantifier": {
+        "type": "string",
+        "enum": [
+          "SOME",
+          "EVERY",
+          "NONE"
+        ],
+        "description": "Quantifier specifies how a set of conditions applies across the rows of a\nto-many relation (edge). It is used on a Group together with Group.Edge\nto express predicates of the form \"some/every/none related row matches\".\n\nOnly related rows the caller may read count: rows outside the caller's\ntenant scope or soft-deleted rows are treated as nonexistent by every\nquantifier."
+      },
+      "Rule": {
+        "type": "object",
+        "description": "Rule represents a single filter condition with a field name, an Operator,\nand a JSON-encoded comparison value.",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "op": {
+            "$ref": "#/components/schemas/Operator"
+          },
+          "value": {}
+        }
+      },
+      "TotalMode": {
+        "type": "string",
+        "enum": [
+          "exact",
+          "none"
+        ],
+        "description": "TotalMode selects whether a list response counts its rows."
+      },
+      "UnauthorizedProblem": {
+        "type": "object",
+        "description": "UNAUTHORIZED (401): Authentication is required.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/UNAUTHORIZED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Authentication is required.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 401
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "UNAUTHORIZED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
+      "ValidationFailedProblem": {
+        "type": "object",
+        "description": "VALIDATION_FAILED (422): Some fields are invalid.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/VALIDATION_FAILED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Some fields are invalid.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 422
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "VALIDATION_FAILED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemViolation"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "errors"
+        ]
+      }
+    },
+    "parameters": {
+      "AcceptLanguage": {
+        "name": "Accept-Language",
+        "in": "header",
+        "description": "Language of problem title/detail texts (RFC 9110 §12.5.4, RFC 4647 lookup). Supported: en, ms, zh-Hans, zh-Hant; zh-CN/zh-SG/zh → zh-Hans, zh-TW/zh-HK/zh-MO → zh-Hant; anything else falls back to en. Success responses never vary by language.",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "en",
+                "ms",
+                "zh-Hans",
+                "zh-Hant"
+              ]
+            },
+            {
+              "type": "string",
+              "description": "Any weighted language-range list, e.g. \"ms-MY, en;q=0.8\"."
+            }
+          ]
+        }
+      }
+    },
+    "headers": {
+      "CorrelationId": {
+        "description": "Correlation id of the request (the problem's correlation_id); the lookup key in logs and traces.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ProblemCacheControl": {
+        "description": "Errors are never cached.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "const": "no-store"
+        }
+      },
+      "ProblemContentLanguage": {
+        "description": "Languages used in the problem text: the negotiated language, plus en when some text fell back to English (e.g. \"ms, en\").",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ProblemVary": {
+        "description": "Always lists Accept-Language (merged with other tokens such as Accept-Encoding).",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Upgrade": {
+        "description": "<client>/<min_version> of the client release the server requires (e.g. gatherdeal-cli/1.4.0). No protocol switch is offered; act on code and details.min_version.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "x-gd-errors": [
+    {
+      "code": "CRM_CONTACT_NOT_FOUND",
+      "type": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_NOT_FOUND",
+      "status": 404,
+      "retryable": false,
+      "title": "Contact not found.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/CRMContactNotFoundProblem"
+      }
+    },
+    {
+      "code": "BAD_REQUEST",
+      "type": "https://docs.gatherdeal.ai/errors/BAD_REQUEST",
+      "status": 400,
+      "retryable": false,
+      "title": "The request is invalid.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/BadRequestProblem"
+      }
+    },
+    {
+      "code": "VALIDATION_FAILED",
+      "type": "https://docs.gatherdeal.ai/errors/VALIDATION_FAILED",
+      "status": 422,
+      "retryable": false,
+      "title": "Some fields are invalid.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/ValidationFailedProblem"
+      }
+    },
+    {
+      "code": "UNAUTHORIZED",
+      "type": "https://docs.gatherdeal.ai/errors/UNAUTHORIZED",
+      "status": 401,
+      "retryable": false,
+      "title": "Authentication is required.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/UnauthorizedProblem"
+      }
+    },
+    {
+      "code": "FORBIDDEN",
+      "type": "https://docs.gatherdeal.ai/errors/FORBIDDEN",
+      "status": 403,
+      "retryable": false,
+      "title": "You do not have permission to perform this action.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/ForbiddenProblem"
+      }
+    },
+    {
+      "code": "CLIENT_UPGRADE_REQUIRED",
+      "type": "https://docs.gatherdeal.ai/errors/CLIENT_UPGRADE_REQUIRED",
+      "status": 426,
+      "retryable": false,
+      "title": "This client version is no longer supported. Update the client to continue.",
+      "details": {
+        "$ref": "#/components/schemas/ClientUpgradeRequiredDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+      }
+    },
+    {
+      "code": "CLIENT_CLOSED_REQUEST",
+      "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
+      "status": 499,
+      "retryable": false,
+      "title": "The client closed the request.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/ClientClosedRequestProblem"
+      }
+    },
+    {
+      "code": "INTERNAL_ERROR",
+      "type": "https://docs.gatherdeal.ai/errors/INTERNAL_ERROR",
+      "status": 500,
+      "retryable": false,
+      "title": "Internal server error.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/InternalErrorProblem"
+      }
+    },
+    {
+      "code": "PAGINATION_PARAMS_INVALID",
+      "type": "https://docs.gatherdeal.ai/errors/PAGINATION_PARAMS_INVALID",
+      "status": 400,
+      "retryable": false,
+      "title": "The pagination parameters are invalid.",
+      "details": {
+        "$ref": "#/components/schemas/PaginationParamsInvalidDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/PaginationParamsInvalidProblem"
+      }
+    },
+    {
+      "code": "PAGINATION_CURSOR_INVALID",
+      "type": "https://docs.gatherdeal.ai/errors/PAGINATION_CURSOR_INVALID",
+      "status": 400,
+      "retryable": false,
+      "title": "The pagination cursor is invalid.",
+      "details": {
+        "$ref": "#/components/schemas/PaginationCursorInvalidDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/PaginationCursorInvalidProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+      "status": 403,
+      "retryable": false,
+      "title": "This credential kind is not available on this resource.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+      "status": 403,
+      "retryable": false,
+      "title": "The credential audience does not match this resource.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_TARGET_MISMATCH",
+      "status": 403,
+      "retryable": false,
+      "title": "The credential target does not match this service.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+      "status": 403,
+      "retryable": false,
+      "title": "The organization is not entitled to delegated access through MCP.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+      "status": 403,
+      "retryable": false,
+      "title": "This route is not available to delegated access.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PERMISSION_DENIED",
+      "status": 403,
+      "retryable": false,
+      "title": "The delegated access lacks a required permission.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+      "status": 403,
+      "retryable": false,
+      "title": "The delegated access does not allow this operation.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+      "status": 403,
+      "retryable": false,
+      "title": "The selected outlet is outside the delegated access.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+      "status": 403,
+      "retryable": false,
+      "title": "The selected organization does not match the delegated access.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+      "status": 403,
+      "retryable": false,
+      "title": "This filter is not available to delegated access.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+      "status": 403,
+      "retryable": false,
+      "title": "This expansion is not available to delegated access.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+      "status": 403,
+      "retryable": false,
+      "title": "Delegated access cannot impersonate.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+      "status": 403,
+      "retryable": false,
+      "title": "The delegated access's user is no longer eligible in its organization.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+      "status": 401,
+      "retryable": false,
+      "title": "Delegated access credentials must be sent in the Authorization header.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_INACTIVE",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_INACTIVE",
+      "status": 401,
+      "retryable": false,
+      "title": "The delegated access is no longer active.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessInactiveDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_UNSUPPORTED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_UNSUPPORTED",
+      "status": 401,
+      "retryable": false,
+      "title": "The caller does not support delegated access.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessUnsupportedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+      }
+    }
+  ]
+}
