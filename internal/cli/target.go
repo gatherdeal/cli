@@ -356,7 +356,7 @@ func storeError(err error, t *target) error {
 	var insecure *store.InsecureError
 	switch {
 	case errors.As(err, &schema):
-		return output.Errorf(output.ExitActionRequired, output.CodeProfileSchema, "%v", schema).WithHint("Use a CLI that supports this profiles.json schema. Do not delete your credentials.").WithDetails(schema)
+		return output.Errorf(output.ExitActionRequired, output.CodeProfileSchema, "%v", schema).WithHint("Use a CLI that supports this " + schema.File + " schema. Do not delete your credentials.").WithDetails(schema)
 	case errors.Is(err, store.ErrNotFound):
 		return notLoggedIn(t)
 	case errors.As(err, &insecure):

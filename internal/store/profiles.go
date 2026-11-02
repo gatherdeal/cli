@@ -55,12 +55,14 @@ type Binding struct {
 
 // SchemaError refuses unknown semantics without rewriting the file.
 type SchemaError struct {
-	Found     int `json:"found"`
-	Supported int `json:"supported"`
+	// File is the versioned file: profiles.json or skills.json.
+	File      string `json:"file"`
+	Found     int    `json:"found"`
+	Supported int    `json:"supported"`
 }
 
 func (e *SchemaError) Error() string {
-	return fmt.Sprintf("profiles.json schema %d is unsupported (this binary supports %d); use a CLI supporting that schema; do not delete credentials", e.Found, e.Supported)
+	return fmt.Sprintf("%s schema %d is unsupported (this binary supports %d); use a CLI supporting that schema; do not delete credentials", e.File, e.Found, e.Supported)
 }
 
 // CredentialRef names where a profile's credential is stored. The account
@@ -176,7 +178,7 @@ func LoadProfiles(root string) (*Profiles, error) {
 		return nil, fmt.Errorf("%s is corrupt: %w", path, err)
 	}
 	if head.SchemaVersion != profilesSchemaVersion {
-		return nil, &SchemaError{Found: head.SchemaVersion, Supported: profilesSchemaVersion}
+		return nil, &SchemaError{File: profilesFileName, Found: head.SchemaVersion, Supported: profilesSchemaVersion}
 	}
 	if err := json.Unmarshal(data, &p.data); err != nil {
 		return nil, fmt.Errorf("%s is corrupt: %w", path, err)
@@ -212,7 +214,7 @@ func (p *Profiles) Delete(name string) { delete(p.data.Profiles, name) }
 // saved file always loads.
 func (p *Profiles) Save() error {
 	if p.data.SchemaVersion != profilesSchemaVersion {
-		return &SchemaError{Found: p.data.SchemaVersion, Supported: profilesSchemaVersion}
+		return &SchemaError{File: profilesFileName, Found: p.data.SchemaVersion, Supported: profilesSchemaVersion}
 	}
 	// Recheck the on-disk boundary even for a previously loaded instance.
 	if _, err := LoadProfiles(p.Root); err != nil {
