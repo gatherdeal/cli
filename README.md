@@ -9,10 +9,47 @@ in one organization; use named profiles (`--profile`) for separate organizations
 You log in by approving a code on the GatherDeal approval page in your
 browser. The CLI never sees your password.
 
+## Quick start
+
+### For people
+
+```sh
+npm install -g @gatherdeal/cli@latest --ignore-scripts
+gatherdeal auth login
+gatherdeal outlets list
+gatherdeal crm contacts list --limit 10
+```
+
+`auth login` prints an approval page address and a code; open the page,
+check the code and approve. Other ways to install are under
+[Install](#install).
+
+### For AI agents
+
+Paste this prompt into your agent (Claude Code, Codex or another agent):
+
+```text
+Install the GatherDeal CLI and its agent skill for me, then help me log in.
+
+1. Install the CLI: npm install -g @gatherdeal/cli@latest --ignore-scripts
+   (without npm, follow https://github.com/gatherdeal/cli#install).
+2. Check it: gatherdeal version
+3. Install the agent skill for yourself, for all my projects:
+   - Claude Code: gatherdeal skills install --target claude --scope user
+   - Codex or another agent that reads ~/.agents/skills:
+     gatherdeal skills install --target agents --scope user
+4. Read the usage rules: gatherdeal agent-context
+5. Log me in: run gatherdeal auth login --no-wait and show me the approval
+   link and code exactly as printed. I approve it myself in my browser; never
+   approve it for me and never ask for my password. When I say it is done,
+   run gatherdeal auth login --continue, then gatherdeal auth status, and tell
+   me which organization, outlets and permissions I granted.
+```
+
 ## Install
 
-**npm** (Linux, macOS and Windows on x64 and arm64). Install an exact
-version with lifecycle scripts disabled (the packages have none):
+**npm** (Linux, macOS and Windows on x64 and arm64). To pin an exact
+version, install it with lifecycle scripts disabled (the packages have none):
 
 ```sh
 npm install -g @gatherdeal/cli@<version> --ignore-scripts
@@ -78,6 +115,9 @@ How you update depends on how you installed; `data.install_method` and
 | `go install` (`go_install`) | Prints the `go install …@v<version>` command; exit 9. |
 | Release archive in the documented location (`release_binary`) | Prints the verified download URL and SHA-256; exit 9. |
 | Anything else (`unknown`, `unwritable`, `dev`) | Prints instructions; exit 9. It never uses `sudo` or changes permissions. |
+
+Every install action's `instructions` end with a reminder to reinstall any
+installed agent skill afterwards (see [Install an agent skill](#install-an-agent-skill)).
 
 This version never replaces its own binary. If a server answers
 `CLIENT_UPGRADE_REQUIRED` (exit 9), this version is too old for it: run
@@ -415,7 +455,8 @@ exactly as printed, and run `gatherdeal auth login --continue` after they
 approve. Never pass `--server` or `--accept-server-risk` unless the person
 typed them, and never paste a token into a chat. Never run `gatherdeal
 update` unless the person asked; it only reports the command to run, which
-you show rather than execute.
+you show rather than execute. To set everything up for a person, use the
+[Quick start prompt](#for-ai-agents).
 
 For WhatsApp, use `whatsapp agents create --outlet <id-or-code> --yes --no-wait`.
 Add `--phone +60123456789` for phone-number pairing. Show the person
@@ -432,12 +473,20 @@ Choose an explicit location; there is no default:
 gatherdeal skills install --dir /path/to/skills
 gatherdeal skills install --target claude --scope project
 gatherdeal skills install --target claude --scope user
+gatherdeal skills install --target agents --scope project
+gatherdeal skills install --target agents --scope user
 gatherdeal skills show
 ```
 
-`--dir PATH` writes to `PATH/gatherdeal/`. The Claude project target writes
-to `./.claude/skills/gatherdeal/` relative to the current directory; the user
-target writes to `$HOME/.claude/skills/gatherdeal/` (the OS home directory).
+`--dir PATH` writes to `PATH/gatherdeal/`. The targets write to a directory
+relative to the current directory (`--scope project`) or to the OS home
+directory (`--scope user`):
+
+| Target | Project scope | User scope | Read by |
+|---|---|---|---|
+| `claude` | `./.claude/skills/gatherdeal/` | `$HOME/.claude/skills/gatherdeal/` | Claude Code |
+| `agents` | `./.agents/skills/gatherdeal/` | `$HOME/.agents/skills/gatherdeal/` | Codex and other agents that read the shared agent-skills directory |
+
 Use exactly one of `--dir` or `--target`. `--scope project|user` is required
 with `--target` and cannot be used with `--dir`. Target destinations resolve
 ancestor symlinks and must stay inside the resolved project/home directory,
@@ -464,9 +513,13 @@ the app's notes and its resources with a summary and their verbs, the same
 text `gatherdeal agent-context <app>` prints. Exact arguments, flags and
 record fields come from `gatherdeal commands <app> <resource>` at the moment
 they are needed. All of it is generated from the command registry.
-After upgrading the CLI,
-re-run the same install command with `--force` to refresh the skill.
-Agents must only run `gatherdeal skills install` when the person asks for it.
+
+The skill records the CLI version it was made for in its metadata
+(`cli_version`). After the CLI changes version, re-run the same install
+command (same `--target` and `--scope`, or `--dir`) with `--force` to refresh
+the skill; the skill tells agents to do this when `gatherdeal version` reports
+a different version. Otherwise agents run `gatherdeal skills install` only
+when the person asks for it.
 
 ## Credentials and security
 
