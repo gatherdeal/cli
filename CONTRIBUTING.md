@@ -77,8 +77,8 @@ to the contract, service discovery, shared pagination and write policies.
 ## Compatibility rules
 
 - Persisted and published formats are versioned: the profile store
-  (`profiles.json`), credential files, discovery documents and the signed
-  `release.json`. Unknown schema versions, unknown restriction versions and
+  (`profiles.json`), the skill install record (`skills.json`), credential
+  files, discovery documents and the signed `release.json`. Unknown schema versions, unknown restriction versions and
   unsupported API versions are refused, never guessed. Any new persisted field
   raises the schema version so an older binary cannot silently discard it.
 - `release.json` fields may be added, never removed or redefined.
