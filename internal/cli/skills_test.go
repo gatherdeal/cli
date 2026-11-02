@@ -53,7 +53,7 @@ func TestSkillFrontmatterAndShow(t *testing.T) {
 	if front.Metadata.CLIVersion != buildinfo.CurrentVersion() || front.Metadata.SkillSchema != 1 {
 		t.Fatalf("metadata %+v", front.Metadata)
 	}
-	if !strings.Contains(parts[2], AgentContext) || !strings.Contains(parts[2], "references/crm.md") || !strings.Contains(parts[2], "gatherdeal skills install ... --force") {
+	if !strings.Contains(parts[2], AgentContext) || !strings.Contains(parts[2], "references/crm.md") || !strings.Contains(parts[2], "Skill freshness") {
 		t.Fatal("missing shared guidance or skill instructions")
 	}
 	te := newTestEnv(t, nil)
@@ -85,10 +85,19 @@ func TestSkillsLocations(t *testing.T) {
 		{[]string{"--dir", filepath.Join(cwd, "absolute")}, filepath.Join(cwd, "absolute", "gatherdeal")},
 		{[]string{"--target", "claude", "--scope", "project"}, filepath.Join(resolvePath(t, cwd), ".claude", "skills", "gatherdeal")},
 		{[]string{"--target", "claude", "--scope", "user"}, filepath.Join(resolvePath(t, home), ".claude", "skills", "gatherdeal")},
+		{[]string{"--target", "agents", "--scope", "project"}, filepath.Join(resolvePath(t, cwd), ".agents", "skills", "gatherdeal")},
+		{[]string{"--target", "agents", "--scope", "user"}, filepath.Join(resolvePath(t, home), ".agents", "skills", "gatherdeal")},
 	} {
 		res := newTestEnv(t, nil).run(append([]string{"skills", "install"}, tc.args...)...)
 		if res.exit != 0 || res.data()["dir"] != tc.want {
 			t.Fatalf("%v: %s", tc.args, res.stdout)
+		}
+		skillActions(t, res, "created", "created", "created")
+		for _, f := range skillFiles() {
+			data, err := os.ReadFile(filepath.Join(tc.want, filepath.FromSlash(f.Path)))
+			if err != nil || string(data) != f.Content {
+				t.Fatalf("%v: %s: %v", tc.args, f.Path, err)
+			}
 		}
 	}
 }
@@ -111,6 +120,8 @@ func TestSkillsUsage(t *testing.T) {
 		{"--dir", "x", "--scope", "project"}, {"--target", "claude"},
 		{"--scope", "user"}, {"--target", "unknown", "--scope", "user"},
 		{"--target", "claude", "--scope", "unknown"}, {"--target", "", "--scope", "user"},
+		{"--dir", "x", "--target", "agents"}, {"--target", "agents"},
+		{"--target", "agents", "--scope", "unknown"}, {"--target", "agents", "--dir", "x", "--scope", "user"},
 	} {
 		res := newTestEnv(t, nil).run(append([]string{"skills", "install"}, args...)...)
 		if res.exit != 2 || res.errorCode() != "CLI_USAGE" {
@@ -368,46 +379,49 @@ func TestSkillsRefuseWrongPathKinds(t *testing.T) {
 }
 
 func TestSkillsAncestorSymlinks(t *testing.T) {
-	for _, scope := range []string{"project", "user"} {
-		for _, inside := range []bool{false, true} {
-			t.Run(fmt.Sprintf("%s/inside=%t", scope, inside), func(t *testing.T) {
-				base, destination := t.TempDir(), t.TempDir()
-				if inside {
-					destination = filepath.Join(base, "actual")
-					if err := os.Mkdir(destination, 0o755); err != nil {
+	for _, target := range skillTargetNames() {
+		top := filepath.Dir(filepath.FromSlash(skillTargets[target]))
+		for _, scope := range []string{"project", "user"} {
+			for _, inside := range []bool{false, true} {
+				t.Run(fmt.Sprintf("%s/%s/inside=%t", target, scope, inside), func(t *testing.T) {
+					base, destination := t.TempDir(), t.TempDir()
+					if inside {
+						destination = filepath.Join(base, "actual")
+						if err := os.Mkdir(destination, 0o755); err != nil {
+							t.Fatal(err)
+						}
+					}
+					t.Chdir(base)
+					t.Setenv("HOME", base)
+					t.Setenv("USERPROFILE", base)
+					if err := os.Symlink(destination, filepath.Join(base, top)); err != nil {
+						t.Skip(err)
+					}
+					te := newTestEnv(t, nil)
+					res := te.run("skills", "install", "--target", target, "--scope", scope)
+					if inside {
+						if res.exit != 0 || res.data()["dir"] != filepath.Join(resolvePath(t, destination), "skills", "gatherdeal") {
+							t.Fatal(res.stdout)
+						}
+					} else {
+						if res.exit != 2 || res.errorCode() != output.CodeSkillPathInvalid {
+							t.Fatal(res.stdout)
+						}
+						entries, err := os.ReadDir(destination)
+						if err != nil || len(entries) != 0 {
+							t.Fatalf("escape wrote files: %v %v", entries, err)
+						}
+					}
+					// Explicit --dir intentionally follows the chosen ancestor link.
+					res = te.run("skills", "install", "--dir", filepath.Join(base, top, "skills"))
+					if res.exit != 0 {
+						t.Fatal(res.stdout)
+					}
+					if _, err := os.Stat(filepath.Join(destination, "skills", "gatherdeal", "SKILL.md")); err != nil {
 						t.Fatal(err)
 					}
-				}
-				t.Chdir(base)
-				t.Setenv("HOME", base)
-				t.Setenv("USERPROFILE", base)
-				if err := os.Symlink(destination, filepath.Join(base, ".claude")); err != nil {
-					t.Skip(err)
-				}
-				te := newTestEnv(t, nil)
-				res := te.run("skills", "install", "--target", "claude", "--scope", scope)
-				if inside {
-					if res.exit != 0 || res.data()["dir"] != filepath.Join(resolvePath(t, destination), "skills", "gatherdeal") {
-						t.Fatal(res.stdout)
-					}
-				} else {
-					if res.exit != 2 || res.errorCode() != output.CodeSkillPathInvalid {
-						t.Fatal(res.stdout)
-					}
-					entries, err := os.ReadDir(destination)
-					if err != nil || len(entries) != 0 {
-						t.Fatalf("escape wrote files: %v %v", entries, err)
-					}
-				}
-				// Explicit --dir intentionally follows the chosen ancestor link.
-				res = te.run("skills", "install", "--dir", filepath.Join(base, ".claude", "skills"))
-				if res.exit != 0 {
-					t.Fatal(res.stdout)
-				}
-				if _, err := os.Stat(filepath.Join(destination, "skills", "gatherdeal", "SKILL.md")); err != nil {
-					t.Fatal(err)
-				}
-			})
+				})
+			}
 		}
 	}
 }
@@ -420,9 +434,11 @@ func TestSkillsSymlinkedHome(t *testing.T) {
 	}
 	t.Setenv("HOME", link)
 	t.Setenv("USERPROFILE", link)
-	res := newTestEnv(t, nil).run("skills", "install", "--target", "claude", "--scope", "user")
-	if res.exit != 0 || res.data()["dir"] != filepath.Join(resolvePath(t, home), ".claude", "skills", "gatherdeal") {
-		t.Fatal(res.stdout)
+	for _, target := range skillTargetNames() {
+		res := newTestEnv(t, nil).run("skills", "install", "--target", target, "--scope", "user")
+		if res.exit != 0 || res.data()["dir"] != filepath.Join(resolvePath(t, home), filepath.FromSlash(skillTargets[target]), "gatherdeal") {
+			t.Fatal(res.stdout)
+		}
 	}
 }
 
@@ -434,7 +450,7 @@ func TestAgentContextMatchesSkill(t *testing.T) {
 		files[f.Path] = f.Content
 	}
 	general := newTestEnv(t, nil).run("agent-context")
-	if general.exit != 0 || !strings.HasPrefix(general.stdout, AgentContext) || !strings.Contains(files["SKILL.md"], "---\n\n"+general.stdout+"\n") {
+	if general.exit != 0 || !strings.HasPrefix(general.stdout, AgentContext) || !strings.HasSuffix(files["SKILL.md"], "---\n\n"+general.stdout) {
 		t.Fatalf("agent-context differs from SKILL.md:\n%s", general.stdout)
 	}
 	apps := skillApps(commandTree(Commands()))

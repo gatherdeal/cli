@@ -460,8 +460,9 @@
           {
             "name": "target",
             "type": "string",
-            "usage": "Agent tool to install for; requires --scope. Cannot be combined with --dir.",
+            "usage": "Agent tool to install for: claude (.claude/skills) or agents (.agents/skills, read by Codex and other agents); requires --scope. Cannot be combined with --dir.",
             "values": [
+              "agents",
               "claude"
             ]
           },
