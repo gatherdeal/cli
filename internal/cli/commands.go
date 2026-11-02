@@ -82,6 +82,7 @@ func Commands() []*Command {
 			Output: "text", ReadOnly: true, Run: runSkillsShow,
 		},
 		updateCommand(),
+		uninstallCommand(),
 		{
 			Path: []string{"version"}, Summary: "Show the CLI version (no network).",
 			Output: "json", ReadOnly: true, Run: runVersion,

@@ -40,6 +40,10 @@ const (
 	CodeUpdateVerifyFailed    = "CLI_UPDATE_VERIFY_FAILED"
 )
 
+// CodeUninstallIncomplete: `gatherdeal uninstall` stopped after a local
+// step failed; data lists what was done and what was not attempted.
+const CodeUninstallIncomplete = "CLI_UNINSTALL_INCOMPLETE"
+
 // Codes of `gatherdeal skills install`.
 const (
 	CodeSkillConflict    = "CLI_SKILL_CONFLICT"
