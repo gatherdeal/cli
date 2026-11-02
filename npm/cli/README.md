@@ -5,7 +5,7 @@ This package launches the platform-specific `gatherdeal` binary.
 
 ## Quick start
 
-### For people
+### Run it yourself
 
 ```sh
 npm install -g @gatherdeal/cli@latest --ignore-scripts
@@ -17,7 +17,7 @@ gatherdeal crm contacts list --limit 10
 `auth login` prints an approval page address and a code; open the page,
 check the code and approve.
 
-### For AI agents
+### Hand it to your AI agent
 
 Paste this prompt into your agent (Claude Code, Codex or another agent):
 

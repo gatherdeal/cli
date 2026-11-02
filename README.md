@@ -11,7 +11,7 @@ browser. The CLI never sees your password.
 
 ## Quick start
 
-### For people
+### Run it yourself
 
 ```sh
 npm install -g @gatherdeal/cli@latest --ignore-scripts
@@ -24,7 +24,7 @@ gatherdeal crm contacts list --limit 10
 check the code and approve. Other ways to install are under
 [Install](#install).
 
-### For AI agents
+### Hand it to your AI agent
 
 Paste this prompt into your agent (Claude Code, Codex or another agent):
 
@@ -456,7 +456,7 @@ approve. Never pass `--server` or `--accept-server-risk` unless the person
 typed them, and never paste a token into a chat. Never run `gatherdeal
 update` unless the person asked; it only reports the command to run, which
 you show rather than execute. To set everything up for a person, use the
-[Quick start prompt](#for-ai-agents).
+[Quick start prompt](#hand-it-to-your-ai-agent).
 
 For WhatsApp, use `whatsapp agents create --outlet <id-or-code> --yes --no-wait`.
 Add `--phone +60123456789` for phone-number pairing. Show the person
