@@ -41,6 +41,7 @@ type fakeServer struct {
 	statusCalls     int
 	statusError     string // raw response body for the status endpoint
 	statusErrorCode int
+	outletIDs       []string
 	lifetimeNever   bool
 	verificationURI string
 	discoveryJSON   string // overrides the discovery document
@@ -66,7 +67,8 @@ type fakeServer struct {
 }
 
 func newFake(t *testing.T, origin string) *fakeServer {
-	f := &fakeServer{t: t, origin: origin, revoked: map[string]bool{}, revokeStatus: 200}
+	f := &fakeServer{t: t, origin: origin, revoked: map[string]bool{}, revokeStatus: 200,
+		outletIDs: []string{"33333333-3333-3333-3333-333333333333"}}
 	f.srv = httptest.NewServer(http.HandlerFunc(f.handle))
 	t.Cleanup(f.srv.Close)
 	if origin == "" {
@@ -157,7 +159,7 @@ func (f *fakeServer) access() map[string]any {
 	a := map[string]any{
 		"id": "11111111-1111-1111-1111-111111111111", "credential_kind": "bearer", "restriction_version": 1,
 		"client_id": "gatherdeal-cli", "organization_id": f.organizationID(),
-		"outlet_ids": []string{"33333333-3333-3333-3333-333333333333"}, "permissions": []string{"crm.contact.read"},
+		"outlet_ids": f.outletIDs, "permissions": []string{"crm.contact.read"},
 		"effect_ceiling": map[string]any{"max_mutation": "none", "allow_external": false, "allowed_risks": []string{}},
 		"lifetime":       "30d", "expire_at": "2030-01-01T00:00:00Z", "idle_expire_at": "2029-12-01T00:00:00Z",
 	}

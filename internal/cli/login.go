@@ -546,8 +546,12 @@ func (inv *Invocation) finishLogin(ctx context.Context, t *target, secrets store
 	if org != nil && org.Name != "" {
 		orgLabel = org.Name
 	}
-	inv.Env.stderrf("Logged in to %s for %s (%d outlet(s), %d permission(s), lifetime %s).\n",
-		t.origin, orgLabel, len(tr.DelegatedAccess.OutletIDs), len(tr.DelegatedAccess.Permissions), tr.DelegatedAccess.Lifetime)
+	outletScope := "all outlets"
+	if n := len(tr.DelegatedAccess.OutletIDs); n > 0 {
+		outletScope = fmt.Sprintf("%d outlet(s)", n)
+	}
+	inv.Env.stderrf("Logged in to %s for %s (%s, %d permission(s), lifetime %s).\n",
+		t.origin, orgLabel, outletScope, len(tr.DelegatedAccess.Permissions), tr.DelegatedAccess.Lifetime)
 	if tr.DelegatedAccess.ExpireAt == nil {
 		inv.Env.stderrf(neverExpiresNote)
 	}

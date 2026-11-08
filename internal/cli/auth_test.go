@@ -103,6 +103,57 @@ func TestLoginProductionKeyring(t *testing.T) {
 	}
 }
 
+func TestDelegationOutletScope(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		outletIDs []string
+		want      string
+	}{
+		{name: "nil", want: "all outlets"},
+		{name: "empty", outletIDs: []string{}, want: "all outlets"},
+		{name: "one", outletIDs: []string{"33333333-3333-3333-3333-333333333333"}, want: "1 outlet(s)"},
+		{name: "multiple", outletIDs: []string{"33333333-3333-3333-3333-333333333333", "44444444-4444-4444-4444-444444444444"}, want: "2 outlet(s)"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fake := newFake(t, server.ProductionOrigin)
+			fake.outletIDs = tc.outletIDs
+			te := newTestEnv(t, fake)
+			// Each completed login path uses the same scope summary.
+			for _, args := range [][]string{
+				{"auth", "login"},
+				{"auth", "login", "--no-wait"},
+				{"auth", "login", "--continue"},
+				{"auth", "login"},
+				{"auth", "status"},
+			} {
+				res := te.run(args...)
+				if args[len(args)-1] == "--no-wait" {
+					if res.exit != 9 {
+						t.Fatalf("%v: exit %d: %s", args, res.exit, res.stdout)
+					}
+					continue
+				}
+				if res.exit != 0 {
+					t.Fatalf("%v: exit %d: %s", args, res.exit, res.stdout)
+				}
+				if args[1] == "login" && !strings.Contains(res.stderr, "("+tc.want+", 1 permission(s), lifetime 30d)") {
+					t.Errorf("%v: scope summary = %s", args, res.stderr)
+				}
+				// JSON retains the IDs, with nil normalized to an empty array.
+				ids := res.data()["delegated_access"].(map[string]any)["outlet_ids"].([]any)
+				if len(ids) != len(tc.outletIDs) {
+					t.Fatalf("%v: outlet_ids = %v", args, ids)
+				}
+				for i, id := range tc.outletIDs {
+					if ids[i] != id {
+						t.Errorf("%v: outlet_ids[%d] = %v, want %s", args, i, ids[i], id)
+					}
+				}
+			}
+		})
+	}
+}
+
 func keys(m map[string]string) []string {
 	var out []string
 	for k := range m {
