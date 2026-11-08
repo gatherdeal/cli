@@ -52,15 +52,15 @@ type Bundle struct {
 
 // Operation is one published operation.
 type Operation struct {
-	Effect               Effect       `json:"effect"`
-	Permissions          []string     `json:"permissions"`
-	OutletScope          OutletPolicy `json:"outlet_scope"`
-	Idempotency          Idempotency  `json:"idempotency"`
-	PublicID             string       `json:"public_id"`
-	Command              string       `json:"command"`
-	Method               string       `json:"method"`
-	Path                 string       `json:"path"`
-	DelegatedEdgeFilters []string     `json:"delegated_edge_filters"`
+	Effect               Effect         `json:"effect"`
+	Permissions          KeyRequirement `json:"permissions"`
+	OutletScope          OutletPolicy   `json:"outlet_scope"`
+	Idempotency          Idempotency    `json:"idempotency"`
+	PublicID             string         `json:"public_id"`
+	Command              string         `json:"command"`
+	Method               string         `json:"method"`
+	Path                 string         `json:"path"`
+	DelegatedEdgeFilters []string       `json:"delegated_edge_filters"`
 	// DelegatedExpansions are the with_* query parameters a delegated
 	// access may set; the server refuses every other expansion.
 	DelegatedExpansions []string `json:"delegated_expansions"`
@@ -96,19 +96,39 @@ type OperationError struct {
 	Retryable bool   `json:"retryable"`
 }
 
-// SupportedFormatVersion is the manifest format this package reads.
-const SupportedFormatVersion = 1
+// SupportedFormatVersion is the manifest format the contract generator
+// writes: permissions are the closed {"allOf"}|{"anyOf"} object.
+const SupportedFormatVersion = 2
+
+// legacyFormatVersion manifests carry permissions as a key array, read as
+// all-of. It is accepted only until the committed bundles are regenerated at
+// SupportedFormatVersion.
+const legacyFormatVersion = 1
 
 var load = sync.OnceValues(func() (*Manifest, error) { return Parse(ManifestJSON) })
 
 // Parse validates one generated inventory containing any number of bundles.
 func Parse(data []byte) (*Manifest, error) {
-	var m Manifest
-	if err := json.Unmarshal(data, &m); err != nil {
+	var version struct {
+		FormatVersion int `json:"format_version"`
+	}
+	if err := json.Unmarshal(data, &version); err != nil {
 		return nil, fmt.Errorf("contracts: manifest.json: %w", err)
 	}
-	if m.FormatVersion != SupportedFormatVersion {
-		return nil, fmt.Errorf("contracts: manifest.json format_version %d, want %d", m.FormatVersion, SupportedFormatVersion)
+	var m Manifest
+	switch version.FormatVersion {
+	case SupportedFormatVersion:
+		if err := json.Unmarshal(data, &m); err != nil {
+			return nil, fmt.Errorf("contracts: manifest.json: %w", err)
+		}
+	case legacyFormatVersion:
+		legacy, err := parseLegacy(data)
+		if err != nil {
+			return nil, err
+		}
+		m = *legacy
+	default:
+		return nil, fmt.Errorf("contracts: manifest.json format_version %d, want %d", version.FormatVersion, SupportedFormatVersion)
 	}
 	seen := map[string]bool{}
 	bundles := map[string]bool{}
@@ -126,6 +146,41 @@ func Parse(data []byte) (*Manifest, error) {
 		}
 	}
 	return &m, nil
+}
+
+// parseLegacy reads a legacyFormatVersion manifest. The outer Permissions
+// fields shadow the embedded ones, so the key arrays never reach
+// KeyRequirement's strict decoder.
+func parseLegacy(data []byte) (*Manifest, error) {
+	var legacy struct {
+		FormatVersion int `json:"format_version"`
+		Bundles       []struct {
+			Bundle
+			Operations []struct {
+				Operation
+				Permissions []string `json:"permissions"`
+			} `json:"operations"`
+		} `json:"bundles"`
+	}
+	if err := json.Unmarshal(data, &legacy); err != nil {
+		return nil, fmt.Errorf("contracts: manifest.json: %w", err)
+	}
+	m := &Manifest{FormatVersion: legacy.FormatVersion}
+	for _, lb := range legacy.Bundles {
+		b := lb.Bundle
+		b.Operations = nil
+		for _, lo := range lb.Operations {
+			op := lo.Operation
+			req, err := AllOf(lo.Permissions...)
+			if err != nil {
+				return nil, fmt.Errorf("contracts: manifest.json %s: %w", op.PublicID, err)
+			}
+			op.Permissions = req
+			b.Operations = append(b.Operations, op)
+		}
+		m.Bundles = append(m.Bundles, b)
+	}
+	return m, nil
 }
 
 // Load returns the parsed manifest.

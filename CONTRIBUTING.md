@@ -56,6 +56,11 @@ publish or contact GitHub or npm.
 `contracts/` holds the public contract of every API the CLI calls:
 `manifest.json` (operations, permissions, and the expansions and edge filters
 a delegated access may use) and one OpenAPI document per service version.
+Manifest `format_version` 2 gives each operation's `permissions` as the closed
+`{"allOf":[...]}` or `{"anyOf":[...]}` requirement (any-of: at least one of
+two or more keys), decoded strictly; `contracts.Parse` still reads a
+`format_version` 1 key array as all-of until the committed bundles are
+regenerated.
 `internal/generated/<service>/<version>/` is the client generated from it,
 standard library only. Both are exported by GatherDeal's contract generator,
 and `contracts/testdata/problem-conformance/` holds the decode fixtures that
