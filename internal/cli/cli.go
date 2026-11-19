@@ -329,25 +329,31 @@ func parse(env *Env, cmd *Command, args []string, helpMode bool) (*Invocation, e
 		}
 	}
 	var positional []string
-	for {
-		if err := fs.Parse(args); err != nil {
+	for len(args) > 0 {
+		arg := args[0]
+		if arg == "--" {
+			positional = append(positional, args[1:]...)
+			break
+		}
+		if arg == "-" || !strings.HasPrefix(arg, "-") {
+			positional = append(positional, arg)
+			args = args[1:]
+			continue
+		}
+		// Let FlagSet parse one option, including its separate value (which
+		// can itself be "--"). Options with "=value" occupy one argument.
+		n := 1
+		name := strings.TrimLeft(arg, "-")
+		if len(args) > 1 && (inv.strs[name] != nil || inv.ints[name] != nil || inv.lists[name] != nil) {
+			n++
+		}
+		if err := fs.Parse(args[:n]); err != nil {
 			if errors.Is(err, flag.ErrHelp) {
 				return nil, err
 			}
 			return nil, usageError("%s: %v", cmd.Name(), err)
 		}
-		rest := fs.Args()
-		if len(rest) == 0 {
-			break
-		}
-		// fs.Parse stops at the first non-flag or after "--".
-		consumed := len(args) - len(rest)
-		if consumed > 0 && args[consumed-1] == "--" {
-			positional = append(positional, rest...)
-			break
-		}
-		positional = append(positional, rest[0])
-		args = rest[1:]
+		args = args[n:]
 	}
 	if helpMode {
 		return nil, flag.ErrHelp

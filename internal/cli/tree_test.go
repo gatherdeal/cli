@@ -135,6 +135,8 @@ func TestLeadingHelpNeverDispatches(t *testing.T) {
 		{[]string{"--idempotency-key", "replay-key"}, 0},
 		{[]string{"--idempotency-key", "--help"}, 0},
 		{[]string{"--help", "--unknown"}, 2},
+		{[]string{"--input", "--", "extra", "--unknown"}, 2},
+		{[]string{"--", "--unknown"}, 0},
 	} {
 		r := te.run(append(args, tc.flags...)...)
 		if r.exit != tc.exit || f.requests.Load() != before {
