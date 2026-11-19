@@ -46,7 +46,16 @@ test('provenance allows earlier attempts, rejects other run/tag/commit/repositor
   const wrong = structuredClone(statement);
   wrong.predicate.buildDefinition.externalParameters.workflow.path = '.github/workflows/other.yml';
   assert.equal(matchesStatement(wrong, context), false);
-  assert.throws(() => checkProvenance({ invalid: [], missing: [] }, pkg, context, bytes));
+});
+test('missing verified npm package is retryable', () => {
+  const report = { invalid: [], missing: [], verified: [{ ...pkg, version: '2.0.0' }] };
+  assert.throws(() => checkProvenance(report, pkg, context, bytes), NotReady);
+});
+test('missing or non-array npm attestation bundles are retryable', () => {
+  for (const entry of [pkg, { ...pkg, attestationBundles: {} }]) {
+    const report = { invalid: [], missing: [], verified: [entry] };
+    assert.throws(() => checkProvenance(report, pkg, context, bytes), NotReady);
+  }
 });
 test('provenance checks the certificate identity in cryptographically verified output', () => {
   const dir = mkdtempSync(join(tmpdir(), 'release-cert-test-'));
@@ -61,7 +70,10 @@ test('provenance checks the certificate identity in cryptographically verified o
       dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString('base64') },
     } }] }] };
     checkProvenance(report, pkg, context, bytes);
-    assert.throws(() => checkProvenance(report, pkg, { ...context, repo: 'attacker/cli' }, bytes));
+    for (const key of Object.keys(context)) {
+      assert.throws(() => checkProvenance(report, pkg, { ...context, [key]: 'different' }, bytes),
+        e => !(e instanceof NotReady) && /npm provenance does not match/.test(e.message));
+    }
     assert.throws(() => checkProvenance({ ...report, invalid: ['invalid signature'] }, pkg, context, bytes));
     assert.throws(() => checkProvenance({ ...report, missing: ['missing signature'] }, pkg, context, bytes));
   } finally { rmSync(dir, { recursive: true, force: true }); }

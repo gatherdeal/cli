@@ -26,7 +26,7 @@ export function checkProvenance(report, pkg, context, bytes) {
   const bundles = verified?.attestationBundles;
   if (report.invalid?.length) throw new Error('npm signature verification failed');
   if (report.missing?.length) throw new NotReady('npm signatures or attestations are not yet available');
-  if (!Array.isArray(bundles)) throw new Error('npm provenance verification unavailable');
+  if (!Array.isArray(bundles)) throw new NotReady('npm provenance verification unavailable');
   const statements = bundles.filter(a => {
     const material = (a.bundle ?? a).verificationMaterial;
     const cert = material?.certificate ?? material?.x509CertificateChain?.certificates?.[0];

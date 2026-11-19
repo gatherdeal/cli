@@ -118,15 +118,17 @@ approves before anything is signed or published:
    publishes the npm platform packages in parallel, with npm provenance.
    Every package must install, pass `npm audit signatures` and match this
    workflow run; the job waits (up to about 10 minutes per package) for the
-   registry to serve a newly published version. The launcher is published
-   last, only after every platform package verifies.
+   registry to serve a newly published version and for its verified
+   attestation bundles to appear in the npm audit report. The launcher is
+   published last, only after every platform package verifies.
 5. Only after every npm package verifies does the GitHub release become
    public (`latest` for stable releases only).
 
 Every step is safe to re-run in the original tag-push run: existing GitHub
 assets and npm versions must match the original bytes and are never replaced.
-A mismatch fails at once; a version the registry still does not serve when
-the wait runs out fails with a message that a re-run is safe. To recover from
-a partial release, re-run the failed jobs of that original run. Never move a tag, delete an npm version, overwrite release assets or
-start a replacement run; if the original assets cannot be recovered, abandon
-that version and release a new tag.
+Invalid signatures and mismatches fail at once. If the version or its
+verified attestations are still unavailable when the wait runs out, the job
+reports that a re-run is safe. To recover from a partial release, re-run the
+failed jobs of that original run. Never move a tag, delete an npm version,
+overwrite release assets or start a replacement run. If the original assets
+cannot be recovered, abandon that version and release a new tag.
