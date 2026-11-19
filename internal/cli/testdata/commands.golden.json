@@ -1114,7 +1114,7 @@
           {
             "name": "input",
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -1174,14 +1174,10 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -1239,16 +1235,6 @@
             "name": "yes",
             "type": "bool",
             "usage": "Explicitly confirm execution of this write."
-          },
-          {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
           },
           {
             "name": "jq",
@@ -1309,8 +1295,9 @@
           },
           {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -1580,8 +1567,9 @@
           },
           {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -1633,7 +1621,7 @@
           {
             "name": "page-size",
             "type": "int",
-            "usage": "Contact_logs per page (1-100; default 20, or 100 with --all or --limit)."
+            "usage": "Contact logs per page (1-100; default 20, or 100 with --all or --limit)."
           },
           {
             "name": "after",
@@ -1643,7 +1631,7 @@
           {
             "name": "total",
             "type": "string",
-            "usage": "Whether the server counts matching contact_logs (default: exact with --page, none with --after).",
+            "usage": "Whether the server counts matching contact logs (default: exact with --page, none with --after).",
             "values": [
               "exact",
               "none"
@@ -1652,12 +1640,12 @@
           {
             "name": "all",
             "type": "bool",
-            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all contact_logs in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: contact_logs created, changed or deleted during the walk may be missed or seen out of order."
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all contact logs in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: contact logs created, changed or deleted during the walk may be missed or seen out of order."
           },
           {
             "name": "limit",
             "type": "int",
-            "usage": "Return at most this many contact_logs (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+            "usage": "Return at most this many contact logs (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
           },
           {
             "name": "before",
@@ -1685,6 +1673,7 @@
           },
           {
             "name": "contact-id",
+            "required": true,
             "type": "string",
             "usage": "Contact whose notes to list."
           },
@@ -1771,11 +1760,6 @@
             "name": "idempotency-key",
             "type": "string",
             "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
           },
           {
             "name": "jq",
@@ -1952,16 +1936,6 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
-          },
-          {
             "name": "jq",
             "type": "string",
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
@@ -2020,8 +1994,9 @@
           },
           {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -2081,14 +2056,10 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -2144,8 +2115,9 @@
           },
           {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -2198,16 +2170,6 @@
             "name": "yes",
             "type": "bool",
             "usage": "Explicitly confirm execution of this write."
-          },
-          {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
           },
           {
             "name": "jq",
@@ -2368,16 +2330,6 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
-          },
-          {
             "name": "jq",
             "type": "string",
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
@@ -2436,8 +2388,9 @@
           },
           {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -2691,16 +2644,6 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
-          },
-          {
             "name": "jq",
             "type": "string",
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
@@ -2759,8 +2702,9 @@
           },
           {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -2817,16 +2761,6 @@
             "name": "yes",
             "type": "bool",
             "usage": "Explicitly confirm execution of this write."
-          },
-          {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
           },
           {
             "name": "jq",
@@ -3024,16 +2958,6 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
-          },
-          {
             "name": "jq",
             "type": "string",
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
@@ -3089,16 +3013,6 @@
             "name": "send",
             "type": "bool",
             "usage": "Explicitly confirm execution of this write."
-          },
-          {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
           },
           {
             "name": "jq",
@@ -3158,14 +3072,10 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -3640,14 +3550,10 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -3700,16 +3606,6 @@
             "name": "send",
             "type": "bool",
             "usage": "Explicitly confirm execution of this write."
-          },
-          {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
-            "name": "input",
-            "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
           },
           {
             "name": "jq",
@@ -3926,8 +3822,9 @@
           },
           {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON request body, inline, from a file, or - for standard input."
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",
@@ -3982,14 +3879,10 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
             "name": "input",
+            "required": true,
             "type": "string",
-            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
           },
           {
             "name": "jq",

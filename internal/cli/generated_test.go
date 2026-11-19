@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/gatherdeal/cli/internal/crm"
@@ -87,6 +88,25 @@ func TestGeneratedBroadcastRecipientWrite(t *testing.T) {
 	f.whatsapp = func(w http.ResponseWriter, _ *http.Request) { calls++; w.WriteHeader(http.StatusBadGateway) }
 	if r := te.run("whatsapp", "broadcasts", "start", waAgentID, "--send"); r.exit != 8 || r.errorCode() != "CLI_WRITE_OUTCOME_UNKNOWN" || calls != 2 {
 		t.Fatal(r.stdout)
+	}
+}
+
+func TestWhatsAppBodylessWriteFlags(t *testing.T) {
+	_, te := loggedIn(t)
+	for _, command := range []string{"agents delete", "broadcasts start"} {
+		t.Run(command, func(t *testing.T) {
+			args := append([]string{"whatsapp"}, strings.Fields(command)...)
+			args = append(args, waAgentID, "--dry-run")
+			if r := te.run(args...); r.exit != 0 {
+				t.Fatal(r.stdout)
+			}
+			for name, value := range map[string]string{"input": "{}", "idempotency-key": "caller-key"} {
+				r := te.run(append(args, "--"+name, value)...)
+				if r.exit != 2 || !strings.Contains(r.stderr, "flag provided but not defined: -"+name) {
+					t.Fatal(r.stdout)
+				}
+			}
+		})
 	}
 }
 
@@ -177,6 +197,20 @@ func TestChatMessagesRevisionPoll(t *testing.T) {
 	}
 }
 
+func TestGeneratedCRMHelp(t *testing.T) {
+	te := newTestEnv(t, nil)
+	for _, name := range []string{"contacts update", "contact-tags assign", "contact-tags remove", "contact-logs list"} {
+		t.Run(name, func(t *testing.T) {
+			args := append([]string{"crm"}, strings.Fields(name)...)
+			res := te.run(append(args, "--help")...)
+			if res.exit != 0 {
+				t.Fatal(res.stdout)
+			}
+			compareGolden(t, "help_crm_"+strings.ReplaceAll(name, " ", "_")+".golden.txt", res.stdout)
+		})
+	}
+}
+
 func TestGeneratedCRMContactLogs(t *testing.T) {
 	f, te := loggedIn(t)
 	const id = "01234567-89ab-4cde-8fab-0123456789ab"
@@ -192,7 +226,7 @@ func TestGeneratedCRMContactLogs(t *testing.T) {
 		writeJSON(w, 200, `{"status":"success","contact_logs":{"data":[{"content":"Follow-up"}],"has_next_page":false}}`)
 	}
 	args := []string{"crm", "contact-logs", "list"}
-	if r := te.run(args...); r.exit != 2 || calls != 0 {
+	if r := te.run(args...); r.exit != 2 || !strings.Contains(r.stderr, `argument "contact-id" is required`) || calls != 0 {
 		t.Fatal(r.stdout, calls)
 	}
 	if r := te.run(append(args, "--contact-id", "invalid")...); r.exit != 2 || calls != 0 {
@@ -259,8 +293,13 @@ func TestGeneratedCRMWrites(t *testing.T) {
 			if r := te.run(append(args, "--dry-run")...); r.exit != 0 || len(keys) != 0 {
 				t.Fatal(r.stdout, keys)
 			}
+			if tc.body == "" {
+				if r := te.run(append(args, "--dry-run", "--input", "{}")...); r.exit != 2 || !strings.Contains(r.stderr, "flag provided but not defined: -input") || len(keys) != 0 {
+					t.Fatal(r.stdout, keys)
+				}
+			}
 			if !tc.keyed {
-				if r := te.run(append(args, "--yes", "--idempotency-key", "caller-key")...); r.exit != 2 || len(keys) != 0 {
+				if r := te.run(append(args, "--yes", "--idempotency-key", "caller-key")...); r.exit != 2 || !strings.Contains(r.stderr, "flag provided but not defined: -idempotency-key") || len(keys) != 0 {
 					t.Fatal(r.stdout, keys)
 				}
 				if r := te.run(append(args, "--yes")...); r.exit != 0 || !reflect.DeepEqual(keys, []string{""}) {

@@ -62,6 +62,12 @@ func whatsappCommands() []*Command {
 		if op == "agents.update" || op == "agents.delete" {
 			c.Args = []ArgSpec{{Name: "agent_id", Usage: "Agent id (UUID)."}}
 		}
+		c.Flags = append(c.Flags, c.Write.flags(c.Contract())...)
+		if op != "agents.delete" {
+			input := flagInput
+			input.Required = op != "agents.create" // --outlet can supply everything creation needs.
+			c.Flags = append(c.Flags, input)
+		}
 		cmds = append(cmds, c)
 	}
 	return cmds
@@ -201,9 +207,6 @@ func whatsappInput(inv *Invocation) (any, error) {
 		id, err := whatsappID(inv)
 		if err != nil {
 			return nil, err
-		}
-		if inv.str("input") != "" {
-			return nil, usageError("delete takes no input body")
 		}
 		return &wa.DeleteAgentInput{AgentID: id}, nil
 	case "whatsapp.messages.create":

@@ -102,9 +102,6 @@ func Commands() []*Command {
 			continue
 		}
 		op := contracts.MustOperation(c.Operation)
-		if c.Write != nil {
-			c.Flags = append(c.Flags, c.Write.Flags()...)
-		}
 		c.Path = strings.Fields(op.Command)
 		c.ReadOnly = op.ReadOnly()
 		if c.Presentation != nil {

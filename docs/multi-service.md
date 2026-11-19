@@ -88,12 +88,17 @@ never shaped.
 ## Writes
 
 Attach `WritePolicy` to the command: `ConfirmConfig` supplies `--yes`, and
-`ConfirmSend` supplies `--send`. The framework registers typed --dry-run,
-confirmation, --idempotency-key and --input flags. Missing confirmation returns
-exit 9 without dispatch. Dry runs require a separate Preview handler and never
-invoke Run. Both handlers must validate concrete generated input and scope;
-use `ReadBody[GeneratedInput]` for bounded inline, file or stdin (`--input -`) JSON.
-Unknown members, null and trailing documents are rejected.
+`ConfirmSend` supplies `--send`. The write policy also supplies `--dry-run`
+and adds `--idempotency-key` for keyed operations. Register `--input` only for
+operations that accept a request body. Generated bindings declare body support
+and required query flags. Help and the command catalog use the same flag
+declarations as the parser.
+
+Missing confirmation returns exit 9 without dispatch. Dry runs require a
+separate Preview handler and never invoke Run. Both handlers must validate
+concrete generated input and scope. Use `ReadBody[GeneratedInput]` for bounded
+inline, file or stdin (`--input -`) JSON. Unknown members, null and trailing
+documents are rejected.
 
 Idempotency support is taken from the manifest. Keyed writes generate a random
 key if omitted; `meta.write` reports the key and whether it was generated on

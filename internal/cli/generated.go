@@ -146,8 +146,6 @@ func generatedCommand[A ~struct {
 					return nil, usageError("invalid --input: %v", err)
 				}
 			}
-		} else if inv.isSet("input") {
-			return nil, usageError("%s does not accept a body", op.PublicID)
 		}
 		var input any
 		if inv.Meta.Write != nil {
@@ -223,8 +221,12 @@ func generatedCommand[A ~struct {
 			confirmation = ConfirmSend
 		}
 		c.Write = &WritePolicy{Confirmation: confirmation, Preview: run}
-	} else if hasBody {
-		c.Flags = append(c.Flags, FlagSpec{Name: "input", Kind: kindString, Usage: "JSON request body, inline, from a file, or - for standard input."})
+		c.Flags = append(c.Flags, c.Write.flags(op)...)
+	}
+	if hasBody {
+		input := flagInput
+		input.Required = true
+		c.Flags = append(c.Flags, input)
 	}
 	return c
 }
