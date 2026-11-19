@@ -245,6 +245,9 @@ func (inv *Invocation) bindingArguments(params []commandParameter) (map[string]j
 			raw, _ = json.Marshal(v)
 		} else {
 			if !inv.isSet(p.flag.Name) {
+				if p.Required {
+					return nil, usageError("flag --%s is required", p.flag.Name)
+				}
 				continue
 			}
 			if p.Required && p.uuid && !uuidRE.MatchString(inv.str(p.flag.Name)) {

@@ -226,9 +226,11 @@ func TestGeneratedCRMContactLogs(t *testing.T) {
 		writeJSON(w, 200, `{"status":"success","contact_logs":{"data":[{"content":"Follow-up"}],"has_next_page":false}}`)
 	}
 	args := []string{"crm", "contact-logs", "list"}
-	if r := te.run(args...); r.exit != 2 || !strings.Contains(r.stderr, `argument "contact-id" is required`) || calls != 0 {
-		t.Fatal(r.stdout, calls)
+	missing := te.run(args...)
+	if missing.exit != 2 || missing.errorCode() != "CLI_USAGE" || !strings.Contains(missing.stderr, "flag --contact-id is required") || calls != 0 {
+		t.Fatal(missing.stdout, missing.stderr, calls)
 	}
+	golden(t, "contact_logs_missing_contact_id.golden.json", missing.stdout)
 	if r := te.run(append(args, "--contact-id", "invalid")...); r.exit != 2 || calls != 0 {
 		t.Fatal(r.stdout, calls)
 	}
