@@ -663,7 +663,13 @@ Keep the same profile and outlet selection across pagination, retries,
 login continuation and multi-step work. Never retry a denial or not-found
 in another organization or profile.
 
-The profile store uses schema 1. Every binding requires both organization
+Login and status report `outlet_consent_mode` (`all` or `listed`) and the
+consent's live `outlet_ids`. Under `effective_outlets`, `restricted` and
+`outlet_ids` describe the member restriction verified by Identity. An absent
+effective scope is unknown. The offline grant caches these values at login.
+
+The profile store uses schema 2. Schema 1 profiles remain readable and upgrade
+on the next save. Their cached scope stays unknown until the next login. Every binding requires both organization
 and principal IDs. Unsupported schemas are refused for both reads and writes
 with `CLI_PROFILE_SCHEMA` (exit 9); use a CLI supporting that schema and do
 not delete credentials.

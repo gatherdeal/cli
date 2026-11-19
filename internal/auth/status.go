@@ -36,6 +36,9 @@ type StatusOrganization struct {
 
 // StatusResult is the part of the status response the CLI uses.
 type StatusResult struct {
+	OutletScopeVersion             int                 `json:"outlet_scope_version"`
+	UserOutletRestricted           bool                `json:"user_outlet_restricted"`
+	UserAllowedOutletIDs           []string            `json:"user_allowed_outlet_ids"`
 	User                           *StatusUser         `json:"user"`
 	Organization                   *StatusOrganization `json:"organization"`
 	DelegatedAccessContractVersion int                 `json:"delegated_access_contract_version"`

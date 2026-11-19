@@ -7,11 +7,12 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestUnsupportedSchemaNeverRewritten(t *testing.T) {
-	for _, version := range []int{0, 2, 3, 99} {
+	for _, version := range []int{0, 3, 99} {
 		t.Run(fmt.Sprint(version), func(t *testing.T) {
 			root := newRoot(t)
 			unlock, err := Lock(root)
@@ -32,7 +33,7 @@ func TestUnsupportedSchemaNeverRewritten(t *testing.T) {
 				t.Fatal(err)
 			}
 			var schema *SchemaError
-			if _, err := LoadProfiles(root); !errors.As(err, &schema) || schema.Found != version || schema.Supported != 1 {
+			if _, err := LoadProfiles(root); !errors.As(err, &schema) || schema.Found != version || schema.Supported != profilesSchemaVersion {
 				t.Fatalf("read: %v", err)
 			}
 			if err := p.Save(); !errors.As(err, &schema) {
@@ -71,7 +72,7 @@ func TestInitialSchemaBindingRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.data.SchemaVersion != 1 || !reflect.DeepEqual(got.Get("acme").Binding, want) {
+	if got.data.SchemaVersion != profilesSchemaVersion || !reflect.DeepEqual(got.Get("acme").Binding, want) {
 		t.Fatal("initial schema binding changed")
 	}
 }
@@ -119,5 +120,38 @@ func TestBindingRequiresBothIDs(t *testing.T) {
 				t.Fatal("loaded incomplete binding")
 			}
 		})
+	}
+}
+
+func TestSchemaOneOutletScopeStaysUnknown(t *testing.T) {
+	root := newRoot(t)
+	unlock, err := Lock(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unlock()
+	path := filepath.Join(root, profilesFileName)
+	raw := `{"schema_version":1,"store_id":"0123456789abcdef0123456789abcdef","profiles":{"acme":{"delegated_access":{"outlet_ids":["legacy"]}}}}`
+	if err := os.WriteFile(path, []byte(raw), 0600); err != nil {
+		t.Fatal(err)
+	}
+	p, err := LoadProfiles(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := p.Get("acme").Access
+	if a.OutletConsentMode != "" || a.EffectiveOutlets != nil || len(a.OutletIDs) != 1 {
+		t.Fatal(a)
+	}
+	saved, err := os.ReadFile(path)
+	if err != nil || string(saved) != raw {
+		t.Fatal("read migrated file")
+	}
+	if err := p.Save(); err != nil {
+		t.Fatal(err)
+	}
+	saved, err = os.ReadFile(path)
+	if err != nil || !strings.Contains(string(saved), `"schema_version": 2`) {
+		t.Fatal(string(saved), err)
 	}
 }

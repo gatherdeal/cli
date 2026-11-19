@@ -88,19 +88,27 @@ type LoginAttempt struct {
 	Device *PendingDevice `json:"device,omitempty"`
 }
 
+// EffectiveOutlets is the outlet restriction reported by verified session status.
+type EffectiveOutlets struct {
+	Restricted bool     `json:"restricted"`
+	OutletIDs  []string `json:"outlet_ids"`
+}
+
 // AccessSummary is what the CLI remembers about an access (no secrets).
 type AccessSummary struct {
-	ID               string     `json:"id"`
-	OrganizationID   string     `json:"organization_id"`
-	OrganizationCode string     `json:"organization_code,omitempty"`
-	OrganizationName string     `json:"organization_name,omitempty"`
-	OutletIDs        []string   `json:"outlet_ids"`
-	Permissions      []string   `json:"permissions"`
-	Lifetime         string     `json:"lifetime"`
-	ExpireAt         *time.Time `json:"expire_at"`
-	IdleExpireAt     time.Time  `json:"idle_expire_at"`
-	TokenHint        string     `json:"token_hint"`
-	LoggedInAt       time.Time  `json:"logged_in_at"`
+	OutletConsentMode string            `json:"outlet_consent_mode,omitempty"`
+	EffectiveOutlets  *EffectiveOutlets `json:"effective_outlets,omitempty"`
+	ID                string            `json:"id"`
+	OrganizationID    string            `json:"organization_id"`
+	OrganizationCode  string            `json:"organization_code,omitempty"`
+	OrganizationName  string            `json:"organization_name,omitempty"`
+	OutletIDs         []string          `json:"outlet_ids"`
+	Permissions       []string          `json:"permissions"`
+	Lifetime          string            `json:"lifetime"`
+	ExpireAt          *time.Time        `json:"expire_at"`
+	IdleExpireAt      time.Time         `json:"idle_expire_at"`
+	TokenHint         string            `json:"token_hint"`
+	LoggedInAt        time.Time         `json:"logged_in_at"`
 }
 
 // PendingDevice is the non-secret part of a started device authorization.
@@ -129,9 +137,9 @@ func (p *Profile) validate() error {
 	return nil
 }
 
-// profilesSchemaVersion is the initial public version of profiles.json.
+// Version 2 adds the verified consent mode and effective outlet restriction.
 // Persisted-field additions must raise it to prevent older binaries losing data.
-const profilesSchemaVersion = 1
+const profilesSchemaVersion = 2
 
 type profilesFile struct {
 	SchemaVersion int `json:"schema_version"`
@@ -177,12 +185,15 @@ func LoadProfiles(root string) (*Profiles, error) {
 	if err := json.Unmarshal(data, &head); err != nil {
 		return nil, fmt.Errorf("%s is corrupt: %w", path, err)
 	}
-	if head.SchemaVersion != profilesSchemaVersion {
+	if head.SchemaVersion != 1 && head.SchemaVersion != profilesSchemaVersion {
 		return nil, &SchemaError{File: profilesFileName, Found: head.SchemaVersion, Supported: profilesSchemaVersion}
 	}
 	if err := json.Unmarshal(data, &p.data); err != nil {
 		return nil, fmt.Errorf("%s is corrupt: %w", path, err)
 	}
+	// Version 1 did not record the consent mode or the effective restriction.
+	// Leave both unknown until the next verified login.
+	p.data.SchemaVersion = profilesSchemaVersion
 	if p.data.Profiles == nil {
 		p.data.Profiles = map[string]*Profile{}
 	}

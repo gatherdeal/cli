@@ -141,7 +141,7 @@ func TestUnsupportedSchemaCLI(t *testing.T) {
 			t.Fatal(res.stdout)
 		}
 		details := res.env["error"].(map[string]any)["details"].(map[string]any)
-		if details["found"] != float64(99) || details["supported"] != float64(1) {
+		if details["found"] != float64(99) || details["supported"] != float64(2) {
 			t.Fatal(res.stdout)
 		}
 	}

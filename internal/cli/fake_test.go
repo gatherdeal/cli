@@ -27,47 +27,51 @@ type fakeServer struct {
 	srv    *httptest.Server
 	origin string // the origin the CLI believes it talks to
 
-	requests        atomic.Uint64
-	mu              sync.Mutex
-	tokens          []string // issued tokens, in order
-	pendingPolls    int      // authorization_pending answers before approval
-	slowDownOnce    bool
-	tokenError      string // RFC 8628 error to answer instead of approving
-	authorizeCalls  int
-	authorizeForm   url.Values
-	tokenCalls      int
-	revokeForms     []url.Values
-	revokeStatus    int
-	revokeFailToken string // this token's revoke answers HTTP 503
-	revoked         map[string]bool
-	statusCalls     int
-	statusError     string // raw response body for the status endpoint
-	statusErrorCode int
-	allOutlets      bool
-	outletIDs       []string
-	lifetimeNever   bool
-	verificationURI string
-	discoveryJSON   string // overrides the discovery document
-	redirectAll     bool
-	contactsQuery   url.Values
-	contactsAuth    string
-	contactsLang    string // Accept-Language of the last CRM request
-	contactsBody    string
-	contactsPages   map[string]string // list bodies by the after cursor; overrides contactsBody
-	contactsStatus  int
-	echoAuth        bool   // status and contacts echo the Authorization header
-	authInterval    *int   // overrides the device interval
-	authExpiresIn   *int   // overrides the device expires_in
-	revokeBody      string // overrides the HTTP 200 revoke body
-	onToken         func() // runs at the start of every token poll
-	onStatus        func() // runs once, unlocked, at the start of the next status call
-	tokenDelay      time.Duration
-	orgID           string
-	principalID     string
-	orgName         string // overrides the organization name
-	contactTags     http.HandlerFunc
-	whatsapp        http.HandlerFunc
-	outlets         http.HandlerFunc
+	requests           atomic.Uint64
+	mu                 sync.Mutex
+	tokens             []string // issued tokens, in order
+	pendingPolls       int      // authorization_pending answers before approval
+	slowDownOnce       bool
+	tokenError         string // RFC 8628 error to answer instead of approving
+	authorizeCalls     int
+	authorizeForm      url.Values
+	tokenCalls         int
+	revokeForms        []url.Values
+	revokeStatus       int
+	revokeFailToken    string // this token's revoke answers HTTP 503
+	revoked            map[string]bool
+	statusCalls        int
+	statusError        string // raw response body for the status endpoint
+	statusErrorCode    int
+	outletScopeVersion int
+	restricted         bool
+	allowedOutlets     []string
+	statusOutletIDs    []string
+	allOutlets         bool
+	outletIDs          []string
+	lifetimeNever      bool
+	verificationURI    string
+	discoveryJSON      string // overrides the discovery document
+	redirectAll        bool
+	contactsQuery      url.Values
+	contactsAuth       string
+	contactsLang       string // Accept-Language of the last CRM request
+	contactsBody       string
+	contactsPages      map[string]string // list bodies by the after cursor; overrides contactsBody
+	contactsStatus     int
+	echoAuth           bool   // status and contacts echo the Authorization header
+	authInterval       *int   // overrides the device interval
+	authExpiresIn      *int   // overrides the device expires_in
+	revokeBody         string // overrides the HTTP 200 revoke body
+	onToken            func() // runs at the start of every token poll
+	onStatus           func() // runs once, unlocked, at the start of the next status call
+	tokenDelay         time.Duration
+	orgID              string
+	principalID        string
+	orgName            string // overrides the organization name
+	contactTags        http.HandlerFunc
+	whatsapp           http.HandlerFunc
+	outlets            http.HandlerFunc
 }
 
 func newFake(t *testing.T, origin string) *fakeServer {
@@ -307,11 +311,15 @@ func (f *fakeServer) handle(w http.ResponseWriter, r *http.Request) {
 		}
 		access := f.access()
 		access["all_outlets"] = f.allOutlets
+		if f.statusOutletIDs != nil {
+			access["outlet_ids"] = f.statusOutletIDs
+		}
 		writeJSON(w, 200, map[string]any{
 			"status":                            "success",
 			"user":                              map[string]any{"id": f.userID(), "username": "staff1", "name": "Staff One"},
 			"organization":                      map[string]any{"id": f.organizationID(), "code": "acme", "name": f.organizationName()},
 			"delegated_access_contract_version": 1, "delegated_access": access,
+			"outlet_scope_version": f.outletScopeVersion, "user_outlet_restricted": f.restricted, "user_allowed_outlet_ids": f.allowedOutlets,
 		})
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/crm/v1/contacts"):
 		f.contactsQuery = r.URL.Query()

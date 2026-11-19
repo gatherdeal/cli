@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 	"testing"
@@ -105,21 +106,21 @@ func TestLoginProductionKeyring(t *testing.T) {
 
 func TestDelegationOutletScope(t *testing.T) {
 	for _, tc := range []struct {
-		name       string
-		allOutlets bool
-		outletIDs  []string
-		want       string
+		name, consent, want    string
+		allOutlets, restricted bool
+		version                int
+		allowed                []string
 	}{
-		{name: "all", allOutlets: true, want: "all outlets"},
-		{name: "all with effective IDs", allOutlets: true, outletIDs: []string{"33333333-3333-3333-3333-333333333333"}, want: "all outlets"},
-		{name: "empty", outletIDs: []string{}, want: "0 outlet(s)"},
-		{name: "one", outletIDs: []string{"33333333-3333-3333-3333-333333333333"}, want: "1 outlet(s)"},
-		{name: "multiple", outletIDs: []string{"33333333-3333-3333-3333-333333333333", "44444444-4444-4444-4444-444444444444"}, want: "2 outlet(s)"},
+		{name: "all with one effective outlet", consent: "all", want: "1 outlet(s)", allOutlets: true, restricted: true, version: 1, allowed: []string{waOutletID}},
+		{name: "restricted empty", consent: "listed", want: "0 outlet(s)", restricted: true, version: 1},
+		{name: "unrestricted", consent: "all", want: "unrestricted", allOutlets: true, version: 1},
+		{name: "unversioned", consent: "all", want: "unknown", allOutlets: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fake := newFake(t, server.ProductionOrigin)
 			fake.allOutlets = tc.allOutlets
-			fake.outletIDs = tc.outletIDs
+			fake.restricted, fake.outletScopeVersion, fake.allowedOutlets = tc.restricted, tc.version, tc.allowed
+			fake.statusOutletIDs = []string{waOutletID, waAgentID}
 			te := newTestEnv(t, fake)
 			// Each completed login path uses the same scope summary.
 			for _, args := range [][]string{
@@ -128,6 +129,7 @@ func TestDelegationOutletScope(t *testing.T) {
 				{"auth", "login", "--continue"},
 				{"auth", "login"},
 				{"auth", "status"},
+				{"auth", "profiles", "list"},
 			} {
 				res := te.run(args...)
 				if args[len(args)-1] == "--no-wait" {
@@ -139,21 +141,31 @@ func TestDelegationOutletScope(t *testing.T) {
 				if res.exit != 0 {
 					t.Fatalf("%v: exit %d: %s", args, res.exit, res.stdout)
 				}
-				if args[1] == "login" && !strings.Contains(res.stderr, "("+tc.want+", 1 permission(s), lifetime 30d)") {
+				if args[1] == "login" && !strings.Contains(res.stderr, "(outlet consent "+tc.consent+", effective outlet scope "+tc.want+", 1 permission(s), lifetime 30d)") {
 					t.Errorf("%v: scope summary = %s", args, res.stderr)
 				}
-				// JSON retains the IDs, with nil normalized to an empty array.
-				access := res.data()["delegated_access"].(map[string]any)
-				if access["all_outlets"] != tc.allOutlets {
-					t.Fatalf("%v: all_outlets = %v", args, access["all_outlets"])
+				var access map[string]any
+				if args[1] == "profiles" {
+					access = res.env["data"].([]any)[0].(map[string]any)["cached_grant"].(map[string]any)
+				} else {
+					access = res.data()["delegated_access"].(map[string]any)
 				}
-				ids := access["outlet_ids"].([]any)
-				if len(ids) != len(tc.outletIDs) {
-					t.Fatalf("%v: outlet_ids = %v", args, ids)
+				if access["outlet_consent_mode"] != tc.consent || !reflect.DeepEqual(access["outlet_ids"], []any{waOutletID, waAgentID}) {
+					t.Fatal(args, res.stdout)
 				}
-				for i, id := range tc.outletIDs {
-					if ids[i] != id {
-						t.Errorf("%v: outlet_ids[%d] = %v, want %s", args, i, ids[i], id)
+				eff, ok := access["effective_outlets"].(map[string]any)
+				if ok != (tc.version == 1) {
+					t.Fatal(args, res.stdout)
+				}
+				if ok {
+					ids := eff["outlet_ids"].([]any)
+					if eff["restricted"] != tc.restricted || len(ids) != len(tc.allowed) {
+						t.Fatal(args, res.stdout)
+					}
+					for i, id := range tc.allowed {
+						if ids[i] != id {
+							t.Fatal(args, res.stdout)
+						}
 					}
 				}
 			}
