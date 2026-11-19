@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -160,15 +159,33 @@ func TestInlineWriteBody(t *testing.T) {
 	}
 }
 
-func TestInvalidWriteSelectors(t *testing.T) {
+func TestKeyedSendRejectsExplicitInvalidKey(t *testing.T) {
 	f, te := loggedIn(t)
-	f.whatsapp = func(http.ResponseWriter, *http.Request) { t.Error("unexpected dispatch") }
-	for _, flag := range [][]string{{"--idempotency-key", ""}, {"--idempotency-key", "gd_dat_" + strings.Repeat("a", 50)}, {"--outlet", ""}} {
-		for _, mode := range []string{"--send", "--dry-run"} {
-			r := te.run(append([]string{"whatsapp", "broadcasts", "start", waAgentID, mode}, flag...)...)
-			if r.exit != 2 || strings.Contains(r.stdout+r.stderr, "gd_dat_") {
-				t.Fatalf("invalid %s: exit %d", flag[0], r.exit)
+	before := f.requests.Load()
+	args := []string{"whatsapp", "messages", "create", "--input", `{"type":"text","text":{"body":"hello"},"reply_to_id":"` + waAgentID + `"}`}
+	for _, key := range []string{"", f.lastToken(), "gd_dcd_" + strings.Repeat("a", 50)} {
+		for _, flags := range [][]string{nil, {"--send"}, {"--dry-run"}} {
+			argv := append(append([]string{}, args...), flags...)
+			r := te.run(append(argv, "--idempotency-key", key)...)
+			if r.exit != 2 || r.env["meta"].(map[string]any)["write"] != nil || key != "" && strings.Contains(r.stdout+r.stderr, key) || f.requests.Load() != before {
+				t.Fatal("invalid key reached write preparation or dispatch", r.exit)
 			}
+		}
+	}
+}
+
+func TestEmptyOutletStopsBeforeDispatch(t *testing.T) {
+	f, te := loggedIn(t)
+	before := f.requests.Load()
+	for _, args := range [][]string{
+		{"whatsapp", "broadcasts", "start", waAgentID, "--send"},
+		{"whatsapp", "broadcasts", "start", waAgentID, "--dry-run"},
+		{"crm", "contacts", "list", "--dry-run"},
+		{"whatsapp", "agents", "get", waAgentID},
+	} {
+		r := te.run(append(args, "--outlet", "")...)
+		if r.exit != 2 || f.requests.Load() != before {
+			t.Fatal(args, r.stdout)
 		}
 	}
 }
