@@ -238,16 +238,11 @@ func Run(ctx context.Context, env *Env, args []string) int {
 		return int(output.ExitOK)
 	}
 	cmd := node.command
-	for _, a := range rest {
-		if a == "-h" || a == "--help" || a == "-help" {
-			writeCommandHelp(env.Stdout, cmd)
-			return int(output.ExitOK)
-		}
-		if a == "--" {
-			break
-		}
-	}
 	inv, err := parse(env, cmd, rest)
+	if errors.Is(err, flag.ErrHelp) {
+		writeCommandHelp(env.Stdout, cmd)
+		return int(output.ExitOK)
+	}
 	if err != nil {
 		return emitError(env, output.Meta{}, err)
 	}
@@ -327,6 +322,9 @@ func parse(env *Env, cmd *Command, args []string) (*Invocation, error) {
 	var positional []string
 	for {
 		if err := fs.Parse(args); err != nil {
+			if errors.Is(err, flag.ErrHelp) {
+				return nil, err
+			}
 			return nil, usageError("%s: %v", cmd.Name(), err)
 		}
 		rest := fs.Args()

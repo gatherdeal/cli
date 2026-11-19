@@ -97,3 +97,23 @@ func TestEveryGroupHasSummary(t *testing.T) {
 		}
 	}
 }
+
+func TestHelpRespectsFlagOrderAndStringValues(t *testing.T) {
+	te := newTestEnv(t, nil)
+	if r := te.run("crm", "contacts", "list", "--unknown", "--help"); r.exit != 2 || r.errorCode() != "CLI_USAGE" {
+		t.Fatal(r.stdout)
+	}
+	r := te.run("commands", "--search", "--help")
+	if r.exit != 0 || r.data() == nil {
+		t.Fatal(r.stdout)
+	}
+	for _, c := range Commands() {
+		if c.Operation == "" {
+			continue
+		}
+		r := te.run(append(append([]string{}, c.Path...), "--help")...)
+		if r.exit != 0 || !strings.HasPrefix(r.stdout, "gatherdeal "+c.Name()) {
+			t.Fatal(c.Name(), r.stdout)
+		}
+	}
+}

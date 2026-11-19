@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -440,17 +441,9 @@ func (te *testEnv) run(args ...string) result {
 	node, rest, resolveErr := commandTree(Commands()).resolve(args)
 	// Text commands print an envelope only on failure.
 	textOutput := resolveErr == nil && (node.command == nil || (node.command.Output == "text" && code == 0))
-	for _, arg := range rest {
-		if arg == "--" {
-			break
-		}
-		if arg == "--help" || arg == "-h" || arg == "-help" {
-			textOutput = true
-		}
-		// A successful --jq prints its results, not an envelope.
-		if (arg == "--jq" || strings.HasPrefix(arg, "--jq=")) && code == 0 {
-			textOutput = true
-		}
+	if code == 0 && resolveErr == nil && node.command != nil {
+		inv, parseErr := parse(env, node.command, rest)
+		textOutput = textOutput || errors.Is(parseErr, flag.ErrHelp) || inv != nil && inv.isSet("jq")
 	}
 	if !textOutput {
 		if strings.Count(res.stdout, "\n") != 1 {
