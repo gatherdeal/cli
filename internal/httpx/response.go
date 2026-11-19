@@ -2,6 +2,7 @@ package httpx
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 )
@@ -45,4 +46,13 @@ func (d *ResponseDoer) Do(req *http.Request) (*http.Response, error) {
 	d.Problem = body
 	resp.Body = io.NopCloser(bytes.NewReader(body))
 	return resp, nil
+}
+
+// ResultMember preserves the original JSON of a required response member.
+func ResultMember(raw []byte, name, correlation string) (json.RawMessage, error) {
+	var envelope map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &envelope); err != nil || len(envelope[name]) == 0 || string(envelope[name]) == "null" {
+		return nil, ProtocolError(http.StatusOK, correlation, "response has no "+name+" result")
+	}
+	return envelope[name], nil
 }

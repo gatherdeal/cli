@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gatherdeal/cli/internal/auth"
+	identityv1 "github.com/gatherdeal/cli/internal/generated/identity/v1"
 	wa "github.com/gatherdeal/cli/internal/generated/whatsapp/v1"
 	"github.com/gatherdeal/cli/internal/output"
 	"github.com/gatherdeal/cli/internal/whatsapp"
@@ -434,9 +435,13 @@ func awaitPairing(ctx context.Context, inv *Invocation, c *whatsapp.Client, id s
 
 func (inv *Invocation) resolveCreateOutlet(ctx context.Context, in *wa.CreateAgentInput) error {
 	if value := inv.str("outlet"); value != "" && !uuidRE.MatchString(value) {
-		outlet, err := inv.resolveOutlet(ctx, value)
+		raw, err := inv.resolveOutlet(ctx, value)
 		if err != nil {
 			return err
+		}
+		var outlet identityv1.Outlet
+		if err := json.Unmarshal(raw, &outlet); err != nil {
+			return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "invalid outlet record").WithCause(err)
 		}
 		if outlet.ID == nil || *outlet.ID == "" {
 			return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "the outlet lookup returned no outlet id")

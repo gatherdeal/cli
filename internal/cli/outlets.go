@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	"github.com/gatherdeal/cli/contracts"
@@ -81,7 +82,7 @@ func runOutletsList(ctx context.Context, inv *Invocation) (any, error) {
 	inv.Meta.PageInfo = &page
 	return items, nil
 }
-func (inv *Invocation) resolveOutlet(ctx context.Context, idOrCode string) (*identityv1.Outlet, error) {
+func (inv *Invocation) resolveOutlet(ctx context.Context, idOrCode string) (json.RawMessage, error) {
 	if strings.TrimSpace(idOrCode) == "" {
 		return nil, usageError("outlet id or code is required")
 	}

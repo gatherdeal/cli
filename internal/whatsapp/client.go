@@ -3,6 +3,7 @@ package whatsapp
 
 import (
 	"context"
+	"encoding/json"
 	"encoding/json/jsontext"
 	"errors"
 	"net/http"
@@ -74,19 +75,27 @@ func (c *Client) Invoke(ctx context.Context, binding wa.CLIBinding, input any, o
 	return raw, call.d.CorrelationID, err
 }
 
+func readBinding(id string) wa.CLIBinding {
+	for _, b := range wa.CLIBindings() {
+		if b.PublicID == id {
+			return b
+		}
+	}
+	panic("missing generated binding: " + id)
+}
 func missing() error {
 	return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "WhatsApp response is missing its result")
 }
-func (c *Client) FetchAgent(ctx context.Context, in *wa.FetchAgentInput, outlet string) (*wa.Agent, string, error) {
-	call := c.call(outlet)
-	out, err := call.api.FetchAgent(ctx, in)
+
+var getAgent = readBinding("whatsapp.agents.get")
+
+func (c *Client) FetchAgent(ctx context.Context, in *wa.FetchAgentInput, outlet string) (json.RawMessage, string, error) {
+	raw, corr, err := c.Invoke(ctx, getAgent, in, outlet, "", false)
 	if err != nil {
-		return nil, call.d.CorrelationID, call.apiError(ctx, err, false)
+		return nil, corr, err
 	}
-	if out == nil || out.Agent == nil {
-		return nil, call.d.CorrelationID, missing()
-	}
-	return out.Agent, call.d.CorrelationID, nil
+	record, err := httpx.ResultMember(raw, "agent", corr)
+	return record, corr, err
 }
 func (c *Client) FetchAgentPairing(ctx context.Context, in *wa.FetchAgentPairingInput, outlet string) (*wa.AgentPairing, string, error) {
 	call := c.call(outlet)
@@ -132,16 +141,16 @@ func (c *Client) DeleteAgent(ctx context.Context, in *wa.DeleteAgentInput, outle
 	}
 	return out.Deletion, call.d.CorrelationID, nil
 }
-func (c *Client) FetchMessage(ctx context.Context, in *wa.FetchMessageInput, outlet string) (*wa.Message, string, error) {
-	call := c.call(outlet)
-	out, err := call.api.FetchMessage(ctx, in)
+
+var getMessage = readBinding("whatsapp.messages.get")
+
+func (c *Client) FetchMessage(ctx context.Context, in *wa.FetchMessageInput, outlet string) (json.RawMessage, string, error) {
+	raw, corr, err := c.Invoke(ctx, getMessage, in, outlet, "", false)
 	if err != nil {
-		return nil, call.d.CorrelationID, call.apiError(ctx, err, false)
+		return nil, corr, err
 	}
-	if out == nil || out.Message == nil {
-		return nil, call.d.CorrelationID, missing()
-	}
-	return out.Message, call.d.CorrelationID, nil
+	record, err := httpx.ResultMember(raw, "message", corr)
+	return record, corr, err
 }
 func (c *Client) CreateMessage(ctx context.Context, in *wa.CreateMessageInput, outlet string, key string) (*wa.Message, string, error) {
 	call := c.call(outlet)
@@ -154,79 +163,37 @@ func (c *Client) CreateMessage(ctx context.Context, in *wa.CreateMessageInput, o
 	}
 	return out.Message, call.d.CorrelationID, nil
 }
-func (c *Client) FetchAgents(ctx context.Context, in wa.FetchAgentsInput, outlet string, all bool, maxItems int) ([]*wa.Agent, output.PageInfo, string, error) {
+
+var listAgents = readBinding("whatsapp.agents.list")
+
+func (c *Client) FetchAgents(ctx context.Context, in wa.FetchAgentsInput, outlet string, all bool, maxItems int) ([]json.RawMessage, output.PageInfo, string, error) {
 	call := c.call(outlet)
 	if all {
-		hadAfter := in.After != ""
 		in.Page, in.Total = 0, wa.TotalModeNone
-		if in.PageSize == 0 {
-			in.PageSize = contracts.MustOperation("whatsapp.agents.list").Pagination.MaxPageSize
-		}
-		res, err := paging.Walk(ctx, "agents", in.After, in.PageSize, maxItems, func(ctx context.Context, after string, size int) (paging.Page[*wa.Agent], error) {
-			in.After, in.PageSize = after, size
-			out, err := call.api.FetchAgents(ctx, &in)
-			if err != nil {
-				return paging.Page[*wa.Agent]{}, call.apiError(ctx, err, false)
-			}
-			if out.Agents == nil {
-				return paging.Page[*wa.Agent]{}, missing()
-			}
-			p := out.Agents
-			return paging.Page[*wa.Agent]{Items: p.Data, HasNextPage: p.HasNextPage, NextCursor: p.NextCursor, CorrelationID: call.d.CorrelationID}, nil
-		})
+	}
+	return paging.Records(ctx, contracts.MustOperation(listAgents.PublicID).Pagination, in.After, in.PageSize, all, maxItems, func(after string, size int) ([]byte, string, error) {
+		in.After, in.PageSize = after, size
+		raw, err := listAgents.Invoke(ctx, call.api, &in, "")
 		if err != nil {
-			return nil, output.PageInfo{}, "", err
+			err = call.apiError(ctx, err, false)
 		}
-		return res.Items, output.PageInfo{HasNextPage: res.Truncated, NextCursor: res.NextCursor, HasPrevPage: hadAfter}, res.CorrelationID, nil
-	}
-	out, err := call.api.FetchAgents(ctx, &in)
-	if err != nil {
-		return nil, output.PageInfo{}, call.d.CorrelationID, call.apiError(ctx, err, false)
-	}
-	if out.Agents == nil {
-		return nil, output.PageInfo{}, call.d.CorrelationID, missing()
-	}
-	p := out.Agents
-	if p.Data == nil {
-		p.Data = []*wa.Agent{}
-	}
-	return p.Data, output.PageInfo{PageSize: p.PageSize, HasNextPage: p.HasNextPage, HasPrevPage: p.HasPrevPage, NextCursor: p.NextCursor, PrevCursor: p.PrevCursor, Page: p.Page, TotalItems: p.TotalItems, TotalPages: p.TotalPages}, call.d.CorrelationID, nil
+		return raw, call.d.CorrelationID, err
+	})
 }
-func (c *Client) FetchMessages(ctx context.Context, in wa.FetchMessagesInput, outlet string, all bool, maxItems int) ([]*wa.Message, output.PageInfo, string, error) {
+
+var listMessages = readBinding("whatsapp.messages.list")
+
+func (c *Client) FetchMessages(ctx context.Context, in wa.FetchMessagesInput, outlet string, all bool, maxItems int) ([]json.RawMessage, output.PageInfo, string, error) {
 	call := c.call(outlet)
 	if all {
-		hadAfter := in.After != ""
 		in.Page, in.Total = 0, wa.TotalModeNone
-		if in.PageSize == 0 {
-			in.PageSize = contracts.MustOperation("whatsapp.messages.list").Pagination.MaxPageSize
-		}
-		res, err := paging.Walk(ctx, "messages", in.After, in.PageSize, maxItems, func(ctx context.Context, after string, size int) (paging.Page[*wa.Message], error) {
-			in.After, in.PageSize = after, size
-			out, err := call.api.FetchMessages(ctx, &in)
-			if err != nil {
-				return paging.Page[*wa.Message]{}, call.apiError(ctx, err, false)
-			}
-			if out.Messages == nil {
-				return paging.Page[*wa.Message]{}, missing()
-			}
-			p := out.Messages
-			return paging.Page[*wa.Message]{Items: p.Data, HasNextPage: p.HasNextPage, NextCursor: p.NextCursor, CorrelationID: call.d.CorrelationID}, nil
-		})
+	}
+	return paging.Records(ctx, contracts.MustOperation(listMessages.PublicID).Pagination, in.After, in.PageSize, all, maxItems, func(after string, size int) ([]byte, string, error) {
+		in.After, in.PageSize = after, size
+		raw, err := listMessages.Invoke(ctx, call.api, &in, "")
 		if err != nil {
-			return nil, output.PageInfo{}, "", err
+			err = call.apiError(ctx, err, false)
 		}
-		return res.Items, output.PageInfo{HasNextPage: res.Truncated, NextCursor: res.NextCursor, HasPrevPage: hadAfter}, res.CorrelationID, nil
-	}
-	out, err := call.api.FetchMessages(ctx, &in)
-	if err != nil {
-		return nil, output.PageInfo{}, call.d.CorrelationID, call.apiError(ctx, err, false)
-	}
-	if out.Messages == nil {
-		return nil, output.PageInfo{}, call.d.CorrelationID, missing()
-	}
-	p := out.Messages
-	if p.Data == nil {
-		p.Data = []*wa.Message{}
-	}
-	return p.Data, output.PageInfo{PageSize: p.PageSize, HasNextPage: p.HasNextPage, HasPrevPage: p.HasPrevPage, NextCursor: p.NextCursor, PrevCursor: p.PrevCursor, Page: p.Page, TotalItems: p.TotalItems, TotalPages: p.TotalPages}, call.d.CorrelationID, nil
+		return raw, call.d.CorrelationID, err
+	})
 }

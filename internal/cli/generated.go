@@ -196,7 +196,7 @@ func generatedCommand[A ~struct {
 			return nil, nil
 		}
 		if result != "" {
-			return resultMember(raw, result, inv.Meta.CorrelationID)
+			return httpx.ResultMember(raw, result, inv.Meta.CorrelationID)
 		}
 		return raw, nil
 	}
@@ -287,21 +287,13 @@ func generatedResult(op contracts.Operation, client any, c *Command) string {
 	return name
 }
 
-func resultMember(raw jsontext.Value, name, correlation string) (json.RawMessage, error) {
-	var envelope map[string]json.RawMessage
-	if err := json.Unmarshal(raw, &envelope); err != nil || len(envelope[name]) == 0 || string(envelope[name]) == "null" {
-		return nil, httpx.ProtocolError(http.StatusOK, correlation, "response has no "+name+" result")
-	}
-	return envelope[name], nil
-}
-
 func generatedList(ctx context.Context, inv *Invocation, pg *contracts.Pagination, args map[string]jsontext.Value, call func() (jsontext.Value, error)) (any, error) {
 	fetch := func() (items []json.RawMessage, info output.PageInfo, err error) {
 		raw, err := call()
 		if err != nil {
 			return nil, info, err
 		}
-		member, err := resultMember(raw, pg.ResultField, inv.Meta.CorrelationID)
+		member, err := httpx.ResultMember(raw, pg.ResultField, inv.Meta.CorrelationID)
 		if err != nil {
 			return nil, info, err
 		}
