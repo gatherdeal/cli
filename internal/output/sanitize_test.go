@@ -148,3 +148,13 @@ func TestStripControls(t *testing.T) {
 		}
 	}
 }
+
+func TestWriteMetaRedaction(t *testing.T) {
+	var r Redactor
+	r.Add("registered-secret")
+	meta := &WriteMeta{IdempotencyKey: "registered-secret", InvocationID: "registered-secret"}
+	env, err := r.Envelope(Envelope{Meta: Meta{Write: meta}})
+	if err != nil || env.Meta.Write.IdempotencyKey != Redacted || env.Meta.Write.InvocationID != Redacted || meta.IdempotencyKey != "registered-secret" {
+		t.Fatalf("write metadata redaction failed: %v", err)
+	}
+}

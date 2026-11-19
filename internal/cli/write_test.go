@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -156,5 +157,18 @@ func TestInlineWriteBody(t *testing.T) {
 				t.Fatalf("inline JSON treated as a file: %v", err)
 			}
 		})
+	}
+}
+
+func TestInvalidWriteSelectors(t *testing.T) {
+	f, te := loggedIn(t)
+	f.whatsapp = func(http.ResponseWriter, *http.Request) { t.Error("unexpected dispatch") }
+	for _, flag := range [][]string{{"--idempotency-key", ""}, {"--idempotency-key", "gd_dat_" + strings.Repeat("a", 50)}, {"--outlet", ""}} {
+		for _, mode := range []string{"--send", "--dry-run"} {
+			r := te.run(append([]string{"whatsapp", "broadcasts", "start", waAgentID, mode}, flag...)...)
+			if r.exit != 2 || strings.Contains(r.stdout+r.stderr, "gd_dat_") {
+				t.Fatalf("invalid %s: exit %d", flag[0], r.exit)
+			}
+		}
 	}
 }

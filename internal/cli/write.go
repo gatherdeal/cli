@@ -46,11 +46,12 @@ type WriteOptions struct {
 	DryRun         bool
 	Confirmed      bool
 	IdempotencyKey string
+	keyProvided    bool
 	Input          string
 }
 
 func (inv *Invocation) writeOptions(policy WritePolicy) WriteOptions {
-	return WriteOptions{DryRun: inv.boolean("dry-run"), Confirmed: inv.boolean(string(policy.Confirmation)), IdempotencyKey: inv.str("idempotency-key"), Input: inv.str("input")}
+	return WriteOptions{DryRun: inv.boolean("dry-run"), Confirmed: inv.boolean(string(policy.Confirmation)), IdempotencyKey: inv.str("idempotency-key"), keyProvided: inv.isSet("idempotency-key"), Input: inv.str("input")}
 }
 
 // PrepareWrite does not make a request. Call before executing a write; dry-run
@@ -66,6 +67,9 @@ func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions,
 		return usageError("external writes require --send")
 	}
 	key := opts.IdempotencyKey
+	if opts.keyProvided && key == "" || output.ContainsCredential(key) {
+		return usageError("invalid --idempotency-key")
+	}
 	if key != "" && op.Idempotency != contracts.IdempotencyKeyed {
 		return usageError("operation %s does not support --idempotency-key", op.PublicID)
 	}

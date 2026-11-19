@@ -89,6 +89,8 @@ func replaceFold(s, secret string) string {
 
 func isAlnum(c byte) bool { return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') }
 
+func ContainsCredential(s string) bool { return replaceFormats(s) != s }
+
 func replaceFormats(s string) string {
 	matches := credentialCandidate.FindAllStringIndex(s, -1)
 	if matches == nil {
@@ -178,6 +180,11 @@ func (r *Redactor) Envelope(env Envelope) (Envelope, error) {
 	env.Hint = r.String(env.Hint)
 	m := env.Meta
 	m.Server, m.Profile, m.CorrelationID = r.String(m.Server), r.String(m.Profile), r.String(m.CorrelationID)
+	if m.Write != nil {
+		w := *m.Write
+		w.IdempotencyKey, w.InvocationID = r.String(w.IdempotencyKey), r.String(w.InvocationID)
+		m.Write = &w
+	}
 	if m.PageInfo != nil {
 		pi := *m.PageInfo
 		pi.NextCursor, pi.PrevCursor = r.String(pi.NextCursor), r.String(pi.PrevCursor)

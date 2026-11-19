@@ -75,7 +75,7 @@ func (inv *Invocation) contactsClient() (crm.Contacts, error) {
 }
 
 func validateOutlet(inv *Invocation) error {
-	if o := inv.str("outlet"); o != "" && !uuidRE.MatchString(o) {
+	if o := inv.str("outlet"); inv.isSet("outlet") && !uuidRE.MatchString(o) {
 		return usageError("--outlet must be an outlet id (UUID)")
 	}
 	return nil
