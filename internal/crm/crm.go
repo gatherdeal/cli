@@ -24,7 +24,7 @@ import (
 //     (httpx.ProblemError), so the exit code follows the problem's status
 //     and its retryable member decides retryability.
 type Contacts interface {
-	InvokeRead(context.Context, crmv1.CLIBinding, any) (jsontext.Value, string, error)
+	Invoke(ctx context.Context, binding crmv1.CLIBinding, input any, outlet, key string, write bool) (jsontext.Value, string, error)
 	ListContacts(ctx context.Context, p ListContactsParams) (*ListContactsResult, error)
 	// ListAllContacts walks forward through every page with cursors (the
 	// shared bounded walker: total=none, 100 per page unless p.PageSize is

@@ -37,8 +37,13 @@ func generatedCommands(existing []*Command) []*Command {
 				if err != nil {
 					return nil, err
 				}
+				outlet := selectedOutlet(inv)
 				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
-					return client.InvokeRead(ctx, b, input)
+					key, err := inv.generatedWriteKey(op)
+					if err != nil {
+						return nil, "", err
+					}
+					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
 				}, nil
 			}))
 	}
@@ -55,18 +60,25 @@ func generatedCommands(existing []*Command) []*Command {
 				}
 				outlet := selectedOutlet(inv)
 				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
-					var key string
-					if !op.ReadOnly() {
-						if err := inv.recordWriteKey(); err != nil {
-							return nil, "", err
-						}
-						key = inv.Meta.Write.IdempotencyKey
+					key, err := inv.generatedWriteKey(op)
+					if err != nil {
+						return nil, "", err
 					}
 					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
 				}, nil
 			}))
 	}
 	return commands
+}
+
+func (inv *Invocation) generatedWriteKey(op contracts.Operation) (string, error) {
+	if op.ReadOnly() {
+		return "", nil
+	}
+	if err := inv.recordWriteKey(); err != nil {
+		return "", err
+	}
+	return inv.Meta.Write.IdempotencyKey, nil
 }
 
 type bindingArgument struct {
@@ -82,7 +94,11 @@ func generatedCommand[A ~struct {
 }](op contracts.Operation, summary string, hasBody bool, args []A, bind bindInput, client any, connect func(*Invocation) (invokeInput, error)) *Command {
 	c := &Command{Operation: op.PublicID, Summary: strings.TrimSuffix(summary, ".") + ".", Network: true, Output: "json", Flags: append([]FlagSpec{}, targetFlags...)}
 	if op.OutletScope == "filtered" {
-		c.Flags = append(c.Flags, flagOutlet)
+		outlet := flagOutlet
+		if !op.ReadOnly() {
+			outlet.Usage = "Outlet id (UUID) within this access's approved write scope."
+		}
+		c.Flags = append(c.Flags, outlet)
 	}
 	if op.Pagination != nil {
 		c.Flags = append(c.Flags, pageFlags(op.PublicID, op.Pagination.ResultField)...)
@@ -228,6 +244,9 @@ func (inv *Invocation) bindingArguments(params []commandParameter) (map[string]j
 		} else {
 			if !inv.isSet(p.flag.Name) {
 				continue
+			}
+			if p.Required && p.uuid && !uuidRE.MatchString(inv.str(p.flag.Name)) {
+				return nil, usageError("--%s must be a UUID", p.flag.Name)
 			}
 			switch {
 			case p.flag.Kind == kindInt:

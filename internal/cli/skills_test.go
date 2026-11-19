@@ -305,7 +305,7 @@ func TestSkillIndexes(t *testing.T) {
 	}
 	skill := content["SKILL.md"]
 	for _, want := range []string{
-		"- crm: Read CRM contacts. Notes and resources: references/crm.md or `gatherdeal agent-context crm`.\n",
+		"- crm: Manage CRM contacts, tags and contact logs. Notes and resources: references/crm.md or `gatherdeal agent-context crm`.\n",
 		"- whatsapp: Manage WhatsApp agents and send WhatsApp messages. Notes and resources: references/whatsapp.md or `gatherdeal agent-context whatsapp`.\n",
 		"- auth: Log in, check or end the access, and list local profiles. Verbs: login, logout, status.\n",
 		"- version: Show the CLI version (no network).\n",
@@ -314,6 +314,15 @@ func TestSkillIndexes(t *testing.T) {
 	} {
 		if !strings.Contains(skill, want) {
 			t.Errorf("SKILL.md lacks %q", want)
+		}
+	}
+	for _, want := range []string{
+		"crm contact-logs list --contact-id <id>",
+		"explicit CRM contact-write approval",
+		"Use a fresh key to reassign a tag after removal.",
+	} {
+		if !strings.Contains(content["references/crm.md"], want) {
+			t.Errorf("CRM skill lacks %q", want)
 		}
 	}
 	if want := "- whatsapp agents: List, create, pair, update and delete WhatsApp agents. Verbs: create, delete, get, list, pairing, update.\n"; !strings.Contains(content["references/whatsapp.md"], want) {

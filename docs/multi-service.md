@@ -11,13 +11,13 @@ runtime. The CRM, Identity and WhatsApp bundles are installed.
 ### Manifest v2 release pins
 
 The bundles were regenerated from the released producer commits with
-`GOWORK=off` and compared against CLI `v0.1.2`. All three producers pin the
-released utilities generator at `33746fdc2708af24b6fdbf21f4ba500ed837b86d`
-(`v0.0.0-20261119035543-33746fdc2708`).
+`GOWORK=off` and compared against their previous CLI bundles. CRM uses utilities
+`v0.0.0-20261119094056-2b8670aebe18`. Identity and WhatsApp use
+`v0.0.0-20261119035543-33746fdc2708`.
 
 | Producer | Released commit | Public operations |
 | --- | --- | ---: |
-| CRM | `2c40fabf580b435678e85591eb78e349fe3ee8ac` | 3 |
+| CRM | `5dbb31a1d6f264b21cca879394e0adeb0b663628` | 9 |
 | Identity | `b7e955aa5161c83957b4b23b8639604b3bad0818` | 1 |
 | WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
 
@@ -107,8 +107,8 @@ retryable=false, with the original cause retained. Cancellation does not erase
 this classification. Definite server rejections use ordinary problem mapping.
 There are no automatic retries. Even a transient failure or an idempotency
 key is not evidence that replay is safe: reconcile the outcome and rely on the
-server's declared replay guarantee. WhatsApp configuration and message writes
-use these policies.
+server's declared replay guarantee. These policies apply to CRM writes and to
+WhatsApp configuration and message writes.
 
 ## Tech debt
 

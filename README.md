@@ -1,10 +1,10 @@
 # gatherdeal CLI
 
 `gatherdeal` lets you, or an AI agent working for you, read and manage your
-GatherDeal business data from a terminal. It reads outlets and CRM contacts
-and manages WhatsApp API agents and messages, limited to the outlets and
-access you approve. Each invocation operates
-in one organization; use named profiles (`--profile`) for separate organizations.
+GatherDeal business data from a terminal. It reads outlets and manages CRM
+contacts, tags, contact logs, and WhatsApp API agents and messages within the
+outlets and access you approve. Each invocation operates in one organization.
+Use named profiles (`--profile`) for separate organizations.
 
 You log in by approving a code on the GatherDeal approval page in your
 browser. The CLI never sees your password.
@@ -146,9 +146,10 @@ and check that it shows this code:
 Open the page, sign in, check that the code matches, then choose the
 organization, the outlets, what the access may do and how long it lasts (30,
 90, 180 or 365 days, or "never"). The CLI suggests **Read only**. Choose
-**Read and write** to create, change or delete WhatsApp agents, and turn on
-**Allow sending messages** to send WhatsApp messages; without them those
-commands are refused with exit 4. Every access also stops working after 30
+**Read and write** to manage WhatsApp agents or to enable individual CRM write
+approval. To run CRM writes, also select **Create and edit contacts**. To send
+WhatsApp messages, turn on **Allow sending messages**. Commands outside the
+approved permissions return exit 4. Every access also stops working after 30
 days without use.
 Only approve a code you started yourself; never approve a code someone sent
 you.
@@ -226,7 +227,7 @@ says for your install:
 | Release archive | Delete `~/.local/bin/gatherdeal` or `%LOCALAPPDATA%\Programs\gatherdeal\gatherdeal.exe`. |
 | `go install` | Delete `gatherdeal` from `$(go env GOPATH)/bin` (or `GOBIN`). |
 
-## Read contacts
+## CRM contacts, tags and logs
 
 App API commands follow `gatherdeal <app> <resource> <verb>`. CRM contacts
 live under `crm`; `auth`, `commands`, `agent-context`, `skills`, `update`, `uninstall` and `version`
@@ -281,6 +282,27 @@ fails and returns no contacts.
 the approved outlets, and `--with-phones`, `--with-emails`, `--with-tags` and
 `--with-attributes` to include those details. A contact outside your
 approved outlets is reported as not found.
+
+Use `--contact-id` to list notes for one contact. CRM writes use `--yes` to
+execute or `--dry-run` to preview the request.
+
+```sh
+gatherdeal crm contact-logs list --contact-id <contact-id> --limit 20
+gatherdeal crm contacts create --input '{"kind":"personal","name":"Amina"}' --yes
+gatherdeal crm contacts update <contact-id> --input '{"remark":"Met at the launch"}' --yes
+gatherdeal crm contact-tags assign <contact-id> <tag-id> --yes
+gatherdeal crm contact-tags remove <contact-id> <tag-id> --yes
+gatherdeal crm contact-logs create --input '{"contact_id":"<contact-id>","content":"Called to follow up"}' --yes
+```
+
+Contact updates accept `name`, `phone`, `email`, `remark` and
+`preferred_language`. Tag assignment and removal take both IDs in the order
+shown above.
+
+Contact creation, tag assignment and contact-log creation generate an
+idempotency key and report it in `meta.write.idempotency_key`. When retrying
+the same request, pass its original key with `--idempotency-key`. A later
+assignment after removal is a new operation and needs a fresh key.
 
 ## Read outlets
 

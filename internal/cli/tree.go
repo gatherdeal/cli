@@ -45,9 +45,10 @@ func (n *commandNode) choices() []string {
 var groupSummaries = map[string]string{
 	"auth":                            "Log in, check or end the access, and list local profiles.",
 	"auth profiles":                   "Inspect local profiles.",
-	"crm":                             "Read CRM contacts.",
-	"crm contact-tags":                "List CRM contact tag definitions.",
-	"crm contacts":                    "List and show CRM contacts.",
+	"crm":                             "Manage CRM contacts, tags and contact logs.",
+	"crm contact-tags":                "List CRM tags and manage their contact assignments.",
+	"crm contact-logs":                "List and create contact logs.",
+	"crm contacts":                    "List, show, create and update CRM contacts.",
 	"outlets":                         "List and look up the outlets this access may read.",
 	"skills":                          "Install or print the GatherDeal agent skill.",
 	"whatsapp":                        "Manage WhatsApp agents and send WhatsApp messages.",
