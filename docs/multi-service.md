@@ -32,7 +32,7 @@ that binding: `outlets list` belongs to `identity.outlets.list`.
 There is no second inventory and presentation never changes service ownership.
 `outlets get` is a convenience lookup through the published list's ID/code
 filters, not an additional public operation. WhatsApp agent creation resolves
-outlet codes through the same scoped list before preview or execution.
+outlet codes through the same scoped list during execution. Offline previews show the unresolved code.
 
 Every command needs a one-sentence `Summary` that says what it does in plain
 language (for example "List CRM contacts in the outlets this access may

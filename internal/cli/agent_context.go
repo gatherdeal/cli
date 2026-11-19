@@ -162,8 +162,8 @@ var appNotes = map[string]string{
   channels; messaging channels are a separate system.
 - Create only when asked: gatherdeal whatsapp agents create --outlet <id-or-code>
   [--phone <E.164>] --yes --no-wait. Phones need the leading +.
-- agents create --outlet accepts a UUID or code. Codes are resolved before
-  preview or execution; the resolved UUID stays selected during pairing.
+- agents create --outlet accepts a UUID or code. Dry runs show the unresolved
+  outlet_code. Execution resolves the code and keeps the UUID selected during pairing.
   A not-found code stops creation. JSON input outlet_id must be a UUID and,
   when combined with --outlet, must identify the same outlet.
 - Exit 9 with data.action means a person must pair. Show data.pairing_url,

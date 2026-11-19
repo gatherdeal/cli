@@ -237,7 +237,7 @@ func whatsappInput(inv *Invocation) (any, error) {
 	}
 	panic("unknown WhatsApp write")
 }
-func previewWhatsAppWrite(ctx context.Context, inv *Invocation) (any, error) {
+func previewWhatsAppWrite(_ context.Context, inv *Invocation) (any, error) {
 	in, err := whatsappInput(inv)
 	if err != nil {
 		return nil, err
@@ -249,9 +249,14 @@ func previewWhatsAppWrite(ctx context.Context, inv *Invocation) (any, error) {
 		if _, err = pairingPage(inv, "preview"); err != nil {
 			return nil, err
 		}
-		if err = inv.resolveCreateOutlet(ctx, create); err != nil {
-			return nil, err
+		if code := inv.str("outlet"); code != "" && !uuidRE.MatchString(code) {
+			return struct {
+				OutletCode string `json:"outlet_code"`
+				OutletID   string `json:"outlet_id,omitempty"`
+				Phone      string `json:"phone,omitempty"`
+			}{code, create.OutletID, create.Phone}, nil
 		}
+		inv.Meta.Context.Request.OutletIDs = []string{create.OutletID}
 	}
 	return in, nil
 }

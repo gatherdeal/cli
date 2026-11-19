@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -26,6 +27,7 @@ type fakeServer struct {
 	srv    *httptest.Server
 	origin string // the origin the CLI believes it talks to
 
+	requests        atomic.Uint64
 	mu              sync.Mutex
 	tokens          []string // issued tokens, in order
 	pendingPolls    int      // authorization_pending answers before approval
@@ -88,6 +90,7 @@ func newFake(t *testing.T, origin string) *fakeServer {
 func (f *fakeServer) transport() http.RoundTripper {
 	target, _ := url.Parse(f.srv.URL)
 	return roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		f.requests.Add(1)
 		r2 := r.Clone(r.Context())
 		r2.URL.Scheme, r2.URL.Host = target.Scheme, target.Host
 		r2.Host = r.URL.Host

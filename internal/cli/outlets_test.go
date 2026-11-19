@@ -115,15 +115,17 @@ func TestWhatsAppCreateOutletCode(t *testing.T) {
 			} else {
 				args = append(args, "--yes")
 			}
+			before := f.requests.Load()
 			res := te.run(args...)
-			if res.exit != 0 || lookups != 1 {
+			if res.exit != 0 {
 				t.Fatal(res.stdout)
 			}
 			if dryRun {
-				if writes != 0 || polls != 0 || res.data()["outlet_id"] != waOutletID {
+				if f.requests.Load() != before || res.data()["outlet_code"] != "HQ" || res.data()["outlet_id"] != nil {
 					t.Fatal(res.stdout)
 				}
-			} else if writes != 1 || polls != 1 {
+				return
+			} else if lookups != 1 || writes != 1 || polls != 1 {
 				t.Fatalf("writes=%d polls=%d", writes, polls)
 			}
 			context := res.env["meta"].(map[string]any)["context"].(map[string]any)

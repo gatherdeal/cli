@@ -368,8 +368,8 @@ write retries.
 Lists use the same bounded cursor pagination as CRM, including `--all`,
 `--limit`, and `--after`. WhatsApp lists have no server-side search. Keep the same profile and outlet selection.
 
-Agent creation accepts an outlet UUID or code with `--outlet`. Codes are
-resolved through the authorized outlets list before preview or execution;
+Agent creation accepts an outlet UUID or code with `--outlet`. An offline preview shows the unresolved code in `outlet_code`. Execution
+resolves it through the authorized outlets list, then
 the resolved UUID is used for the request body, outlet selection and pairing
 polls. A missing or out-of-scope code stops creation with exit 5. JSON input
 `outlet_id` remains a UUID; when combined with `--outlet`, both must resolve to
