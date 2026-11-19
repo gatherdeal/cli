@@ -11,6 +11,7 @@ package contracts
 import (
 	"embed"
 	"encoding/json"
+	jsonv2 "encoding/json/v2"
 	"fmt"
 	"strings"
 	"sync"
@@ -71,6 +72,26 @@ type Operation struct {
 	GoMethod   string           `json:"go_method"`
 	InputType  string           `json:"input_type"`
 	OutputType string           `json:"output_type"`
+}
+
+// UnmarshalJSON rejects duplicate members and aliases of the policy field.
+// Other unknown members remain available for future generator additions.
+func (op *Operation) UnmarshalJSON(data []byte) error {
+	type fields Operation
+	var wire struct {
+		fields
+		Extra map[string]json.RawMessage `json:",embed"`
+	}
+	if err := jsonv2.Unmarshal(data, &wire); err != nil {
+		return err
+	}
+	for name := range wire.Extra {
+		if strings.EqualFold(name, "permissions") {
+			return fmt.Errorf("contracts: expected permissions, got %q", name)
+		}
+	}
+	*op = Operation(wire.fields)
+	return nil
 }
 
 // PaginationAdaptive is the only list style this CLI speaks: page numbers

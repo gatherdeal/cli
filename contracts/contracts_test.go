@@ -123,3 +123,17 @@ func TestEmbeddedManifestLoads(t *testing.T) {
 		t.Fatalf("%+v", op)
 	}
 }
+
+func TestOperationRejectsAmbiguousMembers(t *testing.T) {
+	for _, members := range []string{
+		`"permissions":{"allOf":["crm.contact.read"]},"permissions":{"allOf":[]}`,
+		`"permissions":{"allOf":["crm.contact.read"]},"Permissions":{"allOf":[]}`,
+		`"Permissions":{"allOf":[]}`,
+		`"permissions":{"allOf":[]},"command":"one","command":"two"`,
+	} {
+		raw := `{"format_version":2,"bundles":[{"service":"crm","operations":[{"public_id":"crm.contacts.list",` + members + `}]}]}`
+		if _, err := Parse([]byte(raw)); err == nil {
+			t.Errorf("accepted %s", members)
+		}
+	}
+}
