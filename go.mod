@@ -4,6 +4,7 @@ go 1.27.3
 
 require (
 	github.com/itchyny/gojq v0.12.19
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/sigstore/sigstore-go v1.3.0
 	github.com/theupdateframework/go-tuf/v2 v2.4.2
 	github.com/zalando/go-keyring v0.2.8

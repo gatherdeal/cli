@@ -125,13 +125,31 @@ func generatedCommand[A ~struct {
 				return nil, err
 			}
 			body = *v
+			if !op.ReadOnly() {
+				if err := validateJSON(body, writeContracts()[op.PublicID].request); err != nil {
+					return nil, usageError("invalid --input: %v", err)
+				}
+			}
 		} else if inv.isSet("input") {
 			return nil, usageError("%s does not accept a body", op.PublicID)
 		}
-		if inv.Meta.Write != nil && inv.Meta.Write.DryRun {
-			if _, err := bind(values, body); err != nil {
+		var input any
+		if inv.Meta.Write != nil {
+			input, err = bind(values, body)
+			if err != nil {
 				return nil, usageError("%v", err)
 			}
+			if hasBody {
+				body, err = json.Marshal(input)
+				if err != nil {
+					return nil, usageError("cannot encode --input: %v", err)
+				}
+				if err := validateJSON(body, writeContracts()[op.PublicID].request); err != nil {
+					return nil, usageError("invalid encoded --input: %v", err)
+				}
+			}
+		}
+		if inv.Meta.Write != nil && inv.Meta.Write.DryRun {
 			if _, err := inv.resolveTarget(false); err != nil {
 				return nil, err
 			}
@@ -143,9 +161,12 @@ func generatedCommand[A ~struct {
 		}
 		var invoke invokeInput
 		call := func() (jsontext.Value, error) {
-			input, err := bind(values, body)
-			if err != nil {
-				return nil, usageError("%v", err)
+			bound := input
+			if bound == nil {
+				bound, err = bind(values, body)
+				if err != nil {
+					return nil, usageError("%v", err)
+				}
 			}
 			if invoke == nil {
 				invoke, err = connect(inv)
@@ -153,7 +174,7 @@ func generatedCommand[A ~struct {
 					return nil, err
 				}
 			}
-			raw, corr, err := invoke(ctx, input)
+			raw, corr, err := invoke(ctx, bound)
 			inv.Meta.CorrelationID = corr
 			return raw, auth.Explain(err)
 		}
@@ -161,8 +182,18 @@ func generatedCommand[A ~struct {
 			return generatedList(ctx, inv, op.Pagination, values, call)
 		}
 		raw, err := call()
-		if err != nil || len(raw) == 0 {
+		if err != nil {
 			return nil, err
+		}
+		if !op.ReadOnly() {
+			if receipt := writeContracts()[op.PublicID].receipt; receipt != nil {
+				if err := validateJSON(raw, receipt); err != nil {
+					return nil, output.UnknownWriteOutcome(err)
+				}
+			}
+		}
+		if len(raw) == 0 {
+			return nil, nil
 		}
 		if result != "" {
 			return resultMember(raw, result, inv.Meta.CorrelationID)
