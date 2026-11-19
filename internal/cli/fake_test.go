@@ -440,9 +440,9 @@ func (te *testEnv) run(args ...string) result {
 	res := result{exit: code, stdout: stdout.String(), stderr: stderr.String()}
 	node, rest, resolveErr := commandTree(Commands()).resolve(args)
 	// Text commands print an envelope only on failure.
-	textOutput := resolveErr == nil && (node.command == nil || (node.command.Output == "text" && code == 0))
+	textOutput := (code == 0 && len(args) > 0 && args[0] == "help") || resolveErr == nil && (node.command == nil || (node.command.Output == "text" && code == 0))
 	if code == 0 && resolveErr == nil && node.command != nil {
-		inv, parseErr := parse(env, node.command, rest)
+		inv, parseErr := parse(env, node.command, rest, false)
 		textOutput = textOutput || errors.Is(parseErr, flag.ErrHelp) || inv != nil && inv.isSet("jq")
 	}
 	if !textOutput {

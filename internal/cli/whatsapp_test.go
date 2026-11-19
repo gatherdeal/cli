@@ -219,7 +219,7 @@ func TestWhatsAppPairingRealTimer(t *testing.T) {
 			command = c
 		}
 	}
-	inv, err := parse(env, command, nil)
+	inv, err := parse(env, command, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}

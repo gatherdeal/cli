@@ -38,7 +38,7 @@ func TestAcceptServerRiskCommonFlag(t *testing.T) {
 				for range cmd.Args {
 					args = append(args, "id")
 				}
-				inv, err := parse(&Env{}, cmd, args)
+				inv, err := parse(&Env{}, cmd, args, false)
 				if err != nil {
 					t.Fatal(err)
 				}

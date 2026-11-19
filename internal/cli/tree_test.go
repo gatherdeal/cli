@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"os"
 	"strings"
 	"testing"
 )
@@ -114,6 +115,33 @@ func TestHelpRespectsFlagOrderAndStringValues(t *testing.T) {
 		r := te.run(append(append([]string{}, c.Path...), "--help")...)
 		if r.exit != 0 || !strings.HasPrefix(r.stdout, "gatherdeal "+c.Name()) {
 			t.Fatal(c.Name(), r.stdout)
+		}
+	}
+}
+
+func TestLeadingHelpNeverDispatches(t *testing.T) {
+	f, te := loggedIn(t)
+	t.Chdir(t.TempDir())
+	if err := os.WriteFile("f", []byte(`{"type":"text","text":{"body":"hello"},"reply_to_id":"`+waAgentID+`"}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	before := f.requests.Load()
+	args := []string{"help", "whatsapp", "messages", "create", "--input", "f", "--send"}
+	for _, tc := range []struct {
+		flags []string
+		exit  int
+	}{
+		{[]string{"--idempotency-key"}, 2},
+		{[]string{"--idempotency-key", "replay-key"}, 0},
+		{[]string{"--idempotency-key", "--help"}, 0},
+		{[]string{"--help", "--unknown"}, 2},
+	} {
+		r := te.run(append(args, tc.flags...)...)
+		if r.exit != tc.exit || f.requests.Load() != before {
+			t.Fatalf("%v: exit %d, HTTP calls %d", tc.flags, r.exit, f.requests.Load()-before)
+		}
+		if tc.exit == 0 && !strings.HasPrefix(r.stdout, "gatherdeal whatsapp messages create") || tc.exit == 2 && r.errorCode() != "CLI_USAGE" {
+			t.Fatal(r.stdout)
 		}
 	}
 }

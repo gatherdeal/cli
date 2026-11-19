@@ -229,6 +229,10 @@ func Run(ctx context.Context, env *Env, args []string) int {
 	if env.Getenv != nil {
 		env.addSecret(env.Getenv("GATHERDEAL_TOKEN"))
 	}
+	helpMode := len(args) > 0 && args[0] == "help"
+	if helpMode {
+		args = args[1:]
+	}
 	node, rest, err := commandTree(Commands()).resolve(args)
 	if err != nil {
 		return emitError(env, output.Meta{}, err)
@@ -238,7 +242,7 @@ func Run(ctx context.Context, env *Env, args []string) int {
 		return int(output.ExitOK)
 	}
 	cmd := node.command
-	inv, err := parse(env, cmd, rest)
+	inv, err := parse(env, cmd, rest, helpMode)
 	if errors.Is(err, flag.ErrHelp) {
 		writeCommandHelp(env.Stdout, cmd)
 		return int(output.ExitOK)
@@ -296,7 +300,7 @@ func usageError(format string, args ...any) *output.Error {
 }
 
 // parse binds flags (which may appear before or after positional args).
-func parse(env *Env, cmd *Command, args []string) (*Invocation, error) {
+func parse(env *Env, cmd *Command, args []string, helpMode bool) (*Invocation, error) {
 	inv := &Invocation{
 		Env: env, Command: cmd,
 		strs: map[string]*string{}, bools: map[string]*bool{}, ints: map[string]*int{},
@@ -304,6 +308,11 @@ func parse(env *Env, cmd *Command, args []string) (*Invocation, error) {
 	}
 	fs := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
+	if helpMode {
+		// Parse past additional help flags so later unknown flags still fail.
+		fs.Bool("h", false, "")
+		fs.Bool("help", false, "")
+	}
 	for _, f := range cmd.Flags {
 		switch f.Kind {
 		case kindString:
@@ -339,6 +348,9 @@ func parse(env *Env, cmd *Command, args []string) (*Invocation, error) {
 		}
 		positional = append(positional, rest[0])
 		args = rest[1:]
+	}
+	if helpMode {
+		return nil, flag.ErrHelp
 	}
 	fs.Visit(func(f *flag.Flag) { inv.set[f.Name] = true })
 	required, most := len(cmd.Args), len(cmd.Args)

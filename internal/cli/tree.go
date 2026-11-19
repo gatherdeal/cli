@@ -72,9 +72,6 @@ func (n *commandNode) summary() string {
 }
 
 func (n *commandNode) resolve(args []string) (*commandNode, []string, error) {
-	if len(args) > 0 && args[0] == "help" {
-		args = append(append([]string{}, args[1:]...), "--help")
-	}
 	for len(args) > 0 && n.command == nil {
 		part := args[0]
 		if len(args) == 1 && (part == "--help" || part == "-h" || part == "-help") {
