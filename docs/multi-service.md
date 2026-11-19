@@ -117,3 +117,14 @@ uses an ordinary rename. Use a write-through rename before dispatch. On Unix,
 first use with an environment token can create the config directory without
 syncing its entry in its parent. Sync newly created parent directory entries
 before dispatch. Verify both cases on their respective platforms.
+
+Agent creation with an outlet code opens a WhatsApp client and then opens an
+Identity client for the lookup. Each resolves the profile independently. A
+concurrent profile rebind can therefore resolve the code under a different
+credential from the one used for creation. Bind both service clients to the
+same profile and credential when revisiting cross-service writes.
+
+Some published success schemas make the result optional. For example,
+`BroadcastOutput` permits a missing or null `broadcast`. The producer contract
+would need to require that member for schema validation to distinguish a
+missing broadcast from a valid receipt.
