@@ -413,7 +413,7 @@ func writeCommandHelp(w io.Writer, c *Command) {
 	if len(c.Args) > 0 {
 		b.WriteString("\nArguments:\n")
 		for _, a := range c.Args {
-			fmt.Fprintf(&b, "  %-24s %s\n", a.Name, a.Usage)
+			fmt.Fprintf(&b, "  %-24s %s\n", a.Name, strings.Join(strings.Fields(a.Usage), " "))
 		}
 	}
 	if len(c.Flags) > 0 {
@@ -423,7 +423,7 @@ func writeCommandHelp(w io.Writer, c *Command) {
 			if f.Kind != kindBool {
 				name += " <" + string(f.Kind) + ">"
 			}
-			usage := f.Usage
+			usage := strings.Join(strings.Fields(f.Usage), " ")
 			if f.Required {
 				usage = "(required) " + usage
 			}
