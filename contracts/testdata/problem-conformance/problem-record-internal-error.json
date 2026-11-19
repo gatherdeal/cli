@@ -1,0 +1,20 @@
+{
+  "description": "An INTERNAL_ERROR problem can carry a record too; clients that special-case INTERNAL_ERROR still decode it.",
+  "response": {
+    "status": 500,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/INTERNAL_ERROR\",\"title\":\"Internal server error.\",\"status\":500,\"instance\":\"urn:gatherdeal:request:corr-1\",\"code\":\"INTERNAL_ERROR\",\"retryable\":false,\"correlation_id\":\"corr-1\",\"record\":{\"kind\":\"inference_request\",\"id\":\"019a2b3c-4d5e-7f60-8a9b-0c1d2e3f4a5b\"}}"
+  },
+  "expect": {
+    "kind": "problem",
+    "status": 500,
+    "code": "INTERNAL_ERROR",
+    "record": {
+      "kind": "inference_request",
+      "id": "019a2b3c-4d5e-7f60-8a9b-0c1d2e3f4a5b"
+    }
+  }
+}

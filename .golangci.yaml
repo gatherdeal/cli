@@ -1,0 +1,45 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: standard
+  enable:
+    - errorlint
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - revive
+    - unconvert
+    - usestdlibvars
+  settings:
+    gosec:
+      excludes:
+        # Paths come from the user's own config directory.
+        - G304
+        # The CLI exists to call the server the user chose; every client is
+        # origin-bound in internal/httpx.
+        - G704
+        # Error-code names such as CLI_TOKEN_INVALID are not credentials.
+        - G101
+        # The file credential store serializes the secret by design.
+        - G117
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
+  exclusions:
+    presets:
+      - std-error-handling
+    rules:
+      - path: _test\.go
+        linters: [gosec, noctx]
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

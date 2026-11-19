@@ -1,0 +1,15 @@
+{
+  "description": "A text/plain error is a status-only error.",
+  "response": {
+    "status": 503,
+    "headers": {
+      "Content-Type": "text/plain",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "upstream connect error or disconnect/reset before headers"
+  },
+  "expect": {
+    "kind": "status",
+    "status": 503
+  }
+}

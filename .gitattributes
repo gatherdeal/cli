@@ -1,0 +1,4 @@
+# Check out every text file with LF line endings on every platform. The
+# contract digests, the embedded documents and the golden test files name
+# exact bytes, so a CRLF checkout must never change them.
+* text=auto eol=lf

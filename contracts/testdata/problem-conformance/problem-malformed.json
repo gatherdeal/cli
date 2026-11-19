@@ -1,0 +1,15 @@
+{
+  "description": "A problem media type with a body that is not JSON is a protocol error.",
+  "response": {
+    "status": 500,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/INTERNAL_ERROR\",\"status\":"
+  },
+  "expect": {
+    "kind": "protocol",
+    "status": 500
+  }
+}

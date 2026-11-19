@@ -1,0 +1,16 @@
+{
+  "description": "A record whose id is not a canonical lowercase UUID is still a problem, without a record.",
+  "response": {
+    "status": 422,
+    "headers": {
+      "Content-Type": "application/problem+json",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/INFERENCE_INSUFFICIENT_CREDITS\",\"title\":\"Insufficient AI credits for this request.\",\"status\":422,\"instance\":\"urn:gatherdeal:request:corr-1\",\"code\":\"INFERENCE_INSUFFICIENT_CREDITS\",\"retryable\":false,\"correlation_id\":\"corr-1\",\"record\":{\"kind\":\"inference_request\",\"id\":\"not-a-uuid\"}}"
+  },
+  "expect": {
+    "kind": "problem",
+    "status": 422,
+    "code": "INFERENCE_INSUFFICIENT_CREDITS"
+  }
+}

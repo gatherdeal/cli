@@ -1,0 +1,22 @@
+{
+  "name": "@gatherdeal/cli-win32-arm64",
+  "version": "0.0.0",
+  "description": "The gatherdeal CLI binary for win32-arm64. Install @gatherdeal/cli instead.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gatherdeal/cli.git"
+  },
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "files": [
+    "bin/gatherdeal.exe",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "preferUnplugged": true
+}

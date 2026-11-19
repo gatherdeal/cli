@@ -1,0 +1,16 @@
+{
+  "description": "A problem document whose media type carries a charset parameter decodes as a problem.",
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/problem+json; charset=utf-8",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"type\":\"https://docs.gatherdeal.ai/errors/NOT_FOUND\",\"title\":\"The requested resource was not found.\",\"status\":404,\"instance\":\"urn:gatherdeal:request:corr-1\",\"code\":\"NOT_FOUND\",\"retryable\":false,\"correlation_id\":\"corr-1\"}"
+  },
+  "expect": {
+    "kind": "problem",
+    "status": 404,
+    "code": "NOT_FOUND"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "data": [
+    {
+      "id": "55555555-5555-5555-5555-555555555555",
+      "name": "Ali"
+    }
+  ],
+  "exit_code": 0,
+  "meta": {
+    "context": {
+      "binding": {
+        "organization": {
+          "code": "acme",
+          "id": "22222222-2222-2222-2222-222222222222",
+          "name": "Acme Sdn Bhd"
+        },
+        "principal_id": "44444444-4444-4444-4444-444444444444"
+      },
+      "issuer": "https://api.gatherdeal.com/oidc",
+      "profile": "default",
+      "request": {
+        "outlet_ids": [
+          "33333333-3333-3333-3333-333333333333"
+        ]
+      },
+      "server": "https://api.gatherdeal.ai"
+    },
+    "correlation_id": "corr-test",
+    "credential_expires_at": "2030-01-01T00:00:00Z",
+    "page_info": {
+      "has_next_page": true,
+      "has_prev_page": true,
+      "next_cursor": "cur-3",
+      "page": 2,
+      "page_size": 1,
+      "prev_cursor": "cur-1",
+      "total_items": 3,
+      "total_pages": 3
+    },
+    "profile": "default",
+    "server": "https://api.gatherdeal.ai"
+  },
+  "schema_version": 1,
+  "status": "success"
+}

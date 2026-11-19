@@ -1,0 +1,29 @@
+{
+  "name": "@gatherdeal/cli",
+  "version": "0.0.0",
+  "description": "Read and manage your GatherDeal business data from the terminal or an AI agent.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gatherdeal/cli.git"
+  },
+  "bin": {
+    "gatherdeal": "bin/gatherdeal.js"
+  },
+  "files": [
+    "bin/gatherdeal.js",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "optionalDependencies": {
+    "@gatherdeal/cli-linux-x64": "0.0.0",
+    "@gatherdeal/cli-linux-arm64": "0.0.0",
+    "@gatherdeal/cli-darwin-x64": "0.0.0",
+    "@gatherdeal/cli-darwin-arm64": "0.0.0",
+    "@gatherdeal/cli-win32-x64": "0.0.0",
+    "@gatherdeal/cli-win32-arm64": "0.0.0"
+  }
+}

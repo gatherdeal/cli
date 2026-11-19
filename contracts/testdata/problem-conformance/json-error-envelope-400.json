@@ -1,0 +1,15 @@
+{
+  "description": "A non-2xx application/json body is a status-only error, not a problem.",
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Correlation-Id": "corr-1"
+    },
+    "body": "{\"status\":\"error\",\"error\":{\"code\":\"BAD_REQUEST\",\"message\":\"invalid\"}}"
+  },
+  "expect": {
+    "kind": "status",
+    "status": 400
+  }
+}
