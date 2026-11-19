@@ -111,6 +111,7 @@ type DelegatedAccess struct {
 	RestrictionVersion int           `json:"restriction_version"`
 	ClientID           string        `json:"client_id"`
 	OrganizationID     string        `json:"organization_id"`
+	AllOutlets         bool          `json:"all_outlets"` // Effective scope from the status endpoint.
 	OutletIDs          []string      `json:"outlet_ids"`
 	Permissions        []string      `json:"permissions"`
 	EffectCeiling      EffectCeiling `json:"effect_ceiling"`

@@ -105,17 +105,20 @@ func TestLoginProductionKeyring(t *testing.T) {
 
 func TestDelegationOutletScope(t *testing.T) {
 	for _, tc := range []struct {
-		name      string
-		outletIDs []string
-		want      string
+		name       string
+		allOutlets bool
+		outletIDs  []string
+		want       string
 	}{
-		{name: "nil", want: "all outlets"},
-		{name: "empty", outletIDs: []string{}, want: "all outlets"},
+		{name: "all", allOutlets: true, want: "all outlets"},
+		{name: "all with effective IDs", allOutlets: true, outletIDs: []string{"33333333-3333-3333-3333-333333333333"}, want: "all outlets"},
+		{name: "empty", outletIDs: []string{}, want: "0 outlet(s)"},
 		{name: "one", outletIDs: []string{"33333333-3333-3333-3333-333333333333"}, want: "1 outlet(s)"},
 		{name: "multiple", outletIDs: []string{"33333333-3333-3333-3333-333333333333", "44444444-4444-4444-4444-444444444444"}, want: "2 outlet(s)"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fake := newFake(t, server.ProductionOrigin)
+			fake.allOutlets = tc.allOutlets
 			fake.outletIDs = tc.outletIDs
 			te := newTestEnv(t, fake)
 			// Each completed login path uses the same scope summary.
@@ -140,7 +143,11 @@ func TestDelegationOutletScope(t *testing.T) {
 					t.Errorf("%v: scope summary = %s", args, res.stderr)
 				}
 				// JSON retains the IDs, with nil normalized to an empty array.
-				ids := res.data()["delegated_access"].(map[string]any)["outlet_ids"].([]any)
+				access := res.data()["delegated_access"].(map[string]any)
+				if access["all_outlets"] != tc.allOutlets {
+					t.Fatalf("%v: all_outlets = %v", args, access["all_outlets"])
+				}
+				ids := access["outlet_ids"].([]any)
 				if len(ids) != len(tc.outletIDs) {
 					t.Fatalf("%v: outlet_ids = %v", args, ids)
 				}

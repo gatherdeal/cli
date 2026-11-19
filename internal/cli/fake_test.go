@@ -41,6 +41,7 @@ type fakeServer struct {
 	statusCalls     int
 	statusError     string // raw response body for the status endpoint
 	statusErrorCode int
+	allOutlets      bool
 	outletIDs       []string
 	lifetimeNever   bool
 	verificationURI string
@@ -298,11 +299,13 @@ func (f *fakeServer) handle(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 401, problemJSON(401, "UNAUTHORIZED", "Authentication is required.", nil))
 			return
 		}
+		access := f.access()
+		access["all_outlets"] = f.allOutlets
 		writeJSON(w, 200, map[string]any{
 			"status":                            "success",
 			"user":                              map[string]any{"id": f.userID(), "username": "staff1", "name": "Staff One"},
 			"organization":                      map[string]any{"id": f.organizationID(), "code": "acme", "name": f.organizationName()},
-			"delegated_access_contract_version": 1, "delegated_access": f.access(),
+			"delegated_access_contract_version": 1, "delegated_access": access,
 		})
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/crm/v1/contacts"):
 		f.contactsQuery = r.URL.Query()

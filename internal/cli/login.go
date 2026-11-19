@@ -46,6 +46,7 @@ type accessView struct {
 	ID            string                   `json:"id"`
 	ClientID      string                   `json:"client_id,omitempty"`
 	Organization  *auth.StatusOrganization `json:"organization"`
+	AllOutlets    bool                     `json:"all_outlets"`
 	OutletIDs     []string                 `json:"outlet_ids"`
 	Permissions   []string                 `json:"permissions"`
 	EffectCeiling *auth.EffectCeiling      `json:"effect_ceiling,omitempty"`
@@ -68,7 +69,7 @@ func newAccessView(d *auth.DelegatedAccess, org *auth.StatusOrganization) access
 		perms = []string{}
 	}
 	return accessView{
-		ID: d.ID, ClientID: d.ClientID, Organization: org, OutletIDs: outlets, Permissions: perms,
+		ID: d.ID, ClientID: d.ClientID, Organization: org, AllOutlets: d.AllOutlets, OutletIDs: outlets, Permissions: perms,
 		EffectCeiling: &ceiling, Lifetime: d.Lifetime, ExpireAt: d.ExpireAt, NeverExpires: d.ExpireAt == nil,
 		IdleExpireAt: d.IdleExpireAt,
 	}
@@ -531,7 +532,7 @@ func (inv *Invocation) finishLogin(ctx context.Context, t *target, secrets store
 	data := loginData{
 		Profile: t.name, Server: t.origin, CredentialStore: secrets.Kind(),
 		TokenHint: server.TokenHint(tr.AccessToken), User: user,
-		DelegatedAccess: newAccessView(&tr.DelegatedAccess, org),
+		DelegatedAccess: newAccessView(st.DelegatedAccess, org),
 	}
 	// Renewal: revoke the previous access once the new one is stored.
 	if oldToken != "" && oldToken != tr.AccessToken {
@@ -546,12 +547,12 @@ func (inv *Invocation) finishLogin(ctx context.Context, t *target, secrets store
 	if org != nil && org.Name != "" {
 		orgLabel = org.Name
 	}
-	outletScope := "all outlets"
-	if n := len(tr.DelegatedAccess.OutletIDs); n > 0 {
-		outletScope = fmt.Sprintf("%d outlet(s)", n)
+	outletScope := fmt.Sprintf("%d outlet(s)", len(st.DelegatedAccess.OutletIDs))
+	if st.DelegatedAccess.AllOutlets {
+		outletScope = "all outlets"
 	}
 	inv.Env.stderrf("Logged in to %s for %s (%s, %d permission(s), lifetime %s).\n",
-		t.origin, orgLabel, outletScope, len(tr.DelegatedAccess.Permissions), tr.DelegatedAccess.Lifetime)
+		t.origin, orgLabel, outletScope, len(st.DelegatedAccess.Permissions), st.DelegatedAccess.Lifetime)
 	if tr.DelegatedAccess.ExpireAt == nil {
 		inv.Env.stderrf(neverExpiresNote)
 	}
