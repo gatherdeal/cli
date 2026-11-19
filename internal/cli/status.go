@@ -47,7 +47,7 @@ func runStatus(ctx context.Context, inv *Invocation) (any, error) {
 type logoutData struct {
 	Profile           string `json:"profile"`
 	Server            string `json:"server"`
-	LoggedIn          bool   `json:"logged_in"`
+	LoggedIn          bool   `json:"logged_in"` // Whether the profile has a stored login after logout.
 	Revoked           bool   `json:"revoked"`
 	CredentialDeleted bool   `json:"credential_deleted"`
 	DelegatedAccessID string `json:"delegated_access_id,omitempty"`
@@ -76,7 +76,7 @@ func runLogout(ctx context.Context, inv *Invocation) (any, error) {
 		data.Note = EnvToken + " is set; logout does not revoke or change it"
 	}
 	res, lockErr := inv.endAccess(ctx, t, endAccessOptions{})
-	data.LoggedIn, data.DelegatedAccessID, data.Revoked = res.loggedIn, res.accessID, res.revoked
+	data.DelegatedAccessID, data.Revoked = res.accessID, res.revoked
 	data.Note = joinNote(data.Note, res.note)
 	deleted := res.deleteErr == nil
 	if lockErr != nil {
@@ -85,7 +85,7 @@ func runLogout(ctx context.Context, inv *Invocation) (any, error) {
 		}
 		deleted = false
 	}
-	data.CredentialDeleted = deleted && data.LoggedIn
+	data.CredentialDeleted = deleted && res.hadCredential
 
 	if res.revokeErr != nil {
 		e := output.AsError(res.revokeErr)
@@ -109,7 +109,7 @@ func runLogout(ctx context.Context, inv *Invocation) (any, error) {
 		return nil, output.Errorf(output.ExitUnclassified, output.CodeInternal, "the access was revoked but the local credential could not be deleted").
 			WithDetails(map[string]any{"revoked": data.Revoked})
 	}
-	if data.LoggedIn {
+	if res.hadCredential {
 		inv.Env.stderrf("Logged out of %s (profile %q).\n", t.origin, t.name)
 	}
 	return data, nil
@@ -126,8 +126,8 @@ type endAccessOptions struct {
 
 // endAccessResult is what endAccess did.
 type endAccessResult struct {
-	loggedIn bool
-	accessID string
+	hadCredential bool
+	accessID      string
 	// revoked: the server revoked the access, or (failClosed) reports it
 	// already inactive (alreadyInactive).
 	revoked         bool
@@ -163,7 +163,7 @@ func (inv *Invocation) endAccess(ctx context.Context, t *target, opts endAccessO
 		var credStore store.SecretStore
 		var credAccount string
 		if ref := prof.Credential; ref != nil {
-			r.loggedIn = true
+			r.hadCredential = true
 			credStore, credAccount = inv.secretStore(t, ref.Store), tx.slot.CredentialAccount(ref.Generation)
 			if !opts.localOnly {
 				secret, err := credStore.Get(credAccount)

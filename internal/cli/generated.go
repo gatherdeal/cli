@@ -37,8 +37,13 @@ func generatedCommands(existing []*Command) []*Command {
 				if err != nil {
 					return nil, err
 				}
+				outlet := selectedOutlet(inv)
 				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
-					return client.InvokeRead(ctx, b, input)
+					key, err := inv.generatedWriteKey(op)
+					if err != nil {
+						return nil, "", err
+					}
+					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
 				}, nil
 			}))
 	}
@@ -55,18 +60,25 @@ func generatedCommands(existing []*Command) []*Command {
 				}
 				outlet := selectedOutlet(inv)
 				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
-					var key string
-					if !op.ReadOnly() {
-						if err := inv.recordWriteKey(); err != nil {
-							return nil, "", err
-						}
-						key = inv.Meta.Write.IdempotencyKey
+					key, err := inv.generatedWriteKey(op)
+					if err != nil {
+						return nil, "", err
 					}
 					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
 				}, nil
 			}))
 	}
 	return commands
+}
+
+func (inv *Invocation) generatedWriteKey(op contracts.Operation) (string, error) {
+	if op.ReadOnly() {
+		return "", nil
+	}
+	if err := inv.recordWriteKey(); err != nil {
+		return "", err
+	}
+	return inv.Meta.Write.IdempotencyKey, nil
 }
 
 type bindingArgument struct {
@@ -82,7 +94,11 @@ func generatedCommand[A ~struct {
 }](op contracts.Operation, summary string, hasBody bool, args []A, bind bindInput, client any, connect func(*Invocation) (invokeInput, error)) *Command {
 	c := &Command{Operation: op.PublicID, Summary: strings.TrimSuffix(summary, ".") + ".", Network: true, Output: "json", Flags: append([]FlagSpec{}, targetFlags...)}
 	if op.OutletScope == "filtered" {
-		c.Flags = append(c.Flags, flagOutlet)
+		outlet := flagOutlet
+		if !op.ReadOnly() {
+			outlet.Usage = "Outlet id (UUID) within this access's approved write scope."
+		}
+		c.Flags = append(c.Flags, outlet)
 	}
 	if op.Pagination != nil {
 		c.Flags = append(c.Flags, pageFlags(op.PublicID, op.Pagination.ResultField)...)
@@ -130,8 +146,6 @@ func generatedCommand[A ~struct {
 					return nil, usageError("invalid --input: %v", err)
 				}
 			}
-		} else if inv.isSet("input") {
-			return nil, usageError("%s does not accept a body", op.PublicID)
 		}
 		var input any
 		if inv.Meta.Write != nil {
@@ -207,8 +221,12 @@ func generatedCommand[A ~struct {
 			confirmation = ConfirmSend
 		}
 		c.Write = &WritePolicy{Confirmation: confirmation, Preview: run}
-	} else if hasBody {
-		c.Flags = append(c.Flags, FlagSpec{Name: "input", Kind: kindString, Usage: "JSON request body, inline, from a file, or - for standard input."})
+		c.Flags = append(c.Flags, c.Write.flags(op)...)
+	}
+	if hasBody {
+		input := flagInput
+		input.Required = true
+		c.Flags = append(c.Flags, input)
 	}
 	return c
 }
@@ -227,7 +245,13 @@ func (inv *Invocation) bindingArguments(params []commandParameter) (map[string]j
 			raw, _ = json.Marshal(v)
 		} else {
 			if !inv.isSet(p.flag.Name) {
+				if p.Required {
+					return nil, usageError("flag --%s is required", p.flag.Name)
+				}
 				continue
+			}
+			if p.Required && p.uuid && !uuidRE.MatchString(inv.str(p.flag.Name)) {
+				return nil, usageError("--%s must be a UUID", p.flag.Name)
 			}
 			switch {
 			case p.flag.Kind == kindInt:

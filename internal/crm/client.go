@@ -74,11 +74,11 @@ func (c *Client) call(outletID string) call {
 	return call{api: api, d: d}
 }
 
-func (c *Client) InvokeRead(ctx context.Context, binding crmv1.CLIBinding, input any) (jsontext.Value, string, error) {
-	call := c.call("")
-	raw, err := binding.Invoke(ctx, call.api, input, "")
+func (c *Client) Invoke(ctx context.Context, binding crmv1.CLIBinding, input any, outlet, key string, write bool) (jsontext.Value, string, error) {
+	call := c.call(outlet)
+	raw, err := binding.Invoke(ctx, call.api, input, key)
 	if err != nil {
-		err = call.apiError(ctx, err)
+		err = call.apiError(ctx, err, write)
 	}
 	return raw, call.d.CorrelationID, err
 }
@@ -129,7 +129,7 @@ func (c *Client) ListContacts(ctx context.Context, p ListContactsParams) (*ListC
 func (c call) read(ctx context.Context, binding crmv1.CLIBinding, input, dest any) error {
 	raw, err := binding.Invoke(ctx, c.api, input, "")
 	if err != nil {
-		return c.apiError(ctx, err)
+		return c.apiError(ctx, err, false)
 	}
 	if err := json.Unmarshal(raw, dest); err != nil {
 		return c.protocolError("invalid contact response")
@@ -250,15 +250,18 @@ func ExpansionField(param string) string {
 // problem document by its status and code (httpx.ProblemError), a non-2xx
 // without one by its HTTP status, a contract violation as a protocol error
 // and anything else as a transport failure.
-func (c call) apiError(ctx context.Context, err error) error {
+func (c call) apiError(ctx context.Context, err error, write bool) error {
 	var problem *crmv1.Problem
 	if errors.As(err, &problem) {
 		p := problem
 		return httpx.ProblemError(&httpx.Problem{Type: p.Type, Title: p.Title, Status: p.Status, Detail: p.Detail, Instance: p.Instance, Code: p.Code, Retryable: p.Retryable, RetryAfterMS: p.RetryAfterMS, CorrelationID: p.CorrelationID, Details: p.Details, Errors: p.Errors, ContentLanguage: p.ContentLanguage}, c.d.Problem).WithCause(err)
 	}
 	var status *crmv1.StatusError
-	if errors.As(err, &status) {
+	if errors.As(err, &status) && (!write || status.HTTPStatus >= 400 && status.HTTPStatus < 500) {
 		return httpx.StatusError(status.HTTPStatus, status.CorrelationID).WithCause(err)
+	}
+	if write {
+		return output.UnknownWriteOutcome(err)
 	}
 	var protocol *crmv1.ProtocolError
 	if errors.As(err, &protocol) {

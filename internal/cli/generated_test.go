@@ -3,8 +3,10 @@ package cli
 import (
 	"encoding/base64"
 	"encoding/json"
+	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/gatherdeal/cli/internal/crm"
@@ -86,6 +88,25 @@ func TestGeneratedBroadcastRecipientWrite(t *testing.T) {
 	f.whatsapp = func(w http.ResponseWriter, _ *http.Request) { calls++; w.WriteHeader(http.StatusBadGateway) }
 	if r := te.run("whatsapp", "broadcasts", "start", waAgentID, "--send"); r.exit != 8 || r.errorCode() != "CLI_WRITE_OUTCOME_UNKNOWN" || calls != 2 {
 		t.Fatal(r.stdout)
+	}
+}
+
+func TestWhatsAppBodylessWriteFlags(t *testing.T) {
+	_, te := loggedIn(t)
+	for _, command := range []string{"agents delete", "broadcasts start"} {
+		t.Run(command, func(t *testing.T) {
+			args := append([]string{"whatsapp"}, strings.Fields(command)...)
+			args = append(args, waAgentID, "--dry-run")
+			if r := te.run(args...); r.exit != 0 {
+				t.Fatal(r.stdout)
+			}
+			for name, value := range map[string]string{"input": "{}", "idempotency-key": "caller-key"} {
+				r := te.run(append(args, "--"+name, value)...)
+				if r.exit != 2 || !strings.Contains(r.stderr, "flag provided but not defined: -"+name) {
+					t.Fatal(r.stdout)
+				}
+			}
+		})
 	}
 }
 
@@ -173,5 +194,137 @@ func TestChatMessagesRevisionPoll(t *testing.T) {
 		if r := te.run(append(args, flag, "1")...); r.exit != 2 {
 			t.Fatal(r.stdout)
 		}
+	}
+}
+
+func TestGeneratedCRMHelp(t *testing.T) {
+	te := newTestEnv(t, nil)
+	for _, name := range []string{"contacts update", "contact-tags assign", "contact-tags remove", "contact-logs list"} {
+		t.Run(name, func(t *testing.T) {
+			args := append([]string{"crm"}, strings.Fields(name)...)
+			res := te.run(append(args, "--help")...)
+			if res.exit != 0 {
+				t.Fatal(res.stdout)
+			}
+			compareGolden(t, "help_crm_"+strings.ReplaceAll(name, " ", "_")+".golden.txt", res.stdout)
+		})
+	}
+}
+
+func TestGeneratedCRMContactLogs(t *testing.T) {
+	f, te := loggedIn(t)
+	const id = "01234567-89ab-4cde-8fab-0123456789ab"
+	const outlet = "33333333-3333-3333-3333-333333333333"
+	calls := 0
+	f.crm = func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		q := r.URL.Query()
+		if r.Method != http.MethodGet || r.URL.Path != "/crm/v1/contact-logs" ||
+			q.Get("contact_id") != id || q.Get("outlet_id") != outlet {
+			t.Errorf("unexpected log request: %s %s", r.Method, r.URL)
+		}
+		writeJSON(w, 200, `{"status":"success","contact_logs":{"data":[{"content":"Follow-up"}],"has_next_page":false}}`)
+	}
+	args := []string{"crm", "contact-logs", "list"}
+	missing := te.run(args...)
+	if missing.exit != 2 || missing.errorCode() != "CLI_USAGE" || !strings.Contains(missing.stderr, "flag --contact-id is required") || calls != 0 {
+		t.Fatal(missing.stdout, missing.stderr, calls)
+	}
+	golden(t, "contact_logs_missing_contact_id.golden.json", missing.stdout)
+	if r := te.run(append(args, "--contact-id", "invalid")...); r.exit != 2 || calls != 0 {
+		t.Fatal(r.stdout, calls)
+	}
+	r := te.run(append(args, "--contact-id", id, "--outlet", outlet, "--jq", ".[].content")...)
+	if r.exit != 0 || calls != 1 || r.stdout != "Follow-up\n" {
+		t.Fatal(r.stdout, calls)
+	}
+}
+
+func TestGeneratedCRMWrites(t *testing.T) {
+	const id = "01234567-89ab-4cde-8fab-0123456789ab"
+	const tag = "55555555-5555-4555-8555-555555555555"
+	const outlet = "33333333-3333-3333-3333-333333333333"
+	const contacts = "/crm/v1/contacts"
+	const logs = "/crm/v1/contact-logs"
+	const membership = contacts + "/" + id + "/tags/" + tag
+	for _, tc := range []struct {
+		name, method, path, body string
+		args                     []string
+		keyed                    bool
+	}{
+		{"create contact", http.MethodPost, contacts, `{"kind":"personal","name":"Amina"}`, []string{"contacts", "create"}, true},
+		{"update contact", http.MethodPatch, contacts + "/" + id, `{"remark":null}`, []string{"contacts", "update", id}, false},
+		{"assign tag", http.MethodPut, membership, "", []string{"contact-tags", "assign", id, tag}, true},
+		{"remove tag", http.MethodDelete, membership, "", []string{"contact-tags", "remove", id, tag}, false},
+		{"create log", http.MethodPost, logs, `{"contact_id":"` + id + `","content":" Follow-up "}`, []string{"contact-logs", "create"}, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f, te := loggedIn(t)
+			var keys []string
+			f.crm = func(w http.ResponseWriter, r *http.Request) {
+				keys = append(keys, r.Header.Get("Idempotency-Key"))
+				if r.Method != tc.method || r.URL.Path != tc.path || r.URL.Query().Get("outlet_id") != outlet {
+					t.Errorf("unexpected write request: %s %s", r.Method, r.URL)
+				}
+				var sent, want map[string]any
+				err := json.NewDecoder(r.Body).Decode(&sent)
+				if tc.body == "" {
+					if err != io.EOF || r.ContentLength != 0 || r.Header.Get("Content-Type") != "" {
+						t.Errorf("addressed request has a body: %v, %v", sent, err)
+					}
+				} else if wantErr := json.Unmarshal([]byte(tc.body), &want); wantErr != nil || err != nil || !reflect.DeepEqual(sent, want) {
+					t.Errorf("body: %v, want %v, decode errors: %v, %v", sent, want, err, wantErr)
+				}
+				switch {
+				case !tc.keyed:
+					w.WriteHeader(http.StatusNoContent)
+				case len(keys) == 1:
+					w.WriteHeader(http.StatusBadGateway)
+				default:
+					writeJSON(w, 200, `{"status":"success","id":"`+id+`"}`)
+				}
+			}
+			args := append([]string{"crm"}, tc.args...)
+			args = append(args, "--outlet", outlet)
+			if tc.body != "" {
+				args = append(args, "--input", tc.body)
+			}
+			if r := te.run(args...); r.exit != 9 || len(keys) != 0 {
+				t.Fatal(r.stdout, keys)
+			}
+			if r := te.run(append(args, "--dry-run")...); r.exit != 0 || len(keys) != 0 {
+				t.Fatal(r.stdout, keys)
+			}
+			if tc.body == "" {
+				if r := te.run(append(args, "--dry-run", "--input", "{}")...); r.exit != 2 || !strings.Contains(r.stderr, "flag provided but not defined: -input") || len(keys) != 0 {
+					t.Fatal(r.stdout, keys)
+				}
+			}
+			if !tc.keyed {
+				if r := te.run(append(args, "--yes", "--idempotency-key", "caller-key")...); r.exit != 2 || !strings.Contains(r.stderr, "flag provided but not defined: -idempotency-key") || len(keys) != 0 {
+					t.Fatal(r.stdout, keys)
+				}
+				if r := te.run(append(args, "--yes")...); r.exit != 0 || !reflect.DeepEqual(keys, []string{""}) {
+					t.Fatal(r.stdout, keys)
+				}
+				return
+			}
+			first := te.run(append(args, "--yes")...)
+			if first.exit != 8 || first.errorCode() != "CLI_WRITE_OUTCOME_UNKNOWN" || len(keys) != 1 || keys[0] == "" {
+				t.Fatal(first.stdout, keys)
+			}
+			meta := first.env["meta"].(map[string]any)["write"].(map[string]any)
+			if meta["idempotency_key"] != keys[0] || meta["idempotency_key_generated"] != true || meta["invocation_id"] == nil {
+				t.Fatal(first.stdout)
+			}
+			res := te.run(append(args, "--yes", "--idempotency-key", keys[0])...)
+			if res.exit != 0 || res.data()["id"] != id || len(keys) != 2 || keys[1] != keys[0] {
+				t.Fatal(res.stdout, keys)
+			}
+			res = te.run(append(args, "--yes")...)
+			if res.exit != 0 || len(keys) != 3 || keys[2] == "" || keys[2] == keys[0] {
+				t.Fatal(res.stdout, keys)
+			}
+		})
 	}
 }

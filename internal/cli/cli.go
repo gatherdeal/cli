@@ -122,11 +122,12 @@ const (
 
 // FlagSpec declares one flag; it drives parsing, help and `commands`.
 type FlagSpec struct {
-	Name    string   `json:"name"`
-	Kind    flagKind `json:"type"`
-	Default string   `json:"default,omitempty"`
-	Usage   string   `json:"usage"`
-	Values  []string `json:"values,omitempty"`
+	Name     string   `json:"name"`
+	Kind     flagKind `json:"type"`
+	Default  string   `json:"default,omitempty"`
+	Usage    string   `json:"usage"`
+	Values   []string `json:"values,omitempty"`
+	Required bool     `json:"required,omitempty"`
 }
 
 // ArgSpec declares one positional argument. Only the last argument may be
@@ -422,6 +423,9 @@ func writeCommandHelp(w io.Writer, c *Command) {
 				name += " <" + string(f.Kind) + ">"
 			}
 			usage := f.Usage
+			if f.Required {
+				usage = "(required) " + usage
+			}
 			if len(f.Values) > 0 {
 				usage += " One of: " + strings.Join(f.Values, ", ") + "."
 			}

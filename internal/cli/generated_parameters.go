@@ -119,5 +119,6 @@ func parameterFor(op contracts.Operation, a bindingArgument) commandParameter {
 	case "limit":
 		p.flag.Name = "count" // Single-poll record count. --limit means a cursor walk.
 	}
+	p.flag.Required = a.Required
 	return p
 }

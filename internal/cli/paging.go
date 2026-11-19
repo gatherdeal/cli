@@ -13,6 +13,7 @@ import (
 // and the generated TotalMode.
 func pageFlags(publicID string, resource string) []FlagSpec {
 	pg := pagination(publicID)
+	resource = strings.ReplaceAll(resource, "_", " ")
 	return []FlagSpec{
 		{Name: "page", Kind: kindInt, Usage: fmt.Sprintf("Page number (1-based; default 1). Page numbers reach at most %d rows deep; continue with --after beyond that.", pg.MaxOffset)},
 		{Name: "page-size", Kind: kindInt, Usage: fmt.Sprintf(strings.ToUpper(resource[:1])+resource[1:]+" per page (1-%d; default %d, or %d with --all or --limit).", pg.MaxPageSize, pg.DefaultPageSize, pg.MaxPageSize)},

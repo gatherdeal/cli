@@ -6,6 +6,7 @@ package contractcheck
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -231,6 +232,65 @@ func TestGeneratedImportsStdlibOnly(t *testing.T) {
 	}
 }
 
+func TestRequestFlagsMatchContracts(t *testing.T) {
+	commands := map[string]*cli.Command{}
+	for _, c := range cli.Commands() {
+		commands[c.Operation] = c
+	}
+	for _, b := range manifest(t).Bundles {
+		data, err := b.OpenAPI()
+		if err != nil {
+			t.Fatal(err)
+		}
+		var doc struct {
+			Paths map[string]map[string]struct {
+				ID          string `json:"x-gd-public-id"`
+				RequestBody json.RawMessage
+				Parameters  []struct {
+					Name, In string
+					Required bool
+				}
+			}
+		}
+		if err := json.Unmarshal(data, &doc); err != nil {
+			t.Fatal(err)
+		}
+		for _, path := range doc.Paths {
+			for _, route := range path {
+				c := commands[route.ID]
+				if c == nil {
+					t.Errorf("missing command for %s", route.ID)
+					continue
+				}
+				flags := map[string]cli.FlagSpec{}
+				for _, f := range c.Flags {
+					flags[f.Name] = f
+				}
+				input, hasInput := flags["input"]
+				if hasInput != (route.RequestBody != nil) {
+					t.Errorf("%s: --input present=%v, OpenAPI request body present=%v", c.Name(), hasInput, route.RequestBody != nil)
+				}
+				if hasInput && input.Required != (route.ID != "whatsapp.agents.create") {
+					t.Errorf("%s: unexpected --input required=%v", c.Name(), input.Required)
+				}
+				_, hasKey := flags["idempotency-key"]
+				keyed := c.Contract().Idempotency == contracts.IdempotencyKeyed
+				if hasKey != keyed {
+					t.Errorf("%s: --idempotency-key present=%v, manifest keyed=%v", c.Name(), hasKey, keyed)
+				}
+				for _, p := range route.Parameters {
+					if p.In == "query" && p.Required {
+						name := strings.ReplaceAll(p.Name, "_", "-")
+						if !flags[name].Required {
+							t.Errorf("%s: required query parameter %s has no required flag", c.Name(), p.Name)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 // pageFlagNames are the paging flags every list command has.
 var pageFlagNames = []string{"page", "page-size", "after", "total", "all", "limit"}
 
@@ -251,6 +311,13 @@ func TestPagingFlagsMatchManifest(t *testing.T) {
 			names[f.Name] = true
 		}
 		paged := op.Pagination != nil
+		if paged && strings.Contains(op.Pagination.ResultField, "_") {
+			for _, f := range c.Flags {
+				if slices.Contains(pageFlagNames, f.Name) && strings.Contains(strings.ToLower(f.Usage), op.Pagination.ResultField) {
+					t.Errorf("%s: --%s help exposes wire result field %q", c.Name(), f.Name, op.Pagination.ResultField)
+				}
+			}
+		}
 		if paged && (op.Pagination.Style != contracts.PaginationAdaptive || op.Pagination.MaxPageSize < 1) {
 			t.Errorf("%s: pagination %+v is not adaptive", op.PublicID, *op.Pagination)
 		}
