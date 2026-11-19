@@ -242,6 +242,7 @@ type ContextRequest struct {
 // WriteMeta is reported on previews, successes and failures once a write is
 // prepared. Preserve the key when reconciling an uncertain server outcome.
 type WriteMeta struct {
+	InvocationID            string `json:"invocation_id,omitempty"`
 	DryRun                  bool   `json:"dry_run"`
 	IdempotencyKey          string `json:"idempotency_key,omitempty"`
 	IdempotencyKeyGenerated bool   `json:"idempotency_key_generated,omitempty"`

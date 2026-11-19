@@ -11,6 +11,7 @@ import (
 
 	"github.com/gatherdeal/cli/contracts"
 	"github.com/gatherdeal/cli/internal/output"
+	"github.com/gatherdeal/cli/internal/store"
 )
 
 // Confirmation identifies the explicit execution opt-in. It is not authorization.
@@ -83,6 +84,22 @@ func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions,
 		meta.Write.IdempotencyKey = hex.EncodeToString(bytes[:])
 		meta.Write.IdempotencyKeyGenerated = true
 	}
+	return nil
+}
+
+// recordWriteKey runs after validation and scope resolution, immediately
+// before dispatch. Caller-supplied keys already have a recovery path.
+func (inv *Invocation) recordWriteKey() error {
+	meta := inv.Meta.Write
+	if !meta.IdempotencyKeyGenerated {
+		return nil
+	}
+	id, err := store.RecordWriteKey(inv.target.root, meta.IdempotencyKey)
+	if err != nil {
+		return storeError(err, inv.target)
+	}
+	meta.InvocationID = id
+	inv.Env.stderrf("Write invocation %s: recovery key saved in write-%s.json in the CLI config directory.\n", id, id)
 	return nil
 }
 

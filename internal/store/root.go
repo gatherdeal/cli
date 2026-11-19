@@ -20,6 +20,8 @@ var ErrProfilesRemain = errors.New("the config directory still has profiles")
 // credentialFileRE is the name of a credential file (FileStore.fileName).
 var credentialFileRE = regexp.MustCompile(`^[0-9a-f]{32}\.json$`)
 
+var writeKeyFileRE = regexp.MustCompile(`^write-[0-9a-f]{32}\.json$`)
+
 const credentialsDirName = "credentials"
 
 // RootContents lists a config directory. Owned holds the entries the CLI
@@ -58,7 +60,7 @@ func InspectRoot(root string) (RootContents, error) {
 	for _, e := range entries {
 		name := e.Name()
 		switch {
-		case e.Type().IsRegular() && (name == profilesFileName || name == skillsFileName || name == lockFileName || isTempName(name)):
+		case e.Type().IsRegular() && (name == profilesFileName || name == skillsFileName || name == lockFileName || writeKeyFileRE.MatchString(name) || isTempName(name)):
 			c.Owned = append(c.Owned, name)
 		case e.IsDir() && e.Type()&fs.ModeSymlink == 0 && name == credentialsDirName:
 			credentials = true

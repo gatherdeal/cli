@@ -348,7 +348,13 @@ Message status describes runtime acceptance, not recipient delivery.
 preview without dispatch. Configuration writes require `--yes`; message
 creation requires `--send`. Agent and message creation accept
 `--idempotency-key`; when omitted the CLI generates one and reports it in
-`meta.write`. Preserve that key. `CLI_WRITE_OUTCOME_UNKNOWN` (exit 8) means the
+`meta.write`. Before dispatch with a generated key, the CLI prints an invocation
+ID on stderr and saves the key in `write-<invocation_id>.json` in the CLI config
+directory. If the process stops before printing its result, recover
+`idempotency_key` from that file. The file contains only the format version
+and key. It stays until you remove it or uninstall. After reconciling an
+uncertain outcome, pass that same key with `--idempotency-key` for a deliberate
+retry of the same request. Preserve caller-supplied keys yourself. `CLI_WRITE_OUTCOME_UNKNOWN` (exit 8) means the
 write may have succeeded: reconcile before retrying. There are no automatic
 write retries.
 

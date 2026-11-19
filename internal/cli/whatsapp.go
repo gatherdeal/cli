@@ -264,15 +264,20 @@ func runWhatsAppWrite(ctx context.Context, inv *Invocation) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	var data any
-	switch in := in.(type) {
-	case *wa.CreateAgentInput:
+	if create, ok := in.(*wa.CreateAgentInput); ok {
 		if _, err = pairingPage(inv, "preview"); err != nil {
 			return nil, err
 		}
-		if err = inv.resolveCreateOutlet(ctx, in); err != nil {
+		if err = inv.resolveCreateOutlet(ctx, create); err != nil {
 			return nil, err
 		}
+	}
+	if err := inv.recordWriteKey(); err != nil {
+		return nil, err
+	}
+	var data any
+	switch in := in.(type) {
+	case *wa.CreateAgentInput:
 		var out *wa.CreateAgentOutput
 		out, inv.Meta.CorrelationID, err = c.CreateAgent(ctx, in, in.OutletID, inv.Meta.Write.IdempotencyKey)
 		if err != nil {

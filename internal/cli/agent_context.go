@@ -77,6 +77,8 @@ Writes
   a file path, or - for stdin.
 - --dry-run validates and previews without dispatch. Keyed creates report
   the exact idempotency key in meta.write; keep it with the result.
+  For an interrupted write with a generated key, recover it from
+  write-<invocation_id>.json in the CLI config directory using the ID on stderr.
   CLI_WRITE_OUTCOME_UNKNOWN (exit 8) means reconcile before repeating a write.
   A retryable error never authorizes replay.
 
