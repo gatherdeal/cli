@@ -6,7 +6,20 @@ generator: it merges the service/version into the shared manifest and writes
 `contracts/<service>/<version>/openapi.json` and
 `internal/generated/<service>/<version>`. Commit those artifacts unchanged.
 Do not hand-write API clients, invent operations, or fetch contracts at
-runtime. The CRM, identity, and WhatsApp bundles are installed.
+runtime. The CRM, Identity and WhatsApp bundles are installed.
+
+### Manifest v2 candidate pins
+
+The initial cutover compares all three producers against CLI `v0.1.2`.
+The generator ran with utilities `8bad5bae` in a Go workspace, recorded
+as `(devel)` in the manifest. The release owner must regenerate with the
+released utilities and producer merge commits before release.
+
+| Producer | Provisional commit | Public operations |
+| --- | --- | ---: |
+| CRM | `c6146bf0` | 3 |
+| Identity | `b4e702de` | 1 |
+| WhatsApp | `cf825a05` | 34 |
 
 All OpenAPI documents are embedded automatically. Contract checks enumerate
 all bundles, verify disk/embedded/generated digests, service/version constants
