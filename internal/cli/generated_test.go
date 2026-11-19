@@ -3,10 +3,11 @@ package cli
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/gatherdeal/cli/internal/crm"
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/gatherdeal/cli/internal/crm"
 )
 
 func TestGeneratedTagList(t *testing.T) {
@@ -29,6 +30,11 @@ func TestGeneratedTagList(t *testing.T) {
 		}
 		w.Header().Set("X-Correlation-ID", "tags")
 		if calls == 1 {
+			// A logged-out profile loses its stored bearer between pages.
+			// The in-flight walk must continue with its original client.
+			te.keyring.mu.Lock()
+			clear(te.keyring.items)
+			te.keyring.mu.Unlock()
 			if q.Has("after") || q.Get("count") != "2" {
 				t.Errorf("first page: %v", q)
 			}
