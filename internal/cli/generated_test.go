@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/base64"
 	"encoding/json"
+	"github.com/gatherdeal/cli/internal/crm"
 	"net/http"
 	"testing"
 )
@@ -10,6 +11,10 @@ import (
 func TestGeneratedTagList(t *testing.T) {
 	f, te := loggedIn(t)
 	token := f.lastToken()
+	previous := NewContacts
+	t.Cleanup(func() { NewContacts = previous })
+	clients := 0
+	NewContacts = func(d ContactsDeps) (crm.Contacts, error) { clients++; return previous(d) }
 	var calls int
 	f.contactTags = func(w http.ResponseWriter, r *http.Request) {
 		calls++
@@ -35,7 +40,7 @@ func TestGeneratedTagList(t *testing.T) {
 		writeJSON(w, 200, `{"status":"success","tags":{"data":[{"id":"2","name":"VIP2"}],"has_next_page":false}}`)
 	}
 	res := te.run("crm", "contact_tags", "list", "--search", "VIP", "--filter", `{"conjunction":"AND"}`, "--limit", "2", "--fields", "name", "--jq", ".[].name")
-	if res.exit != 0 || res.stdout != "VIP\nVIP2\n" || calls != 2 {
+	if res.exit != 0 || res.stdout != "VIP\nVIP2\n" || calls != 2 || clients != 1 {
 		t.Fatal(res.stdout, calls)
 	}
 }

@@ -32,12 +32,14 @@ func generatedCommands(existing []*Command) []*Command {
 		}
 		op := contracts.MustOperation(b.PublicID)
 		commands = append(commands, generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*crmv1.Client)(nil),
-			func(ctx context.Context, inv *Invocation, input any) (jsontext.Value, string, error) {
+			func(inv *Invocation) (invokeInput, error) {
 				client, err := inv.contactsClient()
 				if err != nil {
-					return nil, "", err
+					return nil, err
 				}
-				return client.InvokeRead(ctx, b, input)
+				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
+					return client.InvokeRead(ctx, b, input)
+				}, nil
 			}))
 	}
 	for _, b := range wa.CLIBindings() {
@@ -46,19 +48,22 @@ func generatedCommands(existing []*Command) []*Command {
 		}
 		op := contracts.MustOperation(b.PublicID)
 		commands = append(commands, generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*wa.Client)(nil),
-			func(ctx context.Context, inv *Invocation, input any) (jsontext.Value, string, error) {
+			func(inv *Invocation) (invokeInput, error) {
 				client, err := inv.whatsappClient()
 				if err != nil {
-					return nil, "", err
+					return nil, err
 				}
-				var key string
-				if !op.ReadOnly() {
-					if err := inv.recordWriteKey(); err != nil {
-						return nil, "", err
+				outlet := selectedOutlet(inv)
+				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
+					var key string
+					if !op.ReadOnly() {
+						if err := inv.recordWriteKey(); err != nil {
+							return nil, "", err
+						}
+						key = inv.Meta.Write.IdempotencyKey
 					}
-					key = inv.Meta.Write.IdempotencyKey
-				}
-				return client.Invoke(ctx, b, input, selectedOutlet(inv), key, !op.ReadOnly())
+					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
+				}, nil
 			}))
 	}
 	return commands
@@ -69,12 +74,12 @@ type bindingArgument struct {
 	Required           bool
 }
 type bindInput func(map[string]jsontext.Value, jsontext.Value) (any, error)
-type invokeInput func(context.Context, *Invocation, any) (jsontext.Value, string, error)
+type invokeInput func(context.Context, any) (jsontext.Value, string, error)
 
 func generatedCommand[A ~struct {
 	Name, WireName, In string
 	Required           bool
-}](op contracts.Operation, summary string, hasBody bool, args []A, bind bindInput, client any, invoke invokeInput) *Command {
+}](op contracts.Operation, summary string, hasBody bool, args []A, bind bindInput, client any, connect func(*Invocation) (invokeInput, error)) *Command {
 	c := &Command{Operation: op.PublicID, Summary: strings.TrimSuffix(summary, ".") + ".", Network: true, Output: "json", Flags: append([]FlagSpec{}, targetFlags...)}
 	if op.OutletScope == "filtered" {
 		c.Flags = append(c.Flags, flagOutlet)
@@ -123,15 +128,6 @@ func generatedCommand[A ~struct {
 		} else if inv.isSet("input") {
 			return nil, usageError("%s does not accept a body", op.PublicID)
 		}
-		call := func() (jsontext.Value, error) {
-			input, err := bind(values, body)
-			if err != nil {
-				return nil, usageError("%v", err)
-			}
-			raw, corr, err := invoke(ctx, inv, input)
-			inv.Meta.CorrelationID = corr
-			return raw, auth.Explain(err)
-		}
 		if inv.Meta.Write != nil && inv.Meta.Write.DryRun {
 			if _, err := bind(values, body); err != nil {
 				return nil, usageError("%v", err)
@@ -144,6 +140,22 @@ func generatedCommand[A ~struct {
 				Body      jsontext.Value            `json:"body,omitempty"`
 				Outlet    string                    `json:"outlet,omitempty"`
 			}{values, body, selectedOutlet(inv)}, nil
+		}
+		var invoke invokeInput
+		call := func() (jsontext.Value, error) {
+			input, err := bind(values, body)
+			if err != nil {
+				return nil, usageError("%v", err)
+			}
+			if invoke == nil {
+				invoke, err = connect(inv)
+				if err != nil {
+					return nil, err
+				}
+			}
+			raw, corr, err := invoke(ctx, input)
+			inv.Meta.CorrelationID = corr
+			return raw, auth.Explain(err)
 		}
 		if op.Pagination != nil {
 			return generatedList(ctx, inv, op.Pagination, values, call)
