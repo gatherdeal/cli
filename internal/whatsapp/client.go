@@ -3,6 +3,7 @@ package whatsapp
 
 import (
 	"context"
+	"encoding/json/jsontext"
 	"errors"
 	"net/http"
 	"strings"
@@ -64,6 +65,15 @@ func (c call) apiError(ctx context.Context, err error, write bool) error {
 	}
 	return httpx.TransportError(ctx, err)
 }
+func (c *Client) Invoke(ctx context.Context, binding wa.CLIBinding, input any, outlet, key string, write bool) (jsontext.Value, string, error) {
+	call := c.call(outlet)
+	raw, err := binding.Invoke(ctx, call.api, input, key)
+	if err != nil {
+		err = call.apiError(ctx, err, write)
+	}
+	return raw, call.d.CorrelationID, err
+}
+
 func missing() error {
 	return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "WhatsApp response is missing its result")
 }

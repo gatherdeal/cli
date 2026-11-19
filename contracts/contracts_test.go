@@ -45,17 +45,9 @@ func TestMultipleBundlesAndSafety(t *testing.T) {
 	}
 }
 
-func TestLegacyFormatReadsKeyArraysAsAllOf(t *testing.T) {
-	m, err := Parse([]byte(`{"format_version":1,"bundles":[{"service":"crm","version":"v1","digest":"sha256:x","operations":[{"public_id":"crm.contacts.list","permissions":["crm.contact.read","crm.contact.export"],"outlet_scope":"filtered"}]}]}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	op, ok := m.Operation("crm.contacts.list")
-	if !ok || op.Permissions.IsAnyOf() || !slices.Equal(op.Permissions.Keys(), []string{"crm.contact.export", "crm.contact.read"}) ||
-		op.OutletScope != "filtered" || m.Bundles[0].Digest != "sha256:x" {
-		t.Fatalf("%+v", m)
-	}
+func TestParseRejectsUnsupportedVersionsAndPermissions(t *testing.T) {
 	for _, raw := range []string{
+		`{"format_version":1,"bundles":[]}`,
 		`{"format_version":1,"bundles":[{"service":"crm","version":"v1","operations":[{"public_id":"crm.contacts.list","permissions":{"allOf":["crm.contact.read"]}}]}]}`,
 		`{"format_version":1,"bundles":[{"service":"crm","version":"v1","operations":[{"public_id":"crm.contacts.list","permissions":["CRM.contact.read"]}]}]}`,
 		`{"format_version":2,"bundles":[{"service":"crm","version":"v1","operations":[{"public_id":"crm.contacts.list","permissions":["crm.contact.read"]}]}]}`,

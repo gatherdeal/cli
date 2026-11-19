@@ -149,6 +149,7 @@ Rules
 var appNotes = map[string]string{
 	"crm": `- gatherdeal crm contacts list [--search TEXT] [--page N | --after CURSOR]
   [--page-size N] [--tag NAME] returns contacts with the general paging rules.
+- gatherdeal crm contact_tags list --search <name> --fields id,name finds tag IDs.
 - gatherdeal crm contacts get <id> [--with-phones] [--with-emails]
   [--with-tags] [--with-attributes] adds the related records it names.
 `,

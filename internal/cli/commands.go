@@ -91,6 +91,7 @@ func Commands() []*Command {
 	}
 	cmds = append(cmds, whatsappCommands()...)
 	cmds = append(cmds, outletCommands()...)
+	cmds = append(cmds, generatedCommands(cmds)...)
 	// API paths and app ownership come from the published contracts.
 	m, err := contracts.Load()
 	if err != nil {

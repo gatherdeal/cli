@@ -19,7 +19,7 @@ var whatsappSummaries = map[string]string{
 	"agents.get":      "Show one WhatsApp agent.",
 	"agents.pairing":  "Check a WhatsApp agent's pairing once, without requesting a new code.",
 	"agents.create":   "Create a WhatsApp agent and return its pairing instructions.",
-	"agents.update":   "Change a WhatsApp agent's mode or outlet.",
+	"agents.update":   "Change a WhatsApp agent's outlet.",
 	"agents.delete":   "Delete a WhatsApp agent and unlink its device.",
 	"messages.list":   "List WhatsApp messages in the outlets this access may read.",
 	"messages.get":    "Show one WhatsApp message and its status.",
@@ -189,11 +189,6 @@ func whatsappInput(inv *Invocation) (any, error) {
 		in.AgentID = id
 		if in.Revision.IsZero() {
 			return nil, usageError("input revision is required")
-		}
-		if in.Mode.Present {
-			if err := in.Mode.Value.Validate(); err != nil {
-				return nil, usageError("%v", err)
-			}
 		}
 		if in.OutletID.Present && in.OutletID.Value != nil && !uuidRE.MatchString(*in.OutletID.Value) {
 			return nil, usageError("input outlet_id must be a UUID or null")
@@ -433,10 +428,13 @@ func (inv *Invocation) resolveCreateOutlet(ctx context.Context, in *wa.CreateAge
 		if err != nil {
 			return err
 		}
-		if in.OutletID != "" && in.OutletID != outlet.ID {
+		if outlet.ID == nil || *outlet.ID == "" {
+			return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "the outlet lookup returned no outlet id")
+		}
+		if in.OutletID != "" && in.OutletID != *outlet.ID {
 			return usageError("--outlet differs from input outlet_id")
 		}
-		in.OutletID = outlet.ID
+		in.OutletID = *outlet.ID
 	}
 	*inv.strs["outlet"] = in.OutletID
 	inv.Meta.Context.Request.OutletIDs = []string{in.OutletID}

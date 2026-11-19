@@ -1,5 +1,5 @@
 {
-  "format_version": 1,
+  "format_version": 2,
   "bundles": [
     {
       "service": "crm",
@@ -8,10 +8,240 @@
       "service_path": "/crm",
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
-      "digest": "sha256:28582ece8c019992563a3da5dee11082019f6a21ccaf70dbf57e33db7358dc3b",
-      "source_commit": "ccbf775379735be32fe07efcd9d643513bb527f0",
-      "utilities_version": "v0.0.0-20261102024059-937a84032c54",
+      "digest": "sha256:3ab7e6e27dfd4dff599e5ae74bc4cd05ed188fb3afaae66fbdd2444a54ab03c2",
+      "source_commit": "c6146bf06d320c4a8f4b4b378bfcd36a84bb9498",
+      "utilities_version": "(devel)",
       "operations": [
+        {
+          "public_id": "crm.contact_tags.list",
+          "command": "crm contact_tags list",
+          "tool": "crm_contact_tags_list",
+          "method": "GET",
+          "path": "/v1/contact-tags",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.contact.read"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "filter_limits": {
+            "max_depth": 5,
+            "max_rules": 50,
+            "max_in_size": 100
+          },
+          "filter_fields": [
+            {
+              "name": "description",
+              "kind": "string",
+              "optional": true,
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN",
+                "CONTAINS",
+                "STARTS_WITH",
+                "ENDS_WITH",
+                "EQ_FOLD",
+                "CONTAINS_FOLD",
+                "STARTS_WITH_FOLD",
+                "ENDS_WITH_FOLD",
+                "IS_NULL",
+                "IS_NOT_NULL"
+              ]
+            },
+            {
+              "name": "is_archive",
+              "kind": "bool",
+              "ops": [
+                "EQ"
+              ]
+            },
+            {
+              "name": "name",
+              "kind": "string",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN",
+                "CONTAINS",
+                "STARTS_WITH",
+                "ENDS_WITH",
+                "EQ_FOLD",
+                "CONTAINS_FOLD",
+                "STARTS_WITH_FOLD",
+                "ENDS_WITH_FOLD"
+              ]
+            }
+          ],
+          "sortable_fields": [
+            "create_at",
+            "name"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "tags",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchContactTags",
+          "input_type": "FetchContactTagsInput",
+          "output_type": "FetchContactTagsOutput"
+        },
         {
           "public_id": "crm.contacts.get",
           "command": "crm contacts get",
@@ -23,9 +253,11 @@
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "crm.contact.read"
-          ],
+          "permissions": {
+            "allOf": [
+              "crm.contact.read"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
           "delegated_expansions": [
@@ -48,6 +280,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_EXPANSION_LIMIT",
+              "status": 422,
               "retryable": false
             },
             {
@@ -97,6 +334,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -171,13 +413,123 @@
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "crm.contact.read"
-          ],
+          "permissions": {
+            "allOf": [
+              "crm.contact.read"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
           "delegated_edge_filters": [
             "tags"
+          ],
+          "filter_limits": {
+            "max_depth": 5,
+            "max_rules": 50,
+            "max_in_size": 100
+          },
+          "filter_fields": [
+            {
+              "name": "is_verified",
+              "kind": "bool",
+              "ops": [
+                "EQ"
+              ]
+            },
+            {
+              "name": "kind",
+              "kind": "enum",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN"
+              ],
+              "enumValues": [
+                "personal",
+                "company"
+              ]
+            },
+            {
+              "name": "name",
+              "kind": "string",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN",
+                "CONTAINS",
+                "STARTS_WITH",
+                "ENDS_WITH",
+                "EQ_FOLD",
+                "CONTAINS_FOLD",
+                "STARTS_WITH_FOLD",
+                "ENDS_WITH_FOLD"
+              ]
+            },
+            {
+              "name": "remark",
+              "kind": "string",
+              "optional": true,
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN",
+                "CONTAINS",
+                "STARTS_WITH",
+                "ENDS_WITH",
+                "EQ_FOLD",
+                "CONTAINS_FOLD",
+                "STARTS_WITH_FOLD",
+                "ENDS_WITH_FOLD",
+                "IS_NULL",
+                "IS_NOT_NULL"
+              ]
+            }
+          ],
+          "filter_edges": [
+            {
+              "name": "tags",
+              "quantifiers": [
+                "SOME",
+                "EVERY",
+                "NONE"
+              ],
+              "fields": [
+                {
+                  "name": "id",
+                  "kind": "uuid",
+                  "ops": [
+                    "EQ",
+                    "NEQ",
+                    "IN",
+                    "NOT_IN"
+                  ]
+                },
+                {
+                  "name": "name",
+                  "kind": "string",
+                  "ops": [
+                    "EQ",
+                    "NEQ",
+                    "IN",
+                    "NOT_IN",
+                    "CONTAINS",
+                    "STARTS_WITH",
+                    "ENDS_WITH",
+                    "EQ_FOLD",
+                    "CONTAINS_FOLD",
+                    "STARTS_WITH_FOLD",
+                    "ENDS_WITH_FOLD"
+                  ]
+                }
+              ]
+            }
+          ],
+          "sortable_fields": [
+            "create_at",
+            "name"
           ],
           "delegated_expansions": [
             "with_attributes",
@@ -223,6 +575,11 @@
               "retryable": false
             },
             {
+              "code": "CRM_CONTACT_EXPANSION_LIMIT",
+              "status": 422,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
               "status": 403,
               "retryable": false
@@ -264,6 +621,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -364,6 +726,14 @@
           "schema": "#/components/schemas/ClientUpgradeRequiredProblem"
         },
         {
+          "code": "CRM_CONTACT_EXPANSION_LIMIT",
+          "type": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_EXPANSION_LIMIT",
+          "status": 422,
+          "retryable": false,
+          "title": "Contact expansion exceeds its limit.",
+          "schema": "#/components/schemas/CRMContactExpansionLimitProblem"
+        },
+        {
           "code": "CRM_CONTACT_NOT_FOUND",
           "type": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_NOT_FOUND",
           "status": 404,
@@ -442,6 +812,14 @@
           "retryable": false,
           "title": "This credential kind is not available on this resource.",
           "schema": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+        },
+        {
+          "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+          "status": 403,
+          "retryable": false,
+          "title": "This operation is not available to organization API keys.",
+          "schema": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
         },
         {
           "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
@@ -556,9 +934,9 @@
       "service_path": "/identity",
       "contract": "contracts/identity/v1/openapi.json",
       "go_package": "internal/generated/identity/v1",
-      "digest": "sha256:968f3d518f34cd4d0a16d728bab321dcc6cc020b2acd6b0af20a2e407f4328a3",
-      "source_commit": "4d2e20b01afd0a2f5ab5fc56468fb43cdd68669d",
-      "utilities_version": "v0.0.0-20261102024059-937a84032c54",
+      "digest": "sha256:c1f3386aefa73e60370b3cc736dd63ebd8861491b89426eeb0f40a6b879884a5",
+      "source_commit": "b4e702de3b34c98933529dde9080883ed745f072",
+      "utilities_version": "(devel)",
       "operations": [
         {
           "public_id": "identity.outlets.list",
@@ -571,11 +949,166 @@
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "identity.outlet.read"
-          ],
+          "permissions": {
+            "allOf": [
+              "identity.outlet.read"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
+          "filter_limits": {
+            "max_depth": 5,
+            "max_rules": 50,
+            "max_in_size": 100
+          },
+          "filter_fields": [
+            {
+              "name": "code",
+              "kind": "string",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN",
+                "CONTAINS",
+                "STARTS_WITH",
+                "ENDS_WITH",
+                "EQ_FOLD",
+                "CONTAINS_FOLD",
+                "STARTS_WITH_FOLD",
+                "ENDS_WITH_FOLD"
+              ]
+            },
+            {
+              "name": "create_at",
+              "kind": "time",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "GT",
+                "GTE",
+                "LT",
+                "LTE",
+                "IN",
+                "NOT_IN",
+                "BETWEEN"
+              ]
+            },
+            {
+              "name": "delete_at",
+              "kind": "time",
+              "optional": true,
+              "ops": [
+                "EQ",
+                "NEQ",
+                "GT",
+                "GTE",
+                "LT",
+                "LTE",
+                "IN",
+                "NOT_IN",
+                "BETWEEN",
+                "IS_NULL",
+                "IS_NOT_NULL"
+              ]
+            },
+            {
+              "name": "description",
+              "kind": "string",
+              "optional": true,
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN",
+                "CONTAINS",
+                "STARTS_WITH",
+                "ENDS_WITH",
+                "EQ_FOLD",
+                "CONTAINS_FOLD",
+                "STARTS_WITH_FOLD",
+                "ENDS_WITH_FOLD",
+                "IS_NULL",
+                "IS_NOT_NULL"
+              ]
+            },
+            {
+              "name": "id",
+              "kind": "uuid",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN"
+              ]
+            },
+            {
+              "name": "is_master",
+              "kind": "bool",
+              "ops": [
+                "EQ"
+              ]
+            },
+            {
+              "name": "name",
+              "kind": "string",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN",
+                "CONTAINS",
+                "STARTS_WITH",
+                "ENDS_WITH",
+                "EQ_FOLD",
+                "CONTAINS_FOLD",
+                "STARTS_WITH_FOLD",
+                "ENDS_WITH_FOLD"
+              ]
+            },
+            {
+              "name": "organization_id",
+              "kind": "uuid",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN"
+              ]
+            },
+            {
+              "name": "owner_id",
+              "kind": "uuid",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "IN",
+                "NOT_IN"
+              ]
+            },
+            {
+              "name": "update_at",
+              "kind": "time",
+              "ops": [
+                "EQ",
+                "NEQ",
+                "GT",
+                "GTE",
+                "LT",
+                "LTE",
+                "IN",
+                "NOT_IN",
+                "BETWEEN"
+              ]
+            }
+          ],
+          "sortable_fields": [
+            "id",
+            "create_at",
+            "update_at",
+            "name",
+            "code"
+          ],
           "delegated_expansions": [
             "with_organization",
             "with_owner"
@@ -663,6 +1196,11 @@
               "retryable": false
             },
             {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
               "status": 403,
               "retryable": false
@@ -699,6 +1237,21 @@
             },
             {
               "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDENTITY_DISTRIBUTION_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "IDENTITY_ORGANIZATION_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
               "status": 403,
               "retryable": false
             },
@@ -831,6 +1384,14 @@
           "schema": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
         },
         {
+          "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+          "status": 403,
+          "retryable": false,
+          "title": "This operation is not available to organization API keys.",
+          "schema": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+        },
+        {
           "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
           "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
           "status": 403,
@@ -895,6 +1456,30 @@
           "schema": "#/components/schemas/ForbiddenProblem"
         },
         {
+          "code": "IDENTITY_DISTRIBUTION_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/IDENTITY_DISTRIBUTION_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Distribution not found.",
+          "schema": "#/components/schemas/IdentityDistributionNotFoundProblem"
+        },
+        {
+          "code": "IDENTITY_ORGANIZATION_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/IDENTITY_ORGANIZATION_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Organization not found.",
+          "schema": "#/components/schemas/IdentityOrganizationNotFoundProblem"
+        },
+        {
+          "code": "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
+          "type": "https://docs.gatherdeal.ai/errors/IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
+          "status": 403,
+          "retryable": false,
+          "title": "User is not outlet owner or staff.",
+          "schema": "#/components/schemas/IdentityOutletMembershipRequiredProblem"
+        },
+        {
           "code": "INTERNAL_ERROR",
           "type": "https://docs.gatherdeal.ai/errors/INTERNAL_ERROR",
           "status": 500,
@@ -943,9 +1528,9 @@
       "service_path": "/whatsapp",
       "contract": "contracts/whatsapp/v1/openapi.json",
       "go_package": "internal/generated/whatsapp/v1",
-      "digest": "sha256:fb9ffcf1d9d955a2fe35949cdc4705f30bf3ea2dcf56cddbd370978fb6459619",
-      "source_commit": "2e36d0ea5c1ce4d6932117008a0d0884dbaf4db0",
-      "utilities_version": "v0.0.0-20261102024059-937a84032c54",
+      "digest": "sha256:3ec9c078eb1b10a29733c431562bff2456357ef70eeb9cb5f89aaebe2824e2a0",
+      "source_commit": "cf825a050cf55ecd29f20083f476cf31411bc1e2",
+      "utilities_version": "(devel)",
       "operations": [
         {
           "public_id": "whatsapp.agents.create",
@@ -958,9 +1543,11 @@
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "whatsapp.agent.create"
-          ],
+          "permissions": {
+            "allOf": [
+              "whatsapp.agent.create"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "keyed",
           "errors": [
@@ -1021,6 +1608,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -1095,6 +1687,11 @@
               "retryable": false
             },
             {
+              "code": "WHATSAPP_AGENTS_FENCED",
+              "status": 503,
+              "retryable": true
+            },
+            {
               "code": "WHATSAPP_AGENT_OUTLET_INVALID",
               "status": 422,
               "retryable": false
@@ -1123,11 +1720,15 @@
           "effect": {
             "mutation": "non_additive",
             "interaction": "closed",
-            "risks": []
+            "risks": [
+              "destructive"
+            ]
           },
-          "permissions": [
-            "whatsapp.agent.delete"
-          ],
+          "permissions": {
+            "allOf": [
+              "whatsapp.agent.delete"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
           "errors": [
@@ -1188,6 +1789,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -1247,6 +1853,11 @@
               "retryable": false
             },
             {
+              "code": "WHATSAPP_AGENTS_FENCED",
+              "status": 503,
+              "retryable": true
+            },
+            {
               "code": "WHATSAPP_AGENT_NOT_FOUND",
               "status": 404,
               "retryable": false
@@ -1267,9 +1878,11 @@
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "whatsapp.agent.read"
-          ],
+          "permissions": {
+            "allOf": [
+              "whatsapp.agent.read"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
           "errors": [
@@ -1330,6 +1943,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -1409,11 +2027,18 @@
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "whatsapp.agent.read"
-          ],
+          "permissions": {
+            "allOf": [
+              "whatsapp.agent.read"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
+          "sortable_fields": [
+            "id",
+            "create_at",
+            "update_at"
+          ],
           "pagination": {
             "style": "adaptive",
             "page_param": "p",
@@ -1493,6 +2118,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -1577,9 +2207,11 @@
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "whatsapp.agent.create"
-          ],
+          "permissions": {
+            "allOf": [
+              "whatsapp.agent.create"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
           "errors": [
@@ -1640,6 +2272,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -1719,9 +2356,11 @@
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "whatsapp.agent.update"
-          ],
+          "permissions": {
+            "allOf": [
+              "whatsapp.agent.update"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
           "errors": [
@@ -1782,6 +2421,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -1871,21 +2515,660 @@
           "output_type": "UpdateAgentOutput"
         },
         {
-          "public_id": "whatsapp.messages.create",
-          "command": "whatsapp messages create",
-          "tool": "whatsapp_messages_create",
+          "public_id": "whatsapp.broadcast_suppressions.add",
+          "command": "whatsapp broadcast_suppressions add",
+          "tool": "whatsapp_broadcast_suppressions_add",
           "method": "POST",
-          "path": "/v1/messages",
+          "path": "/v1/broadcast-suppressions",
           "effect": {
             "mutation": "additive",
-            "interaction": "external",
-            "risks": [
-              "external_communication"
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write"
             ]
           },
-          "permissions": [
-            "whatsapp.message.create"
+          "outlet_scope": "organization_level",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
           ],
+          "go_method": "AddBroadcastSuppressions",
+          "input_type": "AddBroadcastSuppressionsInput",
+          "output_type": "AddBroadcastRecipientsOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcast_suppressions.delete",
+          "command": "whatsapp broadcast_suppressions delete",
+          "tool": "whatsapp_broadcast_suppressions_delete",
+          "method": "DELETE",
+          "path": "/v1/broadcast-suppressions/:suppression_id",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": [
+              "destructive"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_SUPPRESSION_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "DeleteBroadcastSuppression",
+          "input_type": "DeleteBroadcastSuppressionInput"
+        },
+        {
+          "public_id": "whatsapp.broadcast_suppressions.list",
+          "command": "whatsapp broadcast_suppressions list",
+          "tool": "whatsapp_broadcast_suppressions_list",
+          "method": "GET",
+          "path": "/v1/broadcast-suppressions",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.read"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "sortable_fields": [
+            "create_at"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "suppressions",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchBroadcastSuppressions",
+          "input_type": "FetchBroadcastSuppressionsInput",
+          "output_type": "FetchBroadcastSuppressionsOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.cancel",
+          "command": "whatsapp broadcasts cancel",
+          "tool": "whatsapp_broadcasts_cancel",
+          "method": "POST",
+          "path": "/v1/broadcasts/:broadcast_id/cancel",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": [
+              "destructive"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_STATE_CONFLICT",
+              "status": 409,
+              "retryable": false
+            }
+          ],
+          "go_method": "CancelBroadcast",
+          "input_type": "CancelBroadcastInput",
+          "output_type": "BroadcastOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.create",
+          "command": "whatsapp broadcasts create",
+          "tool": "whatsapp_broadcasts_create",
+          "method": "POST",
+          "path": "/v1/broadcasts",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write",
+              "whatsapp.message.create"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "keyed",
           "errors": [
@@ -1946,6 +3229,11 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -2015,49 +3303,1043 @@
               "retryable": false
             },
             {
-              "code": "WHATSAPP_AGENT_NOT_READY",
-              "status": 409,
+              "code": "WHATSAPP_BROADCAST_SENDER_UNAVAILABLE",
+              "status": 422,
               "retryable": false
             },
             {
-              "code": "WHATSAPP_AGENT_PENDING_MESSAGES_LIMIT_REACHED",
-              "status": 429,
-              "retryable": true
-            },
-            {
-              "code": "WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED",
-              "status": 409,
-              "retryable": false
-            },
-            {
-              "code": "WHATSAPP_SENDER_AGENT_NOT_FOUND",
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
               "status": 404,
               "retryable": false
-            },
-            {
-              "code": "WHATSAPP_SYSTEM_AGENT_UNAVAILABLE",
-              "status": 503,
-              "retryable": true
             }
           ],
-          "go_method": "CreateMessage",
-          "input_type": "CreateMessageInput",
-          "output_type": "CreateMessageOutput"
+          "go_method": "CreateBroadcast",
+          "input_type": "CreateBroadcastInput",
+          "output_type": "BroadcastOutput"
         },
         {
-          "public_id": "whatsapp.messages.get",
-          "command": "whatsapp messages get",
-          "tool": "whatsapp_messages_get",
+          "public_id": "whatsapp.broadcasts.get",
+          "command": "whatsapp broadcasts get",
+          "tool": "whatsapp_broadcasts_get",
           "method": "GET",
-          "path": "/v1/messages/:message_id",
+          "path": "/v1/broadcasts/:broadcast_id",
           "effect": {
             "mutation": "none",
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "whatsapp.message.read"
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.read"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
           ],
+          "go_method": "BroadcastPath",
+          "input_type": "BroadcastPathInput",
+          "output_type": "BroadcastOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.list",
+          "command": "whatsapp broadcasts list",
+          "tool": "whatsapp_broadcasts_list",
+          "method": "GET",
+          "path": "/v1/broadcasts",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.read"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "sortable_fields": [
+            "create_at"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "broadcasts",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchBroadcasts",
+          "input_type": "FetchBroadcastsInput",
+          "output_type": "FetchBroadcastsOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.pause",
+          "command": "whatsapp broadcasts pause",
+          "tool": "whatsapp_broadcasts_pause",
+          "method": "POST",
+          "path": "/v1/broadcasts/:broadcast_id/pause",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_STATE_CONFLICT",
+              "status": 409,
+              "retryable": false
+            }
+          ],
+          "go_method": "PauseBroadcast",
+          "input_type": "PauseBroadcastInput",
+          "output_type": "BroadcastOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.recipients.add",
+          "command": "whatsapp broadcasts recipients add",
+          "tool": "whatsapp_broadcasts_recipients_add",
+          "method": "POST",
+          "path": "/v1/broadcasts/:broadcast_id/recipients",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_RECIPIENT_LIMIT_REACHED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_STATE_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_RENDERED_TOO_LONG",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "AddBroadcastRecipients",
+          "input_type": "AddBroadcastRecipientsInput",
+          "output_type": "AddBroadcastRecipientsOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.recipients.delete",
+          "command": "whatsapp broadcasts recipients delete",
+          "tool": "whatsapp_broadcasts_recipients_delete",
+          "method": "DELETE",
+          "path": "/v1/broadcasts/:broadcast_id/recipients/:recipient_id",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": [
+              "destructive"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_RECIPIENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_STATE_CONFLICT",
+              "status": 409,
+              "retryable": false
+            }
+          ],
+          "go_method": "DeleteBroadcastRecipient",
+          "input_type": "DeleteBroadcastRecipientInput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.recipients.list",
+          "command": "whatsapp broadcasts recipients list",
+          "tool": "whatsapp_broadcasts_recipients_list",
+          "method": "GET",
+          "path": "/v1/broadcasts/:broadcast_id/recipients",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.read"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "sortable_fields": [
+            "position",
+            "settled_at"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "recipients",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchBroadcastRecipients",
+          "input_type": "FetchBroadcastRecipientsInput",
+          "output_type": "FetchBroadcastRecipientsOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.resume",
+          "command": "whatsapp broadcasts resume",
+          "tool": "whatsapp_broadcasts_resume",
+          "method": "POST",
+          "path": "/v1/broadcasts/:broadcast_id/resume",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "external",
+            "risks": [
+              "external_communication"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write",
+              "whatsapp.message.create"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
           "errors": [
@@ -2122,6 +4404,508 @@
               "retryable": false
             },
             {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_SENDER_UNAVAILABLE",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_STATE_CONFLICT",
+              "status": 409,
+              "retryable": false
+            }
+          ],
+          "go_method": "ResumeBroadcast",
+          "input_type": "ResumeBroadcastInput",
+          "output_type": "BroadcastOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.start",
+          "command": "whatsapp broadcasts start",
+          "tool": "whatsapp_broadcasts_start",
+          "method": "POST",
+          "path": "/v1/broadcasts/:broadcast_id/start",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "external",
+            "risks": [
+              "external_communication"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write",
+              "whatsapp.message.create"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_ACTIVE_LIMIT_REACHED",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_SENDER_UNAVAILABLE",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_STATE_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "StartBroadcast",
+          "input_type": "StartBroadcastInput",
+          "output_type": "BroadcastOutput"
+        },
+        {
+          "public_id": "whatsapp.broadcasts.update",
+          "command": "whatsapp broadcasts update",
+          "tool": "whatsapp_broadcasts_update",
+          "method": "PATCH",
+          "path": "/v1/broadcasts/:broadcast_id",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.broadcast.write",
+              "whatsapp.message.create"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_SENDER_UNAVAILABLE",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_BROADCAST_STATE_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "UpdateBroadcast",
+          "input_type": "UpdateBroadcastInput",
+          "output_type": "BroadcastOutput"
+        },
+        {
+          "public_id": "whatsapp.chat_messages.get",
+          "command": "whatsapp chat_messages get",
+          "tool": "whatsapp_chat_messages_get",
+          "method": "GET",
+          "path": "/v1/chat-messages/:id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "anyOf": [
+              "whatsapp.inbound.read",
+              "whatsapp.message.read"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
               "status": 403,
               "retryable": false
@@ -2182,24 +4966,510 @@
               "retryable": false
             }
           ],
-          "go_method": "FetchMessage",
-          "input_type": "FetchMessageInput",
-          "output_type": "FetchMessageOutput"
+          "go_method": "FetchChatMessage",
+          "input_type": "FetchChatMessageInput",
+          "output_type": "FetchChatMessageOutput"
         },
         {
-          "public_id": "whatsapp.messages.list",
-          "command": "whatsapp messages list",
-          "tool": "whatsapp_messages_list",
+          "public_id": "whatsapp.chat_messages.list",
+          "command": "whatsapp chat_messages list",
+          "tool": "whatsapp_chat_messages_list",
           "method": "GET",
-          "path": "/v1/messages",
+          "path": "/v1/chat-messages",
           "effect": {
             "mutation": "none",
             "interaction": "closed",
             "risks": []
           },
-          "permissions": [
-            "whatsapp.message.read"
+          "permissions": {
+            "anyOf": [
+              "whatsapp.inbound.read",
+              "whatsapp.message.read"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
           ],
+          "go_method": "PollChatMessages",
+          "input_type": "PollChatMessagesInput",
+          "output_type": "PollChatMessagesOutput"
+        },
+        {
+          "public_id": "whatsapp.chats.get",
+          "command": "whatsapp chats get",
+          "tool": "whatsapp_chats_get",
+          "method": "GET",
+          "path": "/v1/chats/:chat_id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.inbound.read"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_CHAT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "ChatPath",
+          "input_type": "ChatPathInput",
+          "output_type": "FetchChatOutput"
+        },
+        {
+          "public_id": "whatsapp.chats.list",
+          "command": "whatsapp chats list",
+          "tool": "whatsapp_chats_list",
+          "method": "GET",
+          "path": "/v1/chats",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.inbound.read"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "sortable_fields": [
+            "update_at",
+            "create_at"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "chats",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchChats",
+          "input_type": "FetchChatsInput",
+          "output_type": "FetchChatsOutput"
+        },
+        {
+          "public_id": "whatsapp.chats.messages",
+          "command": "whatsapp chats messages",
+          "tool": "whatsapp_chats_messages",
+          "method": "GET",
+          "path": "/v1/chats/:chat_id/messages",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "anyOf": [
+              "whatsapp.inbound.read",
+              "whatsapp.message.read"
+            ]
+          },
           "outlet_scope": "filtered",
           "idempotency": "safe",
           "pagination": {
@@ -2281,6 +5551,1501 @@
             },
             {
               "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_CHAT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchChatMessages",
+          "input_type": "FetchChatMessagesInput",
+          "output_type": "FetchChatMessagesOutput"
+        },
+        {
+          "public_id": "whatsapp.message_templates.create",
+          "command": "whatsapp message_templates create",
+          "tool": "whatsapp_message_templates_create",
+          "method": "POST",
+          "path": "/v1/message-templates",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "external",
+            "risks": [
+              "external_communication"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.template.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "none",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_LIMIT_REACHED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NAME_TAKEN",
+              "status": 409,
+              "retryable": false
+            }
+          ],
+          "go_method": "CreateMessageTemplate",
+          "input_type": "CreateMessageTemplateInput",
+          "output_type": "MessageTemplateOutput"
+        },
+        {
+          "public_id": "whatsapp.message_templates.delete",
+          "command": "whatsapp message_templates delete",
+          "tool": "whatsapp_message_templates_delete",
+          "method": "DELETE",
+          "path": "/v1/message-templates/:template_id",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "external",
+            "risks": [
+              "destructive",
+              "external_communication"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.template.delete"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "DeleteMessageTemplate",
+          "input_type": "DeleteMessageTemplateInput"
+        },
+        {
+          "public_id": "whatsapp.message_templates.get",
+          "command": "whatsapp message_templates get",
+          "tool": "whatsapp_message_templates_get",
+          "method": "GET",
+          "path": "/v1/message-templates/:template_id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "anyOf": [
+              "whatsapp.message.create",
+              "whatsapp.template.read"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchMessageTemplate",
+          "input_type": "FetchMessageTemplateInput",
+          "output_type": "MessageTemplateOutput"
+        },
+        {
+          "public_id": "whatsapp.message_templates.list",
+          "command": "whatsapp message_templates list",
+          "tool": "whatsapp_message_templates_list",
+          "method": "GET",
+          "path": "/v1/message-templates",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "anyOf": [
+              "whatsapp.message.create",
+              "whatsapp.template.read"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "sortable_fields": [
+            "create_at"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "templates",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_CURSOR_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "PAGINATION_PARAMS_INVALID",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchMessageTemplates",
+          "input_type": "FetchMessageTemplatesInput",
+          "output_type": "FetchMessageTemplatesOutput"
+        },
+        {
+          "public_id": "whatsapp.message_templates.preview",
+          "command": "whatsapp message_templates preview",
+          "tool": "whatsapp_message_templates_preview",
+          "method": "POST",
+          "path": "/v1/message-templates/:template_id/preview",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "anyOf": [
+              "whatsapp.message.create",
+              "whatsapp.template.read"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_RENDERED_TOO_LONG",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "PreviewMessageTemplate",
+          "input_type": "PreviewMessageTemplateInput",
+          "output_type": "PreviewMessageTemplateOutput"
+        },
+        {
+          "public_id": "whatsapp.message_templates.update",
+          "command": "whatsapp message_templates update",
+          "tool": "whatsapp_message_templates_update",
+          "method": "PUT",
+          "path": "/v1/message-templates/:template_id",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "external",
+            "risks": [
+              "external_communication"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.template.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "none",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NAME_TAKEN",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "UpdateMessageTemplate",
+          "input_type": "UpdateMessageTemplateInput",
+          "output_type": "MessageTemplateOutput"
+        },
+        {
+          "public_id": "whatsapp.messages.create",
+          "command": "whatsapp messages create",
+          "tool": "whatsapp_messages_create",
+          "method": "POST",
+          "path": "/v1/messages",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "external",
+            "risks": [
+              "external_communication"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.message.create"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_NOT_READY",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_AGENT_PENDING_MESSAGES_LIMIT_REACHED",
+              "status": 429,
+              "retryable": true
+            },
+            {
+              "code": "WHATSAPP_MESSAGE_OPERATION_NOT_ALLOWED",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_MESSAGE_PRIORITY_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_MESSAGE_TARGET_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_MESSAGE_TARGET_NOT_SENT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_SENDER_AGENT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_SYSTEM_AGENT_UNAVAILABLE",
+              "status": 503,
+              "retryable": true
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_TEMPLATE_RENDERED_TOO_LONG",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "CreateMessage",
+          "input_type": "CreateMessageInput",
+          "output_type": "CreateMessageOutput"
+        },
+        {
+          "public_id": "whatsapp.messages.get",
+          "command": "whatsapp messages get",
+          "tool": "whatsapp_messages_get",
+          "method": "GET",
+          "path": "/v1/messages/:message_id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.message.read"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "WHATSAPP_MESSAGE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchMessage",
+          "input_type": "FetchMessageInput",
+          "output_type": "FetchMessageOutput"
+        },
+        {
+          "public_id": "whatsapp.messages.list",
+          "command": "whatsapp messages list",
+          "tool": "whatsapp_messages_list",
+          "method": "GET",
+          "path": "/v1/messages",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "whatsapp.message.read"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "sortable_fields": [
+            "create_at"
+          ],
+          "pagination": {
+            "style": "adaptive",
+            "page_param": "p",
+            "page_size_param": "count",
+            "after_param": "after",
+            "before_param": "before",
+            "total_param": "total",
+            "default_page_size": 20,
+            "max_page_size": 100,
+            "max_offset": 10000,
+            "result_field": "messages",
+            "items_field": "data",
+            "page_field": "page",
+            "page_size_field": "page_size",
+            "has_next_page_field": "has_next_page",
+            "has_prev_page_field": "has_prev_page",
+            "next_cursor_field": "next_cursor",
+            "prev_cursor_field": "prev_cursor",
+            "total_items_field": "total_items",
+            "total_pages_field": "total_pages"
+          },
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
               "status": 403,
               "retryable": false
             },
@@ -2453,6 +7218,14 @@
           "schema": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
         },
         {
+          "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+          "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+          "status": 403,
+          "retryable": false,
+          "title": "This operation is not available to organization API keys.",
+          "schema": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+        },
+        {
           "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
           "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
           "status": 403,
@@ -2589,6 +7362,14 @@
           "schema": "#/components/schemas/ValidationFailedProblem"
         },
         {
+          "code": "WHATSAPP_AGENTS_FENCED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_AGENTS_FENCED",
+          "status": 503,
+          "retryable": true,
+          "title": "Agents cannot be started during maintenance. Try again later.",
+          "schema": "#/components/schemas/WhatsAppAgentsFencedProblem"
+        },
+        {
           "code": "WHATSAPP_AGENT_NOT_FOUND",
           "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_AGENT_NOT_FOUND",
           "status": 404,
@@ -2629,6 +7410,70 @@
           "schema": "#/components/schemas/WhatsAppAgentSlotLimitReachedProblem"
         },
         {
+          "code": "WHATSAPP_BROADCAST_ACTIVE_LIMIT_REACHED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_BROADCAST_ACTIVE_LIMIT_REACHED",
+          "status": 409,
+          "retryable": false,
+          "title": "Your organization has too many broadcasts in progress.",
+          "schema": "#/components/schemas/WhatsAppBroadcastActiveLimitReachedProblem"
+        },
+        {
+          "code": "WHATSAPP_BROADCAST_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_BROADCAST_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Broadcast not found.",
+          "schema": "#/components/schemas/WhatsAppBroadcastNotFoundProblem"
+        },
+        {
+          "code": "WHATSAPP_BROADCAST_RECIPIENT_LIMIT_REACHED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_BROADCAST_RECIPIENT_LIMIT_REACHED",
+          "status": 422,
+          "retryable": false,
+          "title": "The broadcast has too many recipients.",
+          "schema": "#/components/schemas/WhatsAppBroadcastRecipientLimitReachedProblem"
+        },
+        {
+          "code": "WHATSAPP_BROADCAST_RECIPIENT_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_BROADCAST_RECIPIENT_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Broadcast recipient not found.",
+          "schema": "#/components/schemas/WhatsAppBroadcastRecipientNotFoundProblem"
+        },
+        {
+          "code": "WHATSAPP_BROADCAST_SENDER_UNAVAILABLE",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_BROADCAST_SENDER_UNAVAILABLE",
+          "status": 422,
+          "retryable": false,
+          "title": "This agent cannot send the broadcast.",
+          "schema": "#/components/schemas/WhatsAppBroadcastSenderUnavailableProblem"
+        },
+        {
+          "code": "WHATSAPP_BROADCAST_STATE_CONFLICT",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_BROADCAST_STATE_CONFLICT",
+          "status": 409,
+          "retryable": false,
+          "title": "The broadcast's status does not allow this action.",
+          "schema": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
+        },
+        {
+          "code": "WHATSAPP_BROADCAST_SUPPRESSION_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_BROADCAST_SUPPRESSION_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Broadcast suppression not found.",
+          "schema": "#/components/schemas/WhatsAppBroadcastSuppressionNotFoundProblem"
+        },
+        {
+          "code": "WHATSAPP_CHAT_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_CHAT_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Chat not found.",
+          "schema": "#/components/schemas/WhatsAppChatNotFoundProblem"
+        },
+        {
           "code": "WHATSAPP_MESSAGE_NOT_FOUND",
           "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_MESSAGE_NOT_FOUND",
           "status": 404,
@@ -2637,12 +7482,44 @@
           "schema": "#/components/schemas/WhatsAppMessageNotFoundProblem"
         },
         {
+          "code": "WHATSAPP_MESSAGE_OPERATION_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_MESSAGE_OPERATION_NOT_ALLOWED",
+          "status": 409,
+          "retryable": false,
+          "title": "This operation is not allowed on the referenced message.",
+          "schema": "#/components/schemas/WhatsAppMessageOperationNotAllowedProblem"
+        },
+        {
+          "code": "WHATSAPP_MESSAGE_PRIORITY_NOT_ALLOWED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_MESSAGE_PRIORITY_NOT_ALLOWED",
+          "status": 403,
+          "retryable": false,
+          "title": "This send priority is not allowed for the caller.",
+          "schema": "#/components/schemas/WhatsAppMessagePriorityNotAllowedProblem"
+        },
+        {
           "code": "WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED",
           "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED",
           "status": 409,
           "retryable": false,
           "title": "This agent cannot send messages through the API. Create and pair a new agent.",
           "schema": "#/components/schemas/WhatsAppMessageRuntimeUnsupportedProblem"
+        },
+        {
+          "code": "WHATSAPP_MESSAGE_TARGET_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_MESSAGE_TARGET_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "The referenced message was not found.",
+          "schema": "#/components/schemas/WhatsAppMessageTargetNotFoundProblem"
+        },
+        {
+          "code": "WHATSAPP_MESSAGE_TARGET_NOT_SENT",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_MESSAGE_TARGET_NOT_SENT",
+          "status": 409,
+          "retryable": false,
+          "title": "The referenced message has not been sent yet.",
+          "schema": "#/components/schemas/WhatsAppMessageTargetNotSentProblem"
         },
         {
           "code": "WHATSAPP_REGISTRATION_QUEUE_FULL",
@@ -2675,6 +7552,38 @@
           "retryable": true,
           "title": "Message sending is temporarily unavailable. Try again later.",
           "schema": "#/components/schemas/WhatsAppSystemAgentUnavailableProblem"
+        },
+        {
+          "code": "WHATSAPP_TEMPLATE_LIMIT_REACHED",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_TEMPLATE_LIMIT_REACHED",
+          "status": 422,
+          "retryable": false,
+          "title": "Message template limit reached.",
+          "schema": "#/components/schemas/WhatsAppTemplateLimitReachedProblem"
+        },
+        {
+          "code": "WHATSAPP_TEMPLATE_NAME_TAKEN",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_TEMPLATE_NAME_TAKEN",
+          "status": 409,
+          "retryable": false,
+          "title": "Message template name is already taken.",
+          "schema": "#/components/schemas/WhatsAppTemplateNameTakenProblem"
+        },
+        {
+          "code": "WHATSAPP_TEMPLATE_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_TEMPLATE_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Message template not found.",
+          "schema": "#/components/schemas/WhatsAppTemplateNotFoundProblem"
+        },
+        {
+          "code": "WHATSAPP_TEMPLATE_RENDERED_TOO_LONG",
+          "type": "https://docs.gatherdeal.ai/errors/WHATSAPP_TEMPLATE_RENDERED_TOO_LONG",
+          "status": 422,
+          "retryable": false,
+          "title": "Rendered message template is too long.",
+          "schema": "#/components/schemas/WhatsAppTemplateRenderedTooLongProblem"
         }
       ]
     }

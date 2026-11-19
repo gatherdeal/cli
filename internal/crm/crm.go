@@ -3,11 +3,13 @@
 // The commands depend only on the Contacts interface below. Client
 // implements it over the generated, dependency-free client in
 // internal/generated/crm/v1. Request parameters are CLI-shaped; payloads are
-// the generated DTOs.
+// the record JSON returned through the generated bindings.
 package crm
 
 import (
 	"context"
+	"encoding/json"
+	"encoding/json/jsontext"
 
 	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
 	"github.com/gatherdeal/cli/internal/output"
@@ -22,6 +24,7 @@ import (
 //     (httpx.ProblemError), so the exit code follows the problem's status
 //     and its retryable member decides retryability.
 type Contacts interface {
+	InvokeRead(context.Context, crmv1.CLIBinding, any) (jsontext.Value, string, error)
 	ListContacts(ctx context.Context, p ListContactsParams) (*ListContactsResult, error)
 	// ListAllContacts walks forward through every page with cursors (the
 	// shared bounded walker: total=none, 100 per page unless p.PageSize is
@@ -74,11 +77,11 @@ type GetContactParams struct {
 }
 
 // Contact is the generated contact DTO.
-type Contact = crmv1.Contact
+type Contact = crmv1.ContactView
 
 // ListContactsResult is one page of contacts.
 type ListContactsResult struct {
-	Contacts []*Contact
+	Contacts []json.RawMessage
 	// PageInfo is the page's ListPage fields other than its items.
 	PageInfo      output.PageInfo
 	CorrelationID string
@@ -86,7 +89,7 @@ type ListContactsResult struct {
 
 // ListAllContactsResult is every contact a forward walk returned.
 type ListAllContactsResult struct {
-	Contacts []*Contact
+	Contacts []json.RawMessage
 	// Truncated is true when maxItems stopped the walk before the end.
 	Truncated bool
 	// NextCursor is absent if the server overfilled a page and the cap cut it.
@@ -96,6 +99,6 @@ type ListAllContactsResult struct {
 
 // GetContactResult is one contact.
 type GetContactResult struct {
-	Contact       *Contact
+	Contact       json.RawMessage
 	CorrelationID string
 }

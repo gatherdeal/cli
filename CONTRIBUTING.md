@@ -58,9 +58,7 @@ publish or contact GitHub or npm.
 a delegated access may use) and one OpenAPI document per service version.
 Manifest `format_version` 2 gives each operation's `permissions` as the closed
 `{"allOf":[...]}` or `{"anyOf":[...]}` requirement (any-of: at least one of
-two or more keys), decoded strictly; `contracts.Parse` still reads a
-`format_version` 1 key array as all-of until the committed bundles are
-regenerated.
+two or more keys), decoded strictly. The CLI requires manifest v2.
 `internal/generated/<service>/<version>/` is the client generated from it,
 standard library only. Both are exported by GatherDeal's contract generator,
 and `contracts/testdata/problem-conformance/` holds the decode fixtures that

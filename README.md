@@ -237,6 +237,7 @@ limits it to one resource (see [Command catalog](#command-catalog)).
 ```sh
 gatherdeal crm contacts list --search ali --page 1 --page-size 20
 gatherdeal crm contacts list --search ali --after <next_cursor>
+gatherdeal crm contact_tags list --search VIP --fields id,name
 gatherdeal crm contacts list --tag VIP --limit 500
 gatherdeal crm contacts list --tag VIP --all
 gatherdeal crm contacts get <contact-id> --with-emails --with-tags
@@ -300,6 +301,12 @@ Keep the same profile; never retry a denial or not-found in another organization
 
 ## WhatsApp API
 
+Use `gatherdeal commands whatsapp` to find broadcast, recipient,
+suppression, chat and message-template commands. For example,
+`gatherdeal whatsapp broadcasts recipients list <broadcast-id> --limit 20`
+lists recipients. Write commands accept `--dry-run`. Starting or resuming
+a broadcast requires `--send`.
+
 These commands manage WhatsApp API agents. They do not create messaging inbox
 channels; those are a separate system. Registered agents consume paid quota
 slots. Deleting an agent unlinks its device and releases
@@ -331,10 +338,10 @@ stops creation before dispatch; log in to establish the profile. Environment
 tokens have no cached profile binding.
 
 An update body includes the agent's `update_at` as `revision`, and optional
-`mode` (`resident` or `on_demand`) and `outlet_id` (UUID or null). For example:
+`outlet_id` (UUID or null). For example:
 
 ```json
-{"revision":"2026-10-29T10:00:00Z","mode":"on_demand"}
+{"revision":"2026-10-29T10:00:00Z","outlet_id":"55555555-5555-4555-8555-555555555555"}
 ```
 
 A message body names one agent and recipient; creating it sends the message:

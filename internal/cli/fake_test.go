@@ -63,6 +63,7 @@ type fakeServer struct {
 	orgID           string
 	principalID     string
 	orgName         string // overrides the organization name
+	contactTags     http.HandlerFunc
 	whatsapp        http.HandlerFunc
 	outlets         http.HandlerFunc
 }
@@ -180,6 +181,8 @@ func (f *fakeServer) handle(w http.ResponseWriter, r *http.Request) {
 	}
 	_ = r.ParseForm()
 	switch {
+	case r.URL.Path == "/crm/v1/contact-tags" && f.contactTags != nil:
+		f.contactTags(w, r)
 	case r.URL.Path == "/identity/v1/outlets" && f.outlets != nil:
 		f.outlets(w, r)
 	case strings.HasPrefix(r.URL.Path, "/whatsapp/") && f.whatsapp != nil:

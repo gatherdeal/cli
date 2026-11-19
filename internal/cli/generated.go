@@ -1,0 +1,299 @@
+package cli
+
+import (
+	"context"
+	"encoding/json"
+	"encoding/json/jsontext"
+	"net/http"
+	"reflect"
+	"strconv"
+	"strings"
+
+	"github.com/gatherdeal/cli/contracts"
+	"github.com/gatherdeal/cli/internal/auth"
+	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
+	wa "github.com/gatherdeal/cli/internal/generated/whatsapp/v1"
+	"github.com/gatherdeal/cli/internal/httpx"
+	"github.com/gatherdeal/cli/internal/output"
+	"github.com/gatherdeal/cli/internal/paging"
+)
+
+// Generated bindings own request encoding and dispatch. Existing presentations
+// win by public ID so the same operation never acquires a second command.
+func generatedCommands(existing []*Command) []*Command {
+	bound := make(map[string]bool)
+	for _, c := range existing {
+		bound[c.Operation] = true
+	}
+	var commands []*Command
+	for _, b := range crmv1.CLIBindings() {
+		if bound[b.PublicID] {
+			continue
+		}
+		op := contracts.MustOperation(b.PublicID)
+		commands = append(commands, generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*crmv1.Client)(nil),
+			func(ctx context.Context, inv *Invocation, input any) (jsontext.Value, string, error) {
+				client, err := inv.contactsClient()
+				if err != nil {
+					return nil, "", err
+				}
+				return client.InvokeRead(ctx, b, input)
+			}))
+	}
+	for _, b := range wa.CLIBindings() {
+		if bound[b.PublicID] {
+			continue
+		}
+		op := contracts.MustOperation(b.PublicID)
+		commands = append(commands, generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*wa.Client)(nil),
+			func(ctx context.Context, inv *Invocation, input any) (jsontext.Value, string, error) {
+				client, err := inv.whatsappClient()
+				if err != nil {
+					return nil, "", err
+				}
+				var key string
+				if !op.ReadOnly() {
+					if err := inv.recordWriteKey(); err != nil {
+						return nil, "", err
+					}
+					key = inv.Meta.Write.IdempotencyKey
+				}
+				return client.Invoke(ctx, b, input, selectedOutlet(inv), key, !op.ReadOnly())
+			}))
+	}
+	return commands
+}
+
+type bindingArgument struct {
+	Name, WireName, In string
+	Required           bool
+}
+type bindInput func(map[string]jsontext.Value, jsontext.Value) (any, error)
+type invokeInput func(context.Context, *Invocation, any) (jsontext.Value, string, error)
+
+func generatedCommand[A ~struct {
+	Name, WireName, In string
+	Required           bool
+}](op contracts.Operation, summary string, hasBody bool, args []A, bind bindInput, client any, invoke invokeInput) *Command {
+	c := &Command{Operation: op.PublicID, Summary: strings.TrimSuffix(summary, ".") + ".", Network: true, Output: "json", Flags: append([]FlagSpec{}, targetFlags...)}
+	if op.OutletScope == "filtered" {
+		c.Flags = append(c.Flags, flagOutlet)
+	}
+	if op.Pagination != nil {
+		c.Flags = append(c.Flags, pageFlags(op.PublicID, op.Pagination.ResultField)...)
+	}
+	params := make([]commandParameter, 0, len(args))
+	for _, item := range args {
+		a := bindingArgument(item)
+		p := parameterFor(op, a)
+		params = append(params, p)
+		if a.In == "path" {
+			c.Args = append(c.Args, ArgSpec{Name: a.Name, Usage: p.flag.Usage})
+		} else if !p.shared {
+			c.Flags = append(c.Flags, p.flag)
+		}
+	}
+	result := generatedResult(op, client, c)
+	run := func(ctx context.Context, inv *Invocation) (any, error) {
+		values, err := inv.bindingArguments(params)
+		if err != nil {
+			return nil, err
+		}
+		if inv.isSet("outlet") {
+			if err := validateOutlet(inv); err != nil {
+				return nil, err
+			}
+		}
+		if op.Pagination != nil {
+			if err := validatePaging(inv); err != nil {
+				return nil, err
+			}
+			walk, _ := inv.walk()
+			if inv.isSet("before") && (walk || inv.isSet("after") || inv.isSet("page")) {
+				return nil, usageError("--before requires a single cursor page and cannot be combined with --after or --page")
+			}
+		}
+		var body jsontext.Value
+		if hasBody {
+			v, err := ReadBody[json.RawMessage](inv.str("input"), inv.Env.Stdin)
+			if err != nil {
+				return nil, err
+			}
+			body = *v
+		} else if inv.isSet("input") {
+			return nil, usageError("%s does not accept a body", op.PublicID)
+		}
+		call := func() (jsontext.Value, error) {
+			input, err := bind(values, body)
+			if err != nil {
+				return nil, usageError("%v", err)
+			}
+			raw, corr, err := invoke(ctx, inv, input)
+			inv.Meta.CorrelationID = corr
+			return raw, auth.Explain(err)
+		}
+		if inv.Meta.Write != nil && inv.Meta.Write.DryRun {
+			if _, err := bind(values, body); err != nil {
+				return nil, usageError("%v", err)
+			}
+			if _, err := inv.resolveTarget(false); err != nil {
+				return nil, err
+			}
+			return struct {
+				Arguments map[string]jsontext.Value `json:"arguments,omitempty"`
+				Body      jsontext.Value            `json:"body,omitempty"`
+				Outlet    string                    `json:"outlet,omitempty"`
+			}{values, body, selectedOutlet(inv)}, nil
+		}
+		if op.Pagination != nil {
+			return generatedList(ctx, inv, op.Pagination, values, call)
+		}
+		raw, err := call()
+		if err != nil || len(raw) == 0 {
+			return nil, err
+		}
+		if result != "" {
+			return resultMember(raw, result, inv.Meta.CorrelationID)
+		}
+		return raw, nil
+	}
+	c.Run = run
+	if !op.ReadOnly() {
+		confirmation := ConfirmConfig
+		if op.Effect.Interaction == "external" {
+			confirmation = ConfirmSend
+		}
+		c.Write = &WritePolicy{Confirmation: confirmation, Preview: run}
+	} else if hasBody {
+		c.Flags = append(c.Flags, FlagSpec{Name: "input", Kind: kindString, Usage: "JSON request body, inline, from a file, or - for standard input."})
+	}
+	return c
+}
+
+func (inv *Invocation) bindingArguments(params []commandParameter) (map[string]jsontext.Value, error) {
+	values := make(map[string]jsontext.Value)
+	pos := 0
+	for _, p := range params {
+		var raw jsontext.Value
+		if p.In == "path" {
+			v := inv.Args[pos]
+			pos++
+			if p.uuid && !uuidRE.MatchString(v) {
+				return nil, usageError("%s must be a UUID", p.Name)
+			}
+			raw, _ = json.Marshal(v)
+		} else {
+			if !inv.isSet(p.flag.Name) {
+				continue
+			}
+			switch {
+			case p.flag.Kind == kindInt:
+				raw = jsontext.Value(strconv.Itoa(inv.integer(p.flag.Name)))
+			case p.jsonValue:
+				raw = jsontext.Value(inv.str(p.flag.Name))
+			default:
+				raw, _ = json.Marshal(inv.str(p.flag.Name))
+			}
+		}
+		values[p.Name] = raw
+	}
+	return values, nil
+}
+
+func selectedOutlet(inv *Invocation) string {
+	if inv.isSet("outlet") {
+		return inv.str("outlet")
+	}
+	return ""
+}
+
+// A get with one record or a paginated list supports --fields. Multi-field
+// results (such as revision polling) retain their entire response.
+func generatedResult(op contracts.Operation, client any, c *Command) string {
+	if op.Method != http.MethodGet {
+		return ""
+	}
+	method, ok := reflect.TypeOf(client).MethodByName(op.GoMethod)
+	if !ok {
+		panic("missing generated client method: " + op.GoMethod)
+	}
+	out := method.Type.Out(0).Elem()
+	if out.NumField() != 1 {
+		return ""
+	}
+	field := out.Field(0)
+	t := field.Type
+	if t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return ""
+	}
+	if op.Pagination != nil {
+		data, ok := t.FieldByName("Data")
+		if !ok {
+			panic("missing generated page data in " + op.GoMethod)
+		}
+		t = data.Type.Elem()
+		if t.Kind() == reflect.Pointer {
+			t = t.Elem()
+		}
+	}
+	c.Record = reflect.Zero(t).Interface()
+	name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
+	return name
+}
+
+func resultMember(raw jsontext.Value, name, correlation string) (json.RawMessage, error) {
+	var envelope map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &envelope); err != nil || len(envelope[name]) == 0 || string(envelope[name]) == "null" {
+		return nil, httpx.ProtocolError(http.StatusOK, correlation, "response has no "+name+" result")
+	}
+	return envelope[name], nil
+}
+
+func generatedList(ctx context.Context, inv *Invocation, pg *contracts.Pagination, args map[string]jsontext.Value, call func() (jsontext.Value, error)) (any, error) {
+	fetch := func() (items []json.RawMessage, info output.PageInfo, err error) {
+		raw, err := call()
+		if err != nil {
+			return nil, info, err
+		}
+		member, err := resultMember(raw, pg.ResultField, inv.Meta.CorrelationID)
+		if err != nil {
+			return nil, info, err
+		}
+		var page struct {
+			output.PageInfo
+			Data []json.RawMessage `json:"data"`
+		}
+		if err := json.Unmarshal(member, &page); err != nil || page.Data == nil {
+			return nil, info, httpx.ProtocolError(http.StatusOK, inv.Meta.CorrelationID, "invalid "+pg.ResultField+" page")
+		}
+		return page.Data, page.PageInfo, nil
+	}
+	walk, limit := inv.walk()
+	if !walk {
+		items, page, err := fetch()
+		if err != nil {
+			return nil, err
+		}
+		inv.Meta.PageInfo = &page
+		return items, nil
+	}
+	size := inv.integer("page-size")
+	if size == 0 {
+		size = pg.MaxPageSize
+	}
+	args[pg.TotalParam] = jsontext.Value(`"none"`)
+	r, err := paging.Walk(ctx, pg.ResultField, inv.str("after"), size, limit, func(_ context.Context, cursor string, size int) (paging.Page[json.RawMessage], error) {
+		args[pg.AfterParam], _ = json.Marshal(cursor)
+		args[pg.PageSizeParam] = jsontext.Value(strconv.Itoa(size))
+		items, info, err := fetch()
+		return paging.Page[json.RawMessage]{Items: items, HasNextPage: info.HasNextPage, NextCursor: info.NextCursor, CorrelationID: inv.Meta.CorrelationID}, err
+	})
+	if err != nil {
+		return nil, err
+	}
+	inv.Meta.PageInfo = &output.PageInfo{HasNextPage: r.Truncated, NextCursor: r.NextCursor, HasPrevPage: inv.isSet("after")}
+	return r.Items, nil
+}

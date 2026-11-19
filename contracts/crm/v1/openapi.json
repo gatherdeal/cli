@@ -11,13 +11,543 @@
     }
   ],
   "paths": {
+    "/v1/contact-tags": {
+      "get": {
+        "operationId": "fetchContactTags",
+        "summary": "Fetch Contact Tags",
+        "description": "fetchContactTags lists the organization’s contact tag definitions.",
+        "tags": [
+          "contact-tags"
+        ],
+        "x-filter-limits": {
+          "max_depth": 5,
+          "max_rules": 50,
+          "max_in_size": 100
+        },
+        "x-filter-fields": [
+          {
+            "name": "description",
+            "kind": "string",
+            "optional": true,
+            "ops": [
+              "EQ",
+              "NEQ",
+              "IN",
+              "NOT_IN",
+              "CONTAINS",
+              "STARTS_WITH",
+              "ENDS_WITH",
+              "EQ_FOLD",
+              "CONTAINS_FOLD",
+              "STARTS_WITH_FOLD",
+              "ENDS_WITH_FOLD",
+              "IS_NULL",
+              "IS_NOT_NULL"
+            ]
+          },
+          {
+            "name": "is_archive",
+            "kind": "bool",
+            "ops": [
+              "EQ"
+            ]
+          },
+          {
+            "name": "name",
+            "kind": "string",
+            "ops": [
+              "EQ",
+              "NEQ",
+              "IN",
+              "NOT_IN",
+              "CONTAINS",
+              "STARTS_WITH",
+              "ENDS_WITH",
+              "EQ_FOLD",
+              "CONTAINS_FOLD",
+              "STARTS_WITH_FOLD",
+              "ENDS_WITH_FOLD"
+            ]
+          }
+        ],
+        "x-sortable-fields": [
+          "create_at",
+          "name"
+        ],
+        "x-gd-public-id": "crm.contact_tags.list",
+        "x-gd-effect": {
+          "mutation": "none",
+          "interaction": "closed",
+          "risks": []
+        },
+        "x-required-permissions": {
+          "allOf": [
+            "crm.contact.read"
+          ]
+        },
+        "x-gd-idempotency": "safe",
+        "x-gd-outlet-scope": "organization_level",
+        "x-gd-pagination": {
+          "style": "adaptive",
+          "page_param": "p",
+          "page_size_param": "count",
+          "after_param": "after",
+          "before_param": "before",
+          "total_param": "total",
+          "default_page_size": 20,
+          "max_page_size": 100,
+          "max_offset": 10000,
+          "result_field": "tags",
+          "items_field": "data",
+          "page_field": "page",
+          "page_size_field": "page_size",
+          "has_next_page_field": "has_next_page",
+          "has_prev_page_field": "has_prev_page",
+          "next_cursor_field": "next_cursor",
+          "prev_cursor_field": "prev_cursor",
+          "total_items_field": "total_items",
+          "total_pages_field": "total_pages"
+        },
+        "parameters": [
+          {
+            "name": "p",
+            "in": "query",
+            "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Opaque cursor: the page after this position. Pass a previous response's\nnext_cursor.",
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "description": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor.",
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          {
+            "name": "total",
+            "in": "query",
+            "description": "Whether to count matching rows. Default: exact in page mode, none in\ncursor mode.",
+            "schema": {
+              "$ref": "#/components/schemas/TotalMode"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Free-text search query matched against searchable fields.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s",
+            "in": "query",
+            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "schema": {
+              "type": "string",
+              "pattern": "^(-?(?:create_at|name))(,-?(?:create_at|name))*$"
+            }
+          },
+          {
+            "name": "o",
+            "in": "query",
+            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter is the client-supplied filter group. Query and form parameters\nuse unpadded base64url-encoded JSON; JSON bodies use an object.",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Group"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope (`status: \"success\"`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchContactTagsOutputEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: problem document (BAD_REQUEST, PAGINATION_CURSOR_INVALID, PAGINATION_PARAMS_INVALID)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PaginationCursorInvalidProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PaginationParamsInvalidProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem",
+                      "PAGINATION_CURSOR_INVALID": "#/components/schemas/PaginationCursorInvalidProblem",
+                      "PAGINATION_PARAMS_INVALID": "#/components/schemas/PaginationParamsInvalidProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: problem document (DELEGATED_ACCESS_CREDENTIAL_LOCATION, DELEGATED_ACCESS_INACTIVE, DELEGATED_ACCESS_UNSUPPORTED, UNAUTHORIZED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_CREDENTIAL_LOCATION": "#/components/schemas/DelegatedAccessCredentialLocationProblem",
+                      "DELEGATED_ACCESS_INACTIVE": "#/components/schemas/DelegatedAccessInactiveProblem",
+                      "DELEGATED_ACCESS_UNSUPPORTED": "#/components/schemas/DelegatedAccessUnsupportedProblem",
+                      "UNAUTHORIZED": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_AUDIENCE_MISMATCH": "#/components/schemas/DelegatedAccessAudienceMismatchProblem",
+                      "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem",
+                      "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem",
+                      "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem",
+                      "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
+                      "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
+                      "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
+                      "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
+                      "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
+                      "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
+                      "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
+                      "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Upgrade Required: problem document (CLIENT_UPGRADE_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Upgrade": {
+                "$ref": "#/components/headers/Upgrade"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "499": {
+            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/InternalErrorProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "INTERNAL_ERROR": "#/components/schemas/InternalErrorProblem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/contacts": {
       "get": {
         "operationId": "fetchContacts",
         "summary": "Fetch Contacts",
+        "description": "fetchContacts lists contacts visible to the caller.",
         "tags": [
           "contacts"
         ],
+        "x-filter-limits": {
+          "max_depth": 5,
+          "max_rules": 50,
+          "max_in_size": 100
+        },
         "x-filter-fields": [
           {
             "name": "is_verified",
@@ -78,15 +608,60 @@
             ]
           }
         ],
+        "x-filter-edges": [
+          {
+            "name": "tags",
+            "quantifiers": [
+              "SOME",
+              "EVERY",
+              "NONE"
+            ],
+            "fields": [
+              {
+                "name": "id",
+                "kind": "uuid",
+                "ops": [
+                  "EQ",
+                  "NEQ",
+                  "IN",
+                  "NOT_IN"
+                ]
+              },
+              {
+                "name": "name",
+                "kind": "string",
+                "ops": [
+                  "EQ",
+                  "NEQ",
+                  "IN",
+                  "NOT_IN",
+                  "CONTAINS",
+                  "STARTS_WITH",
+                  "ENDS_WITH",
+                  "EQ_FOLD",
+                  "CONTAINS_FOLD",
+                  "STARTS_WITH_FOLD",
+                  "ENDS_WITH_FOLD"
+                ]
+              }
+            ]
+          }
+        ],
+        "x-sortable-fields": [
+          "create_at",
+          "name"
+        ],
         "x-gd-public-id": "crm.contacts.list",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
           "risks": []
         },
-        "x-required-permissions": [
-          "crm.contact.read"
-        ],
+        "x-required-permissions": {
+          "allOf": [
+            "crm.contact.read"
+          ]
+        },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-delegated-edge-filters": [
@@ -123,8 +698,12 @@
           {
             "name": "id",
             "in": "query",
+            "description": "Include only these contact identifiers.",
             "schema": {
-              "type": "array",
+              "type": [
+                "array",
+                "null"
+              ],
               "items": {
                 "type": "string",
                 "format": "uuid"
@@ -134,8 +713,12 @@
           {
             "name": "exclude_id",
             "in": "query",
+            "description": "Exclude these contact identifiers.",
             "schema": {
-              "type": "array",
+              "type": [
+                "array",
+                "null"
+              ],
               "items": {
                 "type": "string",
                 "format": "uuid"
@@ -145,6 +728,7 @@
           {
             "name": "kind",
             "in": "query",
+            "description": "Filter by contact kind.",
             "schema": {
               "$ref": "#/components/schemas/ContactKind"
             }
@@ -152,6 +736,7 @@
           {
             "name": "is_verified",
             "in": "query",
+            "description": "Filter by whether the contact is linked to a verified account.",
             "schema": {
               "type": [
                 "boolean",
@@ -162,6 +747,7 @@
           {
             "name": "name",
             "in": "query",
+            "description": "Match contacts whose name contains this text.",
             "schema": {
               "type": [
                 "string",
@@ -172,6 +758,7 @@
           {
             "name": "phone",
             "in": "query",
+            "description": "Match primary phone numbers containing this text.",
             "schema": {
               "type": [
                 "string",
@@ -182,6 +769,7 @@
           {
             "name": "phone_exact",
             "in": "query",
+            "description": "Match the normalized primary phone exactly.",
             "schema": {
               "type": [
                 "string",
@@ -200,6 +788,7 @@
           {
             "name": "has_phone",
             "in": "query",
+            "description": "Filter by whether a contact has any phone records.",
             "schema": {
               "type": [
                 "boolean",
@@ -210,6 +799,7 @@
           {
             "name": "email",
             "in": "query",
+            "description": "Match primary email addresses containing this text.",
             "schema": {
               "type": [
                 "string",
@@ -218,26 +808,14 @@
             }
           },
           {
-            "name": "start_time",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "end_time",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "tag_id",
             "in": "query",
+            "description": "Match contacts assigned one or more of these tag identifiers.",
             "schema": {
-              "type": "array",
+              "type": [
+                "array",
+                "null"
+              ],
               "items": {
                 "type": "string",
                 "format": "uuid"
@@ -247,6 +825,7 @@
           {
             "name": "tag_id_conjunction",
             "in": "query",
+            "description": "Combine tag identifiers with OR or AND.",
             "schema": {
               "oneOf": [
                 {
@@ -301,6 +880,24 @@
                   "type": "null"
                 }
               ]
+            }
+          },
+          {
+            "name": "start_at",
+            "in": "query",
+            "description": "Include contacts created at or after this instant.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end_at",
+            "in": "query",
+            "description": "Include contacts created at or before this instant.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           },
           {
@@ -485,7 +1082,7 @@
             }
           },
           "403": {
-            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -526,6 +1123,9 @@
                       "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
                     },
                     {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
                     },
                     {
@@ -557,6 +1157,7 @@
                       "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
                       "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
                       "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
                       "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
                       "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
                       "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
@@ -571,7 +1172,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "description": "Unprocessable Entity: problem document (CRM_CONTACT_EXPANSION_LIMIT, VALIDATION_FAILED)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -591,12 +1192,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/CRMContactExpansionLimitProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/ValidationFailedProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CRM_CONTACT_EXPANSION_LIMIT": "#/components/schemas/CRMContactExpansionLimitProblem",
                       "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
                     }
                   }
@@ -716,6 +1321,7 @@
       "get": {
         "operationId": "fetchContactByID",
         "summary": "Fetch Contact By ID",
+        "description": "fetchContactByID retrieves a visible contact by its identifier.",
         "tags": [
           "contacts"
         ],
@@ -725,9 +1331,11 @@
           "interaction": "closed",
           "risks": []
         },
-        "x-required-permissions": [
-          "crm.contact.read"
-        ],
+        "x-required-permissions": {
+          "allOf": [
+            "crm.contact.read"
+          ]
+        },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-delegated-expansions": [
@@ -741,6 +1349,7 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "description": "Contact identifier.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -874,7 +1483,7 @@
             }
           },
           "403": {
-            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -915,6 +1524,9 @@
                       "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
                     },
                     {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
                     },
                     {
@@ -946,6 +1558,7 @@
                       "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
                       "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
                       "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
                       "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
                       "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
                       "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
@@ -994,7 +1607,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "description": "Unprocessable Entity: problem document (CRM_CONTACT_EXPANSION_LIMIT, VALIDATION_FAILED)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -1014,12 +1627,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/CRMContactExpansionLimitProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/ValidationFailedProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CRM_CONTACT_EXPANSION_LIMIT": "#/components/schemas/CRMContactExpansionLimitProblem",
                       "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
                     }
                   }
@@ -1138,45 +1755,6 @@
   },
   "components": {
     "schemas": {
-      "AuditAgent": {
-        "type": "object",
-        "description": "Identifies the AI agent run that made the change using opaque identifiers.\nIncludes the approving user, if any.",
-        "properties": {
-          "agent_key": {
-            "type": "string"
-          },
-          "staff_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "execution_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "turn_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "turn_seq": {
-            "type": "integer"
-          },
-          "step_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "approved_by_user_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "agent_key",
-          "execution_id",
-          "turn_id",
-          "turn_seq",
-          "step_id"
-        ]
-      },
       "BadRequestProblem": {
         "type": "object",
         "description": "BAD_REQUEST (400): The request is invalid.",
@@ -1224,6 +1802,59 @@
           "status",
           "code",
           "retryable"
+        ]
+      },
+      "CRMContactExpansionLimitProblem": {
+        "type": "object",
+        "description": "CRM_CONTACT_EXPANSION_LIMIT (422): Contact expansion exceeds its limit.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_EXPANSION_LIMIT",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Contact expansion exceeds its limit.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 422
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CRM_CONTACT_EXPANSION_LIMIT"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/ContactExpansionLimitDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
         ]
       },
       "CRMContactNotFoundProblem": {
@@ -1400,34 +2031,6 @@
           "details"
         ]
       },
-      "Company": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "create_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "update_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "organization_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "incorporation_country": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "ISO 3166-1 alpha-2"
-          }
-        }
-      },
       "Conjunction": {
         "type": "string",
         "enum": [
@@ -1436,162 +2039,69 @@
         ],
         "description": "Conjunction represents a logical operator used to combine filter Rule values."
       },
-      "Contact": {
+      "ContactAttributeBrief": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Attribute association identifier."
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the attribute was assigned."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the association was last updated."
           },
-          "delete_at": {
+          "contact_id": {
             "type": "string",
-            "format": "date-time"
+            "format": "uuid",
+            "description": "Contact holding the attribute."
           },
-          "organization_id": {
+          "attribute_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Attribute definition identifier."
           },
-          "outlet_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "create_by_user_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/ContactKind"
-          },
-          "name": {
-            "type": "string"
-          },
-          "profile_image": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "remark": {
-            "type": "string"
-          },
-          "preferred_language": {
-            "type": "string"
-          },
-          "customer_code": {
-            "type": "string"
-          },
-          "is_verified": {
-            "type": "boolean"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "referrer_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContactTagBrief"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "phones": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContactPhone"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "emails": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContactEmail"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "attributes": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContactAttributeAssociation"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "person": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Person"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "company": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Company"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "attribute": {
+            "$ref": "#/components/schemas/ContactAttributeDefinition"
           }
-        }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "update_at",
+          "contact_id",
+          "attribute_id",
+          "attribute"
+        ]
       },
-      "ContactAttribute": {
+      "ContactAttributeDefinition": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Definition identifier."
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the definition was created."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the definition was last updated."
           },
           "organization_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Organization that owns the definition."
           },
           "namespace": {
             "$ref": "#/components/schemas/ContactAttributeNamespace"
@@ -1600,76 +2110,34 @@
             "$ref": "#/components/schemas/ContactAttributeKind"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Definition display name."
           },
           "is_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the definition is enabled."
           },
           "is_required": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the definition is required."
           },
           "is_unique": {
-            "type": "boolean"
-          },
-          "contacts": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContactAttributeAssociation"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
+            "type": "boolean",
+            "description": "Whether values must be unique."
           }
-        }
-      },
-      "ContactAttributeAssociation": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "create_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "update_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "contact_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "attribute_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "contact": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Contact"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "attribute": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContactAttribute"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "update_at",
+          "organization_id",
+          "namespace",
+          "kind",
+          "name",
+          "is_enabled",
+          "is_required",
+          "is_unique"
+        ]
       },
       "ContactAttributeKind": {
         "type": "string",
@@ -1688,42 +2156,75 @@
         ],
         "description": "ContactAttributeNamespace partitions attributes between built-in\nsystem attributes and tenant-defined custom attributes."
       },
-      "ContactEmail": {
+      "ContactCompanyProfile": {
+        "type": "object",
+        "properties": {
+          "incorporation_country": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Incorporation country code, when specified."
+          }
+        }
+      },
+      "ContactEmailBrief": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Email record identifier."
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the email record was created."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the email record was last updated."
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "description": "Email address."
           },
           "is_primary": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether this is the primary email."
           },
           "contact_id": {
             "type": "string",
-            "format": "uuid"
-          },
-          "contact": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Contact"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "format": "uuid",
+            "description": "Contact that owns the email record."
           }
-        }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "update_at",
+          "email",
+          "is_primary",
+          "contact_id"
+        ]
+      },
+      "ContactExpansionLimitDetails": {
+        "type": "object",
+        "properties": {
+          "expansion": {
+            "type": "string",
+            "description": "Query parameter requesting the oversized expansion."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum items per contact."
+          }
+        },
+        "required": [
+          "expansion",
+          "limit"
+        ]
       },
       "ContactKind": {
         "type": "string",
@@ -1733,20 +2234,57 @@
         ],
         "description": "ContactKind represents the kind of contact (personal vs company)."
       },
-      "ContactPhone": {
+      "ContactPersonProfile": {
+        "type": "object",
+        "properties": {
+          "birthday": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth, when available."
+          },
+          "gender": {
+            "$ref": "#/components/schemas/PersonGender"
+          },
+          "nationality": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Nationality country code, when specified."
+          },
+          "citizenship_country": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Citizenship country code, when specified."
+          },
+          "ethnicity": {
+            "type": "string",
+            "description": "Recorded ethnicity, or empty when unspecified."
+          }
+        },
+        "required": [
+          "ethnicity"
+        ]
+      },
+      "ContactPhoneBrief": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Phone record identifier."
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the phone record was created."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the phone record was last updated."
           },
           "phone": {
             "type": [
@@ -1760,53 +2298,302 @@
               "+60 12-345 6789",
               "(60)123456789"
             ],
-            "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+            "description": "Phone number with dialing code."
           },
           "is_primary": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether this is the primary phone."
           },
           "contact_id": {
             "type": "string",
-            "format": "uuid"
-          },
-          "contact": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Contact"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "format": "uuid",
+            "description": "Contact that owns the phone record."
           }
-        }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "update_at",
+          "phone",
+          "is_primary",
+          "contact_id"
+        ]
       },
-      "ContactTagBrief": {
+      "ContactTagAssignment": {
         "type": "object",
-        "description": "A tag's identifier, name, and assignment time, included when with_tags=true.\nAgent details are set when an AI agent made the assignment.",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Assigned tag identifier."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Assigned tag name."
           },
           "assigned_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the tag was assigned."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "assigned_at"
+        ]
+      },
+      "ContactTagListBrief": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tag identifier."
           },
-          "agent": {
+          "name": {
+            "type": "string",
+            "description": "Tag name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Tag description, or empty when unset."
+          },
+          "is_archived": {
+            "type": "boolean",
+            "description": "Whether the tag is archived."
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the tag was created."
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the tag was last updated."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "is_archived",
+          "create_at",
+          "update_at"
+        ]
+      },
+      "ContactView": {
+        "type": "object",
+        "description": "ContactView is the wire resource for the contact list and detail reads.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Contact identifier."
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contact was created."
+          },
+          "update_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contact was last updated."
+          },
+          "delete_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contact was deleted, if applicable."
+          },
+          "organization_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization that owns the contact."
+          },
+          "outlet_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Home outlet, when assigned."
+          },
+          "create_by_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User who created the contact, when recorded."
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ContactKind"
+          },
+          "name": {
+            "type": "string",
+            "description": "Contact display name."
+          },
+          "profile_image": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Reference to the contact's profile image, when set."
+          },
+          "remark": {
+            "type": "string",
+            "description": "Contact remark."
+          },
+          "preferred_language": {
+            "type": "string",
+            "description": "Preferred language code, or empty when unset."
+          },
+          "customer_code": {
+            "type": "string",
+            "description": "Business customer code, absent until assigned."
+          },
+          "is_verified": {
+            "type": "boolean",
+            "description": "Whether the contact is linked to a verified account."
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Linked user account, when present."
+          },
+          "referrer_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Referring contact, when present."
+          },
+          "tags": {
+            "type": "array",
+            "description": "Up to 100 visible tag assignments.",
+            "items": {
+              "$ref": "#/components/schemas/ContactTagAssignment"
+            },
+            "maxItems": 100
+          },
+          "phones": {
+            "type": "array",
+            "description": "Primary phone, when present.",
+            "items": {
+              "$ref": "#/components/schemas/ContactPhoneBrief"
+            },
+            "maxItems": 1
+          },
+          "emails": {
+            "type": "array",
+            "description": "Primary email, when present.",
+            "items": {
+              "$ref": "#/components/schemas/ContactEmailBrief"
+            },
+            "maxItems": 1
+          },
+          "attributes": {
+            "type": "array",
+            "description": "Up to 100 visible attribute associations and definitions.",
+            "items": {
+              "$ref": "#/components/schemas/ContactAttributeBrief"
+            },
+            "maxItems": 100
+          },
+          "person": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/AuditAgent"
+                "$ref": "#/components/schemas/ContactPersonProfile"
               },
               {
                 "type": "null"
               }
             ]
+          },
+          "company": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ContactCompanyProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/ContactViewCapabilities"
           }
-        }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "update_at",
+          "organization_id",
+          "kind",
+          "name",
+          "remark",
+          "preferred_language",
+          "is_verified",
+          "capabilities"
+        ]
+      },
+      "ContactViewCapabilities": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Contact identifier."
+          },
+          "can_attachment_read_staff": {
+            "type": "boolean",
+            "description": "Whether staff attachments may be read."
+          },
+          "can_attachment_share": {
+            "type": "boolean",
+            "description": "Whether contact attachments may be shared."
+          },
+          "can_customer_read": {
+            "type": "boolean",
+            "description": "Whether the caller may read the customer projection."
+          },
+          "can_delete": {
+            "type": "boolean",
+            "description": "Whether the caller may delete the contact."
+          },
+          "can_read": {
+            "type": "boolean",
+            "description": "Whether the caller may read the contact."
+          },
+          "can_reference": {
+            "type": "boolean",
+            "description": "Whether the caller may reference the contact."
+          },
+          "can_statement_read": {
+            "type": "boolean",
+            "description": "Whether the caller may read the contact statement."
+          },
+          "can_statement_share": {
+            "type": "boolean",
+            "description": "Whether the caller may share the contact statement."
+          },
+          "can_update": {
+            "type": "boolean",
+            "description": "Whether the caller may update the contact."
+          },
+          "can_update_identity": {
+            "type": "boolean",
+            "description": "Whether the caller may update the contact's identity."
+          }
+        },
+        "required": [
+          "id",
+          "can_attachment_read_staff",
+          "can_attachment_share",
+          "can_customer_read",
+          "can_delete",
+          "can_read",
+          "can_reference",
+          "can_statement_read",
+          "can_statement_share",
+          "can_update",
+          "can_update_identity"
+        ]
       },
       "DelegatedAccessAudienceMismatchProblem": {
         "type": "object",
@@ -1925,7 +2712,8 @@
             "type": "array",
             "description": "MissingPermissions lists the permission keys the access lacks (reason\nmissing_permissions).",
             "items": {
-              "$ref": "#/components/schemas/PermissionKey"
+              "type": "string",
+              "pattern": "^[a-z]+(_[a-z]+)*\\.[a-z]+(_[a-z]+)*\\.[a-z]+(_[a-z]+)*$"
             }
           }
         },
@@ -1949,7 +2737,8 @@
           "expansion_not_allowed",
           "impersonation_not_allowed",
           "credential_location",
-          "principal_inactive"
+          "principal_inactive",
+          "organization_key_not_admitted"
         ],
         "description": "DelegatedAccessDenyReason names why the delegated-access gate refused a\nrequest. It is the wire reason of every 403 DELEGATED_ACCESS_* code (and of\nthe 401 DELEGATED_ACCESS_CREDENTIAL_LOCATION)."
       },
@@ -2321,6 +3110,59 @@
           "code": {
             "type": "string",
             "const": "DELEGATED_ACCESS_KIND_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessOrganizationKeyNotAdmittedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED (403): This operation is not available to organization API keys.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This operation is not available to organization API keys.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED"
           },
           "retryable": {
             "type": "boolean",
@@ -2732,16 +3574,12 @@
         "type": "object",
         "properties": {
           "contact": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Contact"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContactView"
           }
-        }
+        },
+        "required": [
+          "contact"
+        ]
       },
       "FetchContactByIDOutputEnvelope": {
         "allOf": [
@@ -2762,20 +3600,46 @@
           }
         ]
       },
+      "FetchContactTagsOutput": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "$ref": "#/components/schemas/ListPageContactTagListBrief"
+          }
+        },
+        "required": [
+          "tags"
+        ]
+      },
+      "FetchContactTagsOutputEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FetchContactTagsOutput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "success"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        ]
+      },
       "FetchContactsOutput": {
         "type": "object",
         "properties": {
           "contacts": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageContact"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageContactView"
           }
-        }
+        },
+        "required": [
+          "contacts"
+        ]
       },
       "FetchContactsOutputEnvelope": {
         "allOf": [
@@ -2850,7 +3714,10 @@
         "description": "Group represents a recursive filter expression composed of Rule values\nand nested Group values combined by a Conjunction.\nWhen Group.Negated is true the entire group predicate is logically inverted.\n\nWhen Group.Edge is set, the group's rules and subgroups are evaluated\nagainst the named edge relation rather than the current entity. In that case\nGroup.Quantifier selects the quantifier (some/every/none) that governs\nhow the inner predicate applies across the related rows, and the rules'\nfield names are resolved against the target entity's registry rather than\nthe current one.",
         "properties": {
           "groups": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "oneOf": [
                 {
@@ -2863,7 +3730,10 @@
             }
           },
           "rules": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "oneOf": [
                 {
@@ -2887,7 +3757,8 @@
           "negated": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "InternalErrorProblem": {
         "type": "object",
@@ -2938,21 +3809,62 @@
           "retryable"
         ]
       },
-      "ListPageContact": {
+      "ListPageContactTagListBrief": {
         "type": "object",
         "description": "ListPage is one page of a list in either mode.",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Contact"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/ContactTagListBrief"
+            }
+          },
+          "page_size": {
+            "type": "integer"
+          },
+          "has_next_page": {
+            "type": "boolean"
+          },
+          "has_prev_page": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "type": "string"
+          },
+          "prev_cursor": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "total_items": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "total_pages": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "page_size",
+          "has_next_page",
+          "has_prev_page"
+        ]
+      },
+      "ListPageContactView": {
+        "type": "object",
+        "description": "ListPage is one page of a list in either mode.",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContactView"
             }
           },
           "page_size": {
@@ -3176,64 +4088,6 @@
         ],
         "description": "PaginationParamsReason refines PAGINATION_PARAMS_INVALID."
       },
-      "PermissionKey": {
-        "type": "string",
-        "enum": [
-          "crm.contact.read",
-          "identity.outlet.read",
-          "whatsapp.agent.create",
-          "whatsapp.agent.delete",
-          "whatsapp.agent.read",
-          "whatsapp.agent.update",
-          "whatsapp.message.create",
-          "whatsapp.message.read"
-        ],
-        "description": "Key identifies a cataloged service permission\n(\"<service>.<resource>.<action>\")."
-      },
-      "Person": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "create_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "update_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "organization_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "birthday": {
-            "type": "string"
-          },
-          "gender": {
-            "$ref": "#/components/schemas/PersonGender"
-          },
-          "nationality": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "ISO 3166-1 alpha-2"
-          },
-          "citizenship_country": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "ISO 3166-1 alpha-2"
-          },
-          "ethnicity": {
-            "type": "string"
-          }
-        }
-      },
       "PersonGender": {
         "type": "string",
         "enum": [
@@ -3426,7 +4280,8 @@
             "$ref": "#/components/schemas/Operator"
           },
           "value": {}
-        }
+        },
+        "additionalProperties": false
       },
       "TotalMode": {
         "type": "string",
@@ -3615,6 +4470,19 @@
       "details": null,
       "problem": {
         "$ref": "#/components/schemas/CRMContactNotFoundProblem"
+      }
+    },
+    {
+      "code": "CRM_CONTACT_EXPANSION_LIMIT",
+      "type": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_EXPANSION_LIMIT",
+      "status": 422,
+      "retryable": false,
+      "title": "Contact expansion exceeds its limit.",
+      "details": {
+        "$ref": "#/components/schemas/ContactExpansionLimitDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/CRMContactExpansionLimitProblem"
       }
     },
     {
@@ -3928,6 +4796,19 @@
       },
       "problem": {
         "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+      "status": 403,
+      "retryable": false,
+      "title": "This operation is not available to organization API keys.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
       }
     }
   ]

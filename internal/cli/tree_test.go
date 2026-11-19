@@ -41,7 +41,7 @@ func TestUnknownGroupChoices(t *testing.T) {
 		{[]string{"pos"}, "unknown app or command"},
 		{[]string{"contacts", "list"}, "crm"}, // Resources live under their app only.
 		{[]string{"crm", "orders"}, "unknown resource"},
-		{[]string{"crm", "orders"}, "valid choices: contacts"},
+		{[]string{"crm", "orders"}, "valid choices: contact_tags, contacts"},
 		{[]string{"crm", "contacts", "delete"}, "valid choices: get, list"},
 		{[]string{"auth", "unknown"}, "valid choices: login, logout, profiles, status"},
 	} {

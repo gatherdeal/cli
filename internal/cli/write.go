@@ -69,7 +69,7 @@ func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions,
 	if key != "" && op.Idempotency != contracts.IdempotencyKeyed {
 		return usageError("operation %s does not support --idempotency-key", op.PublicID)
 	}
-	if strings.TrimSpace(key) != key || strings.ContainsAny(key, "\r\n") {
+	if len(key) > 128 || strings.IndexFunc(key, func(r rune) bool { return r < 0x21 || r > 0x7e }) >= 0 {
 		return usageError("invalid --idempotency-key")
 	}
 	meta.Write = &output.WriteMeta{DryRun: opts.DryRun, IdempotencyKey: key}

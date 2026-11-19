@@ -3,6 +3,7 @@ package crm
 import (
 	"context"
 	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"net/http"
 	"reflect"
@@ -73,6 +74,15 @@ func (c *Client) call(outletID string) call {
 	return call{api: api, d: d}
 }
 
+func (c *Client) InvokeRead(ctx context.Context, binding crmv1.CLIBinding, input any) (jsontext.Value, string, error) {
+	call := c.call("")
+	raw, err := binding.Invoke(ctx, call.api, input, "")
+	if err != nil {
+		err = call.apiError(ctx, err)
+	}
+	return raw, call.d.CorrelationID, err
+}
+
 // listInput builds the generated list input from p.
 func listInput(p ListContactsParams) (*crmv1.FetchContactsInput, error) {
 	in := &crmv1.FetchContactsInput{
@@ -96,50 +106,61 @@ func (c *Client) ListContacts(ctx context.Context, p ListContactsParams) (*ListC
 		return nil, err
 	}
 	call := c.call(p.OutletID)
-	out, err := call.api.FetchContacts(ctx, in)
-	if err != nil {
-		return nil, call.apiError(ctx, err)
+	var response struct {
+		Contacts *struct {
+			output.PageInfo
+			Data []json.RawMessage `json:"data"`
+		} `json:"contacts"`
 	}
-	page := out.Contacts
+	if err := call.read(ctx, listBinding, in, &response); err != nil {
+		return nil, err
+	}
+	page := response.Contacts
 	if page == nil {
 		return nil, call.protocolError("the contacts response has no contacts page")
 	}
-	data := page.Data
-	if data == nil {
-		data = []*Contact{}
+	if page.Data == nil {
+		page.Data = []json.RawMessage{}
 	}
-	return &ListContactsResult{
-		Contacts:      data,
-		CorrelationID: call.d.CorrelationID,
-		PageInfo: output.PageInfo{
-			PageSize: page.PageSize, HasNextPage: page.HasNextPage, HasPrevPage: page.HasPrevPage,
-			NextCursor: page.NextCursor, PrevCursor: page.PrevCursor, Page: page.Page,
-			TotalItems: page.TotalItems, TotalPages: page.TotalPages,
-		},
-	}, nil
+	return &ListContactsResult{Contacts: page.Data, PageInfo: page.PageInfo, CorrelationID: call.d.CorrelationID}, nil
 }
+
+// Preserve field presence from the producer when projecting records with --fields or --jq.
+func (c call) read(ctx context.Context, binding crmv1.CLIBinding, input, dest any) error {
+	raw, err := binding.Invoke(ctx, c.api, input, "")
+	if err != nil {
+		return c.apiError(ctx, err)
+	}
+	if err := json.Unmarshal(raw, dest); err != nil {
+		return c.protocolError("invalid contact response")
+	}
+	return nil
+}
+
+func contactBinding(id string) crmv1.CLIBinding {
+	for _, b := range crmv1.CLIBindings() {
+		if b.PublicID == id {
+			return b
+		}
+	}
+	panic("missing generated binding: " + id)
+}
+
+var listBinding = contactBinding(ListOperation)
+var getBinding = contactBinding(GetOperation)
 
 func (c *Client) ListAllContacts(ctx context.Context, p ListContactsParams, maxItems int) (*ListAllContactsResult, error) {
 	p.Page, p.Total = 0, crmv1.TotalModeNone
 	if p.PageSize == 0 {
 		p.PageSize = contracts.MustOperation(ListOperation).Pagination.MaxPageSize
 	}
-	in, err := listInput(p)
-	if err != nil {
-		return nil, err
-	}
-	call := c.call(p.OutletID)
-	res, err := paging.Walk(ctx, "contacts", p.After, p.PageSize, maxItems, func(ctx context.Context, after string, size int) (paging.Page[*Contact], error) {
-		in.After, in.PageSize = after, size
-		out, err := call.api.FetchContacts(ctx, in)
+	res, err := paging.Walk(ctx, "contacts", p.After, p.PageSize, maxItems, func(ctx context.Context, after string, size int) (paging.Page[json.RawMessage], error) {
+		p.After, p.PageSize = after, size
+		page, err := c.ListContacts(ctx, p)
 		if err != nil {
-			return paging.Page[*Contact]{}, call.apiError(ctx, err)
+			return paging.Page[json.RawMessage]{}, err
 		}
-		if out.Contacts == nil {
-			return paging.Page[*Contact]{}, call.protocolError("the contacts response has no contacts page")
-		}
-		page := out.Contacts
-		return paging.Page[*Contact]{Items: page.Data, HasNextPage: page.HasNextPage, NextCursor: page.NextCursor, CorrelationID: call.d.CorrelationID}, nil
+		return paging.Page[json.RawMessage]{Items: page.Contacts, HasNextPage: page.PageInfo.HasNextPage, NextCursor: page.PageInfo.NextCursor, CorrelationID: page.CorrelationID}, nil
 	})
 	if err != nil {
 		return nil, err
@@ -153,14 +174,16 @@ func (c *Client) GetContact(ctx context.Context, p GetContactParams) (*GetContac
 		return nil, err
 	}
 	call := c.call(p.OutletID)
-	out, err := call.api.FetchContactByID(ctx, in)
-	if err != nil {
-		return nil, call.apiError(ctx, err)
+	var response struct {
+		Contact json.RawMessage `json:"contact"`
 	}
-	if out.Contact == nil {
+	if err := call.read(ctx, getBinding, in, &response); err != nil {
+		return nil, err
+	}
+	if len(response.Contact) == 0 || string(response.Contact) == "null" {
 		return nil, call.protocolError("the contact response has no contact")
 	}
-	return &GetContactResult{Contact: out.Contact, CorrelationID: call.d.CorrelationID}, nil
+	return &GetContactResult{Contact: response.Contact, CorrelationID: call.d.CorrelationID}, nil
 }
 
 func (c call) protocolError(msg string) *output.Error {
