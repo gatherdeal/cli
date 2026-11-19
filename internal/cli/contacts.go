@@ -93,10 +93,6 @@ func runContactsList(ctx context.Context, inv *Invocation) (any, error) {
 			return nil, usageError("--tag-id %q is not a tag id (UUID)", id)
 		}
 	}
-	client, err := inv.contactsClient()
-	if err != nil {
-		return nil, err
-	}
 	params := crm.ListContactsParams{
 		Page: inv.integer("page"), PageSize: inv.integer("page-size"),
 		After: inv.str("after"), Total: crmv1.TotalMode(inv.str("total")),
@@ -104,7 +100,27 @@ func runContactsList(ctx context.Context, inv *Invocation) (any, error) {
 		OutletID: inv.str("outlet"), Expand: inv.expansions(),
 		TagIDs: inv.list("tag-id"), TagNames: inv.list("tag"),
 	}
-	if walk, limit := inv.walk(); walk {
+	walk, limit := inv.walk()
+	if inv.boolean("dry-run") {
+		if _, err := inv.resolveTarget(false); err != nil {
+			return nil, err
+		}
+		// The preview describes the selected fields. Only returned contacts
+		// are subject to the projection.
+		fields := inv.shaping.fields
+		inv.shaping.fields = nil
+		return struct {
+			Operation string                 `json:"operation"`
+			Selection crm.ListContactsParams `json:"selection"`
+			Limit     int                    `json:"walk_limit,omitempty"`
+			Fields    []string               `json:"fields,omitempty"`
+		}{inv.Command.Operation, params, limit, fields}, nil
+	}
+	client, err := inv.contactsClient()
+	if err != nil {
+		return nil, err
+	}
+	if walk {
 		res, err := client.ListAllContacts(ctx, params, limit)
 		if err != nil {
 			return nil, auth.Explain(err)

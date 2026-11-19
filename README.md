@@ -242,6 +242,8 @@ gatherdeal crm contacts list --tag VIP --all
 gatherdeal crm contacts get <contact-id> --with-emails --with-tags
 ```
 
+Use `--dry-run` on `crm contacts list` to preview the selection, walk limit and output fields without reading any contacts.
+
 `crm contacts list` returns one page. `meta.page_info` carries the API's page
 fields: `page_size`, `has_next_page`, `has_prev_page`, and when present
 `next_cursor`, `prev_cursor`, `page`, `total_items` and `total_pages`. Get

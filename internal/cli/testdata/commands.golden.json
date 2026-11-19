@@ -217,6 +217,11 @@
             "usage": "Return at most this many contacts (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
           },
           {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the contact selection and output fields without reading contacts."
+          },
+          {
             "name": "search",
             "type": "string",
             "usage": "Server-side free-text search."

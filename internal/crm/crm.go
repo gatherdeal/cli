@@ -43,27 +43,27 @@ type Expansions []string
 type ListContactsParams struct {
 	// Page is 1-based; 0 means the server default (page 1, or cursor mode
 	// with After).
-	Page int
+	Page int `json:"page,omitempty"`
 	// PageSize is 1..100; 0 means the server default.
-	PageSize int
+	PageSize int `json:"page_size,omitempty"`
 	// After is an opaque cursor (a previous page's next_cursor): the page
 	// after it. Exclusive with Page.
-	After string
+	After string `json:"after,omitempty"`
 	// Total selects whether the server counts the rows ("exact" or "none");
 	// empty means the server default (exact in page mode, none with After).
-	Total crmv1.TotalMode
+	Total crmv1.TotalMode `json:"total,omitempty"`
 	// Search is free text matched by the server.
-	Search string
+	Search string `json:"search,omitempty"`
 	// SortBy is a field name; SortOrder is "asc" or "desc".
-	SortBy    string
-	SortOrder string
+	SortBy    string `json:"sort,omitempty"`
+	SortOrder string `json:"order,omitempty"`
 	// OutletID narrows the request to one outlet of the access.
-	OutletID string
-	Expand   Expansions
+	OutletID string     `json:"outlet_id,omitempty"`
+	Expand   Expansions `json:"expansions,omitempty"`
 	// TagIDs and TagNames filter by tag through the TagsEdge edge filter
 	// (any match).
-	TagIDs   []string
-	TagNames []string
+	TagIDs   []string `json:"tag_ids,omitempty"`
+	TagNames []string `json:"tag_names,omitempty"`
 }
 
 // GetContactParams selects one contact.
