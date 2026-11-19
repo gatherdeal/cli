@@ -21,17 +21,18 @@ import (
 // Generated bindings own request encoding and dispatch. Existing presentations
 // win by public ID so the same operation never acquires a second command.
 func generatedCommands(existing []*Command) []*Command {
-	bound := make(map[string]bool)
+	bound := make(map[string]*Command)
 	for _, c := range existing {
-		bound[c.Operation] = true
+		bound[c.Operation] = c
 	}
 	var commands []*Command
 	for _, b := range crmv1.CLIBindings() {
-		if bound[b.PublicID] {
+		if c := bound[b.PublicID]; c != nil {
+			c.FilterFields = b.FilterFields
 			continue
 		}
 		op := contracts.MustOperation(b.PublicID)
-		commands = append(commands, generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*crmv1.Client)(nil),
+		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*crmv1.Client)(nil),
 			func(inv *Invocation) (invokeInput, error) {
 				client, err := inv.contactsClient()
 				if err != nil {
@@ -45,10 +46,12 @@ func generatedCommands(existing []*Command) []*Command {
 					}
 					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
 				}, nil
-			}))
+			})
+		c.FilterFields = b.FilterFields
+		commands = append(commands, c)
 	}
 	for _, b := range wa.CLIBindings() {
-		if bound[b.PublicID] {
+		if bound[b.PublicID] != nil {
 			continue
 		}
 		op := contracts.MustOperation(b.PublicID)

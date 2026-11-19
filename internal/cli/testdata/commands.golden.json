@@ -1587,6 +1587,20 @@
       {
         "app": "crm",
         "args": [],
+        "filter_fields": {
+          "contact_id": [
+            "EQ",
+            "IN"
+          ],
+          "create_at": [
+            "GTE",
+            "LTE"
+          ],
+          "id": [
+            "EQ",
+            "IN"
+          ]
+        },
         "flags": [
           {
             "name": "profile",
@@ -2142,6 +2156,20 @@
       {
         "app": "crm",
         "args": [],
+        "filter_fields": {
+          "id": [
+            "EQ",
+            "IN"
+          ],
+          "pipeline_id": [
+            "EQ",
+            "IN"
+          ],
+          "stage_id": [
+            "EQ",
+            "IN"
+          ]
+        },
         "flags": [
           {
             "name": "profile",
@@ -2274,6 +2302,16 @@
       {
         "app": "crm",
         "args": [],
+        "filter_fields": {
+          "id": [
+            "EQ",
+            "IN"
+          ],
+          "name": [
+            "EQ_FOLD",
+            "CONTAINS_FOLD"
+          ]
+        },
         "flags": [
           {
             "name": "profile",

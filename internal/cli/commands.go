@@ -137,10 +137,11 @@ type commandInfo struct {
 	Args      []ArgSpec  `json:"args"`
 	Flags     []FlagSpec `json:"flags"`
 	// RecordFields are the names --fields accepts.
-	RecordFields []string `json:"record_fields,omitempty"`
-	Output       string   `json:"output"`
-	Network      bool     `json:"network"`
-	ReadOnly     bool     `json:"read_only"`
+	RecordFields []string            `json:"record_fields,omitempty"`
+	FilterFields map[string][]string `json:"filter_fields,omitzero"`
+	Output       string              `json:"output"`
+	Network      bool                `json:"network"`
+	ReadOnly     bool                `json:"read_only"`
 }
 
 type envVarInfo struct {
@@ -181,7 +182,7 @@ func runCommands(_ context.Context, inv *Invocation) (any, error) {
 		if flags == nil {
 			flags = []FlagSpec{}
 		}
-		out = append(out, commandInfo{App: c.App, Name: c.Name(), Summary: c.Summary, Operation: c.Operation, Args: args, Flags: flags, RecordFields: recordFields(c.Record), Output: c.Output, Network: c.Network, ReadOnly: c.ReadOnly})
+		out = append(out, commandInfo{App: c.App, Name: c.Name(), Summary: c.Summary, Operation: c.Operation, Args: args, Flags: flags, RecordFields: recordFields(c.Record), FilterFields: c.FilterFields, Output: c.Output, Network: c.Network, ReadOnly: c.ReadOnly})
 	}
 	return commandsData{
 		EnvelopeSchemaVersion: output.SchemaVersion,

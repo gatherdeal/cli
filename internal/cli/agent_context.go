@@ -29,6 +29,8 @@ Look up commands one layer at a time instead of reading the whole catalog:
 3. Command: ` + "`gatherdeal commands <app> <resource>`" + ` (for example
    ` + "`gatherdeal commands crm contacts`" + `) prints the exact arguments,
    flags, record_fields and read_only of each verb, plus the exit codes.
+   When filter_fields is present, use its allowed --filter operators for the
+   listed root fields, including rules inside nested boolean groups.
 4. Run it.
 - When the app is unknown, ` + "`gatherdeal commands --search TEXT`" + ` lists the
   commands whose path, summary or resource summary contains TEXT
@@ -242,8 +244,8 @@ func appReference(app *commandNode) string {
 Resources
 Each line is a resource path, its summary and its verbs. A command is the
 resource path followed by a verb, for example `+"`gatherdeal %s %s`"+`.
-Before running a command, read its exact arguments, flags, record_fields and
-read_only with `+"`gatherdeal commands <resource>`"+`, for example
+Before running a command, read its arguments, flags, record_fields,
+filter_fields (allowed root filter operators) and read_only with `+"`gatherdeal commands <resource>`"+`, for example
 `+"`gatherdeal commands %s`"+`.
 `, group, first.choices()[0], group)
 	writeResourceIndex(&b, app)

@@ -78,6 +78,13 @@ can be used against it. Credentials are never sent cross-origin.
 
 ## Thin typed adapters
 
+Commands with explicit operator restrictions take their `filter_fields`
+metadata from the generated `CLIBinding.FilterFields` map. Command help and
+`gatherdeal commands <app> <resource>` expose it. The CLI checks these operators
+on root fields, including nested boolean groups, before any request. Edge
+groups have their own field scope. The server validates those groups, filter
+values, and the full filter policy.
+
 Use the origin-bound authenticated HTTP client with `httpx.ResponseDoer` to
 add the outlet selector and retain correlation IDs/raw problems. Generated
 problem structs convert explicitly to `httpx.Problem`; preserve the original
