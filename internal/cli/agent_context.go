@@ -41,7 +41,7 @@ Shaping output (saves tokens)
 - --jq EXPR (every JSON command) runs a jq expression on data, not on the
   envelope, and prints only its results, one per line: strings raw, other
   values as compact JSON. Example: crm contacts list --limit 50 --jq '.[].id'.
-- --fields a,b,c (list and get commands) keeps only those top-level fields
+- --fields a,b,c (commands with record_fields) keeps only those top-level fields
   of each record and keeps the envelope; record_fields in
   ` + "`gatherdeal commands <app> <resource>`" + ` lists the names. Unknown names exit 2. With --jq,
   fields apply first.
@@ -52,7 +52,7 @@ Shaping output (saves tokens)
   on its data; data holds the unfiltered result. Fix the expression and do
   not repeat a write.
 
-Paging (list commands)
+Paging (paginated record lists)
 - data is an array of records; meta.page_info has page_size, has_next_page,
   has_prev_page and, when present, next_cursor, prev_cursor, page,
   total_items, total_pages. Continue with --after <meta.page_info.next_cursor>;
@@ -160,6 +160,10 @@ var appNotes = map[string]string{
 `,
 	"whatsapp": `- These agents serve the WhatsApp API. They do not appear as messaging inbox
   channels; messaging channels are a separate system.
+- gatherdeal whatsapp chat_messages list --agent-id UUID --after-rev 0 --count 100
+  polls the message ledger. Read data.messages and save data.after_rev for the
+  next poll with the same agent and outlet. While data.has_more is true, poll
+  again immediately. Use --jq to select members of this revision poll.
 - Create only when asked: gatherdeal whatsapp agents create --outlet <id-or-code>
   [--phone <E.164>] --yes --no-wait. Phones need the leading +.
 - agents create --outlet accepts a UUID or code. Dry runs show the unresolved

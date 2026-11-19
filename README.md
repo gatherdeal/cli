@@ -344,7 +344,9 @@ An update body includes the agent's `update_at` as `revision`, and optional
 {"revision":"2026-10-29T10:00:00Z","outlet_id":"55555555-5555-4555-8555-555555555555"}
 ```
 
-A message body names one agent and recipient; creating it sends the message:
+A new text or template message names an agent and recipient. A reply can use
+`reply_to_id` for its chat, and a reaction, edit, or revoke uses its payload’s
+`target_id`. For example, this body sends a new text message.
 
 ```json
 {"agent_id":"55555555-5555-5555-5555-555555555555","to":"+60123456789","type":"text","text":{"body":"Hello"}}
@@ -365,12 +367,19 @@ retry of the same request. Preserve caller-supplied keys yourself. `CLI_WRITE_OU
 write may have succeeded: reconcile before retrying. There are no automatic
 write retries.
 
-Lists use the same bounded cursor pagination as CRM, including `--all`,
-`--limit`, and `--after`. WhatsApp lists have no server-side search. Keep the same profile and outlet selection.
+Paginated record lists support `--all`, `--limit`, and `--after`. Keep the same
+profile, outlet, and filters when continuing a list.
+
+`gatherdeal whatsapp chat_messages list --agent-id <uuid> --after-rev 0 --count 100`
+polls the agent's message ledger from the beginning. `--count` sets the maximum
+messages per poll (default 100). The `data` object contains `messages`,
+`after_rev`, and `has_more`. Save `data.after_rev` and pass it to `--after-rev`
+on the next poll with the same agent and outlet. Poll again immediately while
+`data.has_more` is true. Use `--jq '.messages[]'` to select individual messages.
 
 Agent creation accepts an outlet UUID or code with `--outlet`. An offline preview shows the unresolved code in `outlet_code`. Execution
-resolves it through the authorized outlets list, then
-the resolved UUID is used for the request body, outlet selection and pairing
+resolves it through the authorized outlets list and uses that UUID for
+the request body, outlet selection and pairing
 polls. A missing or out-of-scope code stops creation with exit 5. JSON input
 `outlet_id` remains a UUID; when combined with `--outlet`, both must resolve to
 the same outlet.
@@ -418,8 +427,8 @@ instructions go to stderr only.
 
 ### Shaping the output
 
-Every command that prints a JSON envelope takes `--jq <expr>`; list and get
-commands also take `--fields a,b,c`. Both apply only to a successful result.
+Every command that prints a JSON envelope takes `--jq <expr>`. Commands with
+`record_fields` in the catalog also take `--fields a,b,c`. Both apply only to a successful result.
 
 ```sh
 gatherdeal crm contacts list --search ali --fields id,name
@@ -430,8 +439,7 @@ gatherdeal whatsapp messages list --agent <agent-id> --fields id,status --jq '.[
 
 - `--fields` keeps only the named top-level members of each record: the
   `data` object of a get, or each element of the `data` array of a list. The
-  envelope (`meta`, `page_info` and so on) stays. A record that lacks a field
-  (empty values are omitted) leaves it absent. An unknown name is a usage
+  envelope (`meta`, `page_info` and so on) stays. Absent fields stay absent, and explicit nulls stay null. An unknown name is a usage
   error (exit 2) that lists the available names; `record_fields` in
   `gatherdeal commands` lists them too.
 - `--jq` evaluates a [jq](https://jqlang.org/manual/) expression, with an

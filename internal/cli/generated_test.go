@@ -148,3 +148,24 @@ func TestGeneratedPreviewUsesWireBody(t *testing.T) {
 		t.Fatal(r.stdout)
 	}
 }
+
+func TestChatMessagesRevisionPoll(t *testing.T) {
+	f, te := loggedIn(t)
+	f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if q.Get("agent_id") != waAgentID || q.Get("after_rev") != "7" || q.Get("limit") != "10" {
+			t.Error(q)
+		}
+		writeJSON(w, 200, `{"status":"success","messages":[],"after_rev":9,"has_more":false}`)
+	}
+	args := []string{"whatsapp", "chat_messages", "list", "--agent-id", waAgentID}
+	r := te.run(append(args, "--count", "10", "--after-rev", "7")...)
+	if r.exit != 0 || r.data()["after_rev"] != float64(9) || r.data()["has_more"] != false || !reflect.DeepEqual(r.data()["messages"], []any{}) {
+		t.Fatal(r.stdout)
+	}
+	for _, flag := range []string{"--limit", "--after", "--fields"} {
+		if r := te.run(append(args, flag, "1")...); r.exit != 2 {
+			t.Fatal(r.stdout)
+		}
+	}
+}
