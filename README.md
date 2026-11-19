@@ -675,9 +675,10 @@ login continuation and multi-step work. Never retry a denial or not-found
 in another organization or profile.
 
 Login and status report `outlet_consent_mode` (`all` or `listed`) and the
-consent's live `outlet_ids`. Under `effective_outlets`, `restricted` and
-`outlet_ids` describe the member restriction verified by Identity. An absent
-effective scope is unknown. The offline grant caches these values at login.
+consent's live `outlet_ids`. Identity intersects that consent with the member's
+outlet access. The `restricted` and `outlet_ids` fields under `effective_outlets`
+describe the resulting selection for the delegated session. An absent effective
+scope is unknown. The offline grant caches these values at login.
 
 The profile store uses schema 2. Schema 1 profiles remain readable and upgrade
 on the next save. Their cached scope stays unknown until the next login. Every binding requires both organization
