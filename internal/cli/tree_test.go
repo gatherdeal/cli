@@ -24,6 +24,7 @@ func TestGroupHelp(t *testing.T) {
 		{[]string{"auth", "--help"}, "logout"},
 		{[]string{"help", "crm", "contacts", "get"}, "gatherdeal crm contacts get <id>"},
 		{[]string{"crm", "contacts", "get", "--help"}, "--with-emails"},
+		{[]string{"crm", "contact-tags", "list", "--help"}, "gatherdeal crm contact-tags list"},
 	} {
 		t.Run(strings.Join(tc.args, " "), func(t *testing.T) {
 			res := newTestEnv(t, nil).run(tc.args...)
@@ -42,12 +43,16 @@ func TestUnknownGroupChoices(t *testing.T) {
 		{[]string{"pos"}, "unknown app or command"},
 		{[]string{"contacts", "list"}, "crm"}, // Resources live under their app only.
 		{[]string{"crm", "orders"}, "unknown resource"},
-		{[]string{"crm", "orders"}, "valid choices: contact_tags, contacts"},
+		{[]string{"crm", "orders"}, "valid choices: contact-tags, contacts"},
+		{[]string{"crm", "contact_tags", "list"}, `unknown resource "contact_tags"; valid choices: contact-tags, contacts`},
+		{[]string{"whatsapp", "chat_messages", "list"}, `unknown resource "chat_messages"`},
+		{[]string{"whatsapp", "broadcast_suppressions", "list"}, `unknown resource "broadcast_suppressions"`},
+		{[]string{"whatsapp", "message_templates", "list"}, `unknown resource "message_templates"`},
 		{[]string{"crm", "contacts", "delete"}, "valid choices: get, list"},
 		{[]string{"auth", "unknown"}, "valid choices: login, logout, profiles, status"},
 	} {
 		res := newTestEnv(t, nil).run(tc.args...)
-		if res.exit != 2 || res.errorCode() != "CLI_USAGE" || !strings.Contains(res.stdout, tc.want) {
+		if res.exit != 2 || res.errorCode() != "CLI_USAGE" || !strings.Contains(res.env["error"].(map[string]any)["message"].(string), tc.want) {
 			t.Fatalf("%v: exit %d: %s", tc.args, res.exit, res.stdout)
 		}
 	}
@@ -65,6 +70,16 @@ func TestRegistryGroupsSeparateSharedResources(t *testing.T) {
 	}
 	if root.children["pos"].summary() != "Commands: orders." {
 		t.Fatal("app group not derived from registry")
+	}
+}
+
+func TestCommandPathSegmentsHaveNoUnderscores(t *testing.T) {
+	for _, c := range Commands() {
+		for _, segment := range c.Path {
+			if strings.Contains(segment, "_") {
+				t.Errorf("%s: command path segment %q contains an underscore", c.Name(), segment)
+			}
+		}
 	}
 }
 

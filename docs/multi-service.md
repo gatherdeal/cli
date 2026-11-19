@@ -29,6 +29,7 @@ effects, permissions, outlet policy and idempotency for metadata and skills;
 API `ReadOnly` is derived from the effect. Catalog and skills derive from the
 installed commands. A top-level presentation is a `CommandPresentation{Path: ...}` on
 that binding: `outlets list` belongs to `identity.outlets.list`.
+The CLI renders underscores as hyphens in command path segments.
 There is no second inventory and presentation never changes service ownership.
 `outlets get` is a convenience lookup through the published list's ID/code
 filters, not an additional public operation. WhatsApp agent creation resolves

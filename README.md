@@ -18,6 +18,7 @@ npm install -g @gatherdeal/cli@latest --ignore-scripts
 gatherdeal auth login
 gatherdeal outlets list
 gatherdeal crm contacts list --limit 10
+gatherdeal crm contact-tags list --search VIP --limit 10
 
 # Optional: let your AI agent use it (Claude Code, Codex and others)
 gatherdeal skills install --target claude --scope user
@@ -237,7 +238,7 @@ limits it to one resource (see [Command catalog](#command-catalog)).
 ```sh
 gatherdeal crm contacts list --search ali --page 1 --page-size 20
 gatherdeal crm contacts list --search ali --after <next_cursor>
-gatherdeal crm contact_tags list --search VIP --fields id,name
+gatherdeal crm contact-tags list --search VIP --fields id,name
 gatherdeal crm contacts list --tag VIP --limit 500
 gatherdeal crm contacts list --tag VIP --all
 gatherdeal crm contacts get <contact-id> --with-emails --with-tags
@@ -372,7 +373,7 @@ write retries.
 Paginated record lists support `--all`, `--limit`, and `--after`. Keep the same
 profile, outlet, and filters when continuing a list.
 
-`gatherdeal whatsapp chat_messages list --agent-id <uuid> --after-rev 0 --count 100`
+`gatherdeal whatsapp chat-messages list --agent-id <uuid> --after-rev 0 --count 100`
 polls the agent's message ledger from the beginning. `--count` sets the maximum
 messages per poll (default 100). The `data` object contains `messages`,
 `after_rev`, and `has_more`. Save `data.after_rev` and pass it to `--after-rev`
@@ -489,8 +490,9 @@ gatherdeal commands --search pairing          # by text, across apps
 gatherdeal commands whatsapp --search send    # by text, within an app
 ```
 
-A path prefix matches whole segments. An unknown prefix exits 2, and its
-message lists the valid next segments. `--search` matches the command path,
+Multi-word command segments use hyphens, as in `contact-tags` and
+`chat-messages`. A path prefix matches whole segments. An unknown prefix exits 2
+and lists the valid next segments. `--search` matches the command path,
 the command summary and the summary of the resource that holds the command,
 ignoring case; no match is a success with an empty `commands` array. The
 filtered output keeps the same envelope and schema, including the complete

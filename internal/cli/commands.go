@@ -121,7 +121,11 @@ func Commands() []*Command {
 			panic("contract command path must start with its app: " + c.Operation)
 		}
 	}
+	// Keep the published spelling in the contract and use kebab-case in the CLI.
 	for _, c := range cmds {
+		for i, segment := range c.Path {
+			c.Path[i] = strings.ReplaceAll(segment, "_", "-")
+		}
 		addShapingFlags(c)
 	}
 	return cmds
