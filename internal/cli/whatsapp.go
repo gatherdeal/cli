@@ -223,6 +223,15 @@ func whatsappInput(inv *Invocation) (any, error) {
 		if err := jsonv2.Unmarshal(*raw, &in, jsonv2.RejectUnknownMembers(true)); err != nil {
 			return nil, usageError("invalid --input: %v", err)
 		}
+		const zeroUUID = "00000000-0000-0000-0000-000000000000"
+		if in.ReplyToID == zeroUUID {
+			return nil, usageError("reply_to_id must be a nonzero UUID")
+		}
+		if (in.Reaction != nil && in.Reaction.TargetID == zeroUUID) ||
+			(in.Edit != nil && in.Edit.TargetID == zeroUUID) ||
+			(in.Revoke != nil && in.Revoke.TargetID == zeroUUID) {
+			return nil, usageError("target_id must be a nonzero UUID")
+		}
 		direct := in.Type == wa.CreateMessageTypeText || in.Type == wa.CreateMessageTypeTemplate
 		if !direct && in.ReplyToID != "" {
 			return nil, usageError("reply_to_id requires a text or template message")

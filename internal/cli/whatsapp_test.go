@@ -249,6 +249,8 @@ func TestMessageCreateVariants(t *testing.T) {
 	const address = `"agent_id":"` + waAgentID + `","to":"+60 12-345 6789",`
 	const reply = `"reply_to_id":"` + waAgentID + `",`
 	const target = `"target_id":"` + waAgentID + `"`
+	const zeroReply = `"reply_to_id":"00000000-0000-0000-0000-000000000000",`
+	const zeroTarget = `"target_id":"00000000-0000-0000-0000-000000000000"`
 	const text = `"type":"text","text":{"body":"hello"}`
 	const template = `"type":"template","template":{"id":"` + waAgentID + `","params":{}}`
 	const reaction = `"type":"reaction","reaction":{` + target + `,"emoji":""}`
@@ -258,6 +260,10 @@ func TestMessageCreateVariants(t *testing.T) {
 	}{
 		{address + text, true}, {address + template, true}, {reply + text, true}, {reply + template, true}, {reaction, true},
 		{`"type":"edit","edit":{` + target + `,"body":"fixed"}`, true}, {`"type":"revoke","revoke":{` + target + `}`, true},
+		{address + zeroReply + text, false}, {address + zeroReply + template, false},
+		{`"type":"reaction","reaction":{` + zeroTarget + `,"emoji":""}`, false},
+		{`"type":"edit","edit":{` + zeroTarget + `,"body":"fixed"}`, false},
+		{`"type":"revoke","revoke":{` + zeroTarget + `}`, false},
 		{address + `"type":"text"`, false}, {address + `"type":"template","template":null`, false}, {text, false},
 		{reply + reaction, false}, {`"strategy":"only_phone",` + reaction, false}, {`"type":"reaction","reaction":{}`, false},
 		{`"type":"edit","edit":{` + target + `}`, false}, {`"type":"revoke","revoke":{"target_id":"bad"}`, false},
