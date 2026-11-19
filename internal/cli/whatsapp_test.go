@@ -238,3 +238,44 @@ func TestWhatsAppPairingRealTimer(t *testing.T) {
 		t.Fatalf("calls=%d data=%+v err=%v", calls, data, err)
 	}
 }
+
+func TestMessageCreateVariants(t *testing.T) {
+	f, te := loggedIn(t)
+	calls := 0
+	f.whatsapp = func(w http.ResponseWriter, _ *http.Request) {
+		calls++
+		writeJSON(w, 200, `{"status":"success","message":{"id":"`+waAgentID+`"}}`)
+	}
+	const address = `"agent_id":"` + waAgentID + `","to":"+60 12-345 6789",`
+	const reply = `"reply_to_id":"` + waAgentID + `",`
+	const target = `"target_id":"` + waAgentID + `"`
+	const text = `"type":"text","text":{"body":"hello"}`
+	const template = `"type":"template","template":{"id":"` + waAgentID + `","params":{}}`
+	const reaction = `"type":"reaction","reaction":{` + target + `,"emoji":""}`
+	for _, tc := range []struct {
+		members string
+		valid   bool
+	}{
+		{address + text, true}, {address + template, true}, {reply + text, true}, {reply + template, true}, {reaction, true},
+		{`"type":"edit","edit":{` + target + `,"body":"fixed"}`, true}, {`"type":"revoke","revoke":{` + target + `}`, true},
+		{address + `"type":"text"`, false}, {address + `"type":"template","template":null`, false}, {text, false},
+		{reply + reaction, false}, {`"strategy":"only_phone",` + reaction, false}, {`"type":"reaction","reaction":{}`, false},
+		{`"type":"edit","edit":{` + target + `}`, false}, {`"type":"revoke","revoke":{"target_id":"bad"}`, false},
+		{reply + `"strategy":"only_phone",` + text, false}, {address + text + `,"revoke":{}`, false},
+	} {
+		for _, mode := range []string{"--dry-run", "--send"} {
+			before := calls
+			r := te.run("whatsapp", "messages", "create", "--input", "{"+tc.members+"}", mode)
+			wantExit, wantCalls := 2, before
+			if tc.valid {
+				wantExit = 0
+				if mode == "--send" {
+					wantCalls++
+				}
+			}
+			if r.exit != wantExit || calls != wantCalls {
+				t.Fatalf("%s %s: %s calls=%d", tc.members, mode, r.stdout, calls)
+			}
+		}
+	}
+}

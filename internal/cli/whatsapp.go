@@ -2,6 +2,8 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
+	jsonv2 "encoding/json/v2"
 	"net/url"
 	"regexp"
 	"strings"
@@ -207,28 +209,31 @@ func whatsappInput(inv *Invocation) (any, error) {
 		if err := validateOutlet(inv); err != nil {
 			return nil, err
 		}
-		in, err := ReadBody[wa.CreateMessageInput](inv.str("input"), inv.Env.Stdin)
+		raw, err := ReadBody[json.RawMessage](inv.str("input"), inv.Env.Stdin)
 		if err != nil {
 			return nil, err
 		}
-		if !uuidRE.MatchString(in.AgentID) {
-			return nil, usageError("input agent_id must be a UUID")
+		// The discriminated schema requires the selected payload, rejects
+		// null and mismatched variants, and checks its required members.
+		if err := validateJSON(*raw, writeContracts()[inv.Command.Operation].request); err != nil {
+			return nil, usageError("invalid --input: %v", err)
 		}
-		if !e164RE.MatchString(in.To) {
-			return nil, usageError("input to must be E.164 with a leading +")
+		var in wa.CreateMessageInput
+		if err := jsonv2.Unmarshal(*raw, &in, jsonv2.RejectUnknownMembers(true)); err != nil {
+			return nil, usageError("invalid --input: %v", err)
 		}
-		if err := in.Type.Validate(); err != nil {
-			return nil, usageError("%v", err)
+		direct := in.Type == wa.CreateMessageTypeText || in.Type == wa.CreateMessageTypeTemplate
+		if !direct && in.ReplyToID != "" {
+			return nil, usageError("reply_to_id requires a text or template message")
 		}
-		if in.Text.Body == "" {
-			return nil, usageError("input text.body is required")
-		}
-		if in.Strategy != "" {
-			if err := in.Strategy.Validate(); err != nil {
-				return nil, usageError("%v", err)
+		if direct && in.ReplyToID == "" {
+			if in.AgentID == "" || in.To == "" {
+				return nil, usageError("input agent_id and to are required for a new chat message")
 			}
+		} else if in.Strategy != "" {
+			return nil, usageError("strategy cannot be combined with a referenced chat message")
 		}
-		return in, nil
+		return &in, nil
 	}
 	panic("unknown WhatsApp write")
 }

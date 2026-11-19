@@ -42,6 +42,7 @@ var writeContracts = sync.OnceValue(func() map[string]writeSchemas {
 		}
 		compiler := jsonschema.NewCompiler()
 		compiler.DefaultDraft(jsonschema.Draft2020)
+		compiler.AssertFormat()
 		doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
 		if err != nil {
 			panic(err)
