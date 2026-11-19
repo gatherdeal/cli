@@ -254,6 +254,8 @@ func (inv *Invocation) bindingArguments(params []commandParameter) (map[string]j
 				return nil, usageError("--%s must be a UUID", p.flag.Name)
 			}
 			switch {
+			case p.flag.Kind == kindBool:
+				raw = jsontext.Value(strconv.FormatBool(inv.boolean(p.flag.Name)))
 			case p.flag.Kind == kindInt:
 				raw = jsontext.Value(strconv.Itoa(inv.integer(p.flag.Name)))
 			case p.jsonValue:

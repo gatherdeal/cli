@@ -10,14 +10,14 @@ runtime. The CRM, Identity and WhatsApp bundles are installed.
 
 ### Manifest v2 release pins
 
-The bundles were regenerated from the released producer commits with
-`GOWORK=off` and compared against their previous CLI bundles. CRM uses utilities
-`v0.0.0-20261119094056-2b8670aebe18`. Identity and WhatsApp use
+The bundles were regenerated from the pinned producer commits with
+`GOWORK=off`. The CRM candidate uses utilities
+`v0.0.0-20261119164439-98728874d429`. Identity and WhatsApp use
 `v0.0.0-20261119035543-33746fdc2708`.
 
-| Producer | Released commit | Public operations |
+| Producer | Pinned commit | Public operations |
 | --- | --- | ---: |
-| CRM | `5dbb31a1d6f264b21cca879394e0adeb0b663628` | 9 |
+| CRM | `632cabcdff0c60573d2a646c0796a0611e3cebd9` | 12 |
 | Identity | `b7e955aa5161c83957b4b23b8639604b3bad0818` | 1 |
 | WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
 
@@ -47,6 +47,22 @@ Guidance an agent needs for one app only (workflows, pairing, write caveats)
 goes into that app's entry in `appNotes` (`internal/cli/agent_context.go`),
 which heads `references/<app>.md` and `gatherdeal agent-context <app>`;
 `AgentContext` holds only guidance that applies to every app.
+
+## CRM v0.4.0 release gate
+
+The producer's public compatibility check against the CLI `v0.3.0` contract
+exits 1 for these 11 removed field/operator pairs on `crm.contact_logs.list`.
+
+| Field | Removed operators | Retained operators |
+| --- | --- | --- |
+| `contact_id` | `NEQ`, `NOT_IN` | `EQ`, `IN` |
+| `create_at` | `BETWEEN`, `EQ`, `GT`, `IN`, `LT`, `NEQ`, `NOT_IN` | `GTE`, `LTE` |
+| `id` | `NEQ`, `NOT_IN` | `EQ`, `IN` |
+
+A v0.4.0 release with this surface requires the CLI owner's explicit acceptance
+of all 11 removals as a breaking release, a discovery `min_cli_version` of
+`0.4.0`, and gated regeneration against the preserved `v0.3.0` contract with
+the producer's `--public-major` flag. The branch carries the development candidate.
 
 ## Service discovery
 

@@ -307,6 +307,20 @@ idempotency key and report it in `meta.write.idempotency_key`. When retrying
 the same request, pass its original key with `--idempotency-key`. A later
 assignment after removal is a new operation and needs a fresh key.
 
+## Read sales pipelines and deals
+
+These commands require `crm.deal.read`. Use `--search` to match names, and
+`--outlet` on deal reads to select one approved outlet.
+
+```sh
+gatherdeal crm sales-pipelines list --with-stages
+gatherdeal crm deals list --pipeline-id <pipeline-id> --stage-id <stage-id>
+gatherdeal crm deals get <deal-id>
+```
+
+If a pipeline has more than 50 stages, `--with-stages` returns HTTP 422
+(`CRM_SALES_PIPELINE_STAGE_LIMIT`). Omit the flag to read the pipeline list.
+
 ## Read outlets
 
 ```sh

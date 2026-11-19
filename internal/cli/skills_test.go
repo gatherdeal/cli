@@ -305,7 +305,7 @@ func TestSkillIndexes(t *testing.T) {
 	}
 	skill := content["SKILL.md"]
 	for _, want := range []string{
-		"- crm: Manage CRM contacts, tags and contact logs. Notes and resources: references/crm.md or `gatherdeal agent-context crm`.\n",
+		"- crm: Manage CRM contacts, tags and contact logs, and read sales pipelines and deals. Notes and resources: references/crm.md or `gatherdeal agent-context crm`.\n",
 		"- whatsapp: Manage WhatsApp agents and send WhatsApp messages. Notes and resources: references/whatsapp.md or `gatherdeal agent-context whatsapp`.\n",
 		"- auth: Log in, check or end the access, and list local profiles. Verbs: login, logout, status.\n",
 		"- version: Show the CLI version (no network).\n",

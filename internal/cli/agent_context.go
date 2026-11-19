@@ -158,6 +158,10 @@ var appNotes = map[string]string{
 - gatherdeal crm contacts get <id> [--with-phones] [--with-emails]
   [--with-tags] [--with-attributes] adds the related records it names.
 - gatherdeal crm contact-logs list --contact-id <id> lists notes for one contact.
+- gatherdeal crm sales-pipelines list --with-stages finds pipeline and stage IDs.
+  If CRM_SALES_PIPELINE_STAGE_LIMIT occurs, omit --with-stages to list pipelines.
+- gatherdeal crm deals list [--pipeline-id UUID] [--stage-id UUID] [--search TEXT]
+  narrows the deal list. Use gatherdeal crm deals get <id> for one deal.
 - CRM writes require explicit CRM contact-write approval during auth login and
   use --dry-run to preview or --yes to execute.
 - contacts create, contact-tags assign and contact-logs create use a key from

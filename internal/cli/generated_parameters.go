@@ -90,6 +90,8 @@ func parameterFor(op contracts.Operation, a bindingArgument) commandParameter {
 	switch string(wire.Schema.Type) {
 	case `"integer"`:
 		p.flag.Kind = kindInt
+	case `"boolean"`:
+		p.flag.Kind = kindBool
 	case `"object"`, `"array"`:
 		p.jsonValue = true
 		p.flag.Usage = "JSON value for " + a.WireName + "."

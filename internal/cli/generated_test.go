@@ -199,7 +199,7 @@ func TestChatMessagesRevisionPoll(t *testing.T) {
 
 func TestGeneratedCRMHelp(t *testing.T) {
 	te := newTestEnv(t, nil)
-	for _, name := range []string{"contacts update", "contact-tags assign", "contact-tags remove", "contact-logs list"} {
+	for _, name := range []string{"contacts update", "contact-tags assign", "contact-tags remove", "contact-logs list", "sales-pipelines list", "deals list", "deals get"} {
 		t.Run(name, func(t *testing.T) {
 			args := append([]string{"crm"}, strings.Fields(name)...)
 			res := te.run(append(args, "--help")...)
@@ -208,6 +208,70 @@ func TestGeneratedCRMHelp(t *testing.T) {
 			}
 			compareGolden(t, "help_crm_"+strings.ReplaceAll(name, " ", "_")+".golden.txt", res.stdout)
 		})
+	}
+}
+
+func TestGeneratedCRMBoardReads(t *testing.T) {
+	const pipeline = "01234567-89ab-4cde-8fab-0123456789ab"
+	const stage = "55555555-5555-4555-8555-555555555555"
+	const deal = "44444444-4444-4444-8444-444444444444"
+	const outlet = "33333333-3333-3333-3333-333333333333"
+	for _, tc := range []struct {
+		name     string
+		args     []string
+		path     string
+		query    string
+		response string
+		want     string
+	}{
+		{
+			"pipeline stages", []string{"sales-pipelines", "list", "--with-stages", "--search", "retail", "--jq", ".[].stages[].name"},
+			"/crm/v1/sales-pipelines", "q=retail&with_stages=true",
+			`{"status":"success","sales_pipelines":{"data":[{"name":"Retail","stages":[{"name":"Lead"}]}],"page_size":20}}`, "Lead\n",
+		},
+		{
+			"no pipeline expansion", []string{"sales-pipelines", "list", "--with-stages=false", "--jq", ".[].name"},
+			"/crm/v1/sales-pipelines", "",
+			`{"status":"success","sales_pipelines":{"data":[{"name":"Retail"}],"page_size":20}}`, "Retail\n",
+		},
+		{
+			"deal list", []string{"deals", "list", "--pipeline-id", pipeline, "--stage-id", stage, "--search", "retail", "--outlet", outlet, "--jq", ".[].name"},
+			"/crm/v1/deals", "outlet_id=" + outlet + "&pipeline_id=" + pipeline + "&q=retail&stage_id=" + stage,
+			`{"status":"success","deals":{"data":[{"name":"Renewal"}],"page_size":20}}`, "Renewal\n",
+		},
+		{
+			"deal detail", []string{"deals", "get", deal, "--jq", ".name"},
+			"/crm/v1/deals/" + deal, "", `{"status":"success","deal":{"name":"Renewal"}}`, "Renewal\n",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f, te := loggedIn(t)
+			f.crm = func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet || r.URL.Path != tc.path || r.URL.RawQuery != tc.query {
+					t.Errorf("unexpected CRM request: %s %s", r.Method, r.URL)
+				}
+				writeJSON(w, http.StatusOK, tc.response)
+			}
+			if r := te.run(append([]string{"crm"}, tc.args...)...); r.exit != 0 || r.stdout != tc.want {
+				t.Fatal(r.stdout, r.stderr)
+			}
+		})
+	}
+}
+
+func TestGeneratedCRMPipelineStageLimit(t *testing.T) {
+	f, te := loggedIn(t)
+	const code = "CRM_SALES_PIPELINE_STAGE_LIMIT"
+	f.crm = func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("with_stages") != "true" {
+			t.Errorf("unexpected CRM request: %s %s", r.Method, r.URL)
+		}
+		writeJSON(w, http.StatusUnprocessableEntity, problemJSON(http.StatusUnprocessableEntity, code,
+			"Pipeline stage expansion exceeds its limit.", map[string]any{"expansion": "with_stages", "limit": 50}))
+	}
+	r := te.run("crm", "sales-pipelines", "list", "--with-stages")
+	if r.exit != 6 || r.errorCode() != code || !strings.Contains(r.stdout, `"details":{"expansion":"with_stages","limit":50}`) {
+		t.Fatal(r.stdout, r.stderr)
 	}
 }
 
