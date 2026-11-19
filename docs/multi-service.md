@@ -22,8 +22,31 @@ The bundles were regenerated from the released producer commits with
 | WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
 
 All OpenAPI documents are embedded automatically. Contract checks enumerate
-all bundles, verify disk/embedded/generated digests, service/version constants
-and generated Client methods, and require one command per published operation.
+all bundles, verify the OpenAPI and generated Go digests, service/version
+constants and generated Client methods, and require one command per published
+operation.
+
+`utilities apigen --public-dist` must populate each bundle's
+`generated_go_digest` after emitting its final formatted Go sources. Compute
+SHA-256 over the following records concatenated without a separator:
+
+1. Take the `.go` files directly in the bundle's `go_package` directory and
+   sort their package-relative filenames in ascending lexicographic byte order.
+2. For each file, replace CRLF with LF. Preserve all other bytes.
+3. Append the filename, one NUL byte, the normalized content length in decimal
+   ASCII, one NUL byte, and the normalized content bytes.
+
+Store the digest as `sha256:` followed by 64 lowercase hexadecimal digits.
+Keep `digest` and the generated `BundleDigest` as the OpenAPI digest. Preserve
+`generated_go_digest` on other bundle entries when merging an export into the
+shared manifest. The field is additive in format v2, and older v2 readers can
+ignore it. Runtime loading still accepts earlier v2 manifests. The contract
+check fails with a re-export message if a bundle lacks the field. Re-export
+CRM, Identity and WhatsApp with the updated utilities before merging the CLI
+change.
+
+## Command bindings
+
 Command bindings reference a public ID. `Command.Contract()` exposes typed
 effects, permissions, outlet policy and idempotency for metadata and skills;
 API `ReadOnly` is derived from the effect. Catalog and skills derive from the
