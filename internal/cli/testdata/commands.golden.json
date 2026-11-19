@@ -1632,7 +1632,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "crm contact_tags list",
+        "name": "crm contact-tags list",
         "network": true,
         "operation": "crm.contact_tags.list",
         "output": "json",
@@ -1697,7 +1697,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp broadcast_suppressions add",
+        "name": "whatsapp broadcast-suppressions add",
         "network": true,
         "operation": "whatsapp.broadcast_suppressions.add",
         "output": "json",
@@ -1759,7 +1759,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp broadcast_suppressions delete",
+        "name": "whatsapp broadcast-suppressions delete",
         "network": true,
         "operation": "whatsapp.broadcast_suppressions.delete",
         "output": "json",
@@ -1859,7 +1859,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp broadcast_suppressions list",
+        "name": "whatsapp broadcast-suppressions list",
         "network": true,
         "operation": "whatsapp.broadcast_suppressions.list",
         "output": "json",
@@ -2769,7 +2769,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp chat_messages get",
+        "name": "whatsapp chat-messages get",
         "network": true,
         "operation": "whatsapp.chat_messages.get",
         "output": "json",
@@ -2847,7 +2847,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp chat_messages list",
+        "name": "whatsapp chat-messages list",
         "network": true,
         "operation": "whatsapp.chat_messages.list",
         "output": "json",
@@ -3199,7 +3199,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp message_templates create",
+        "name": "whatsapp message-templates create",
         "network": true,
         "operation": "whatsapp.message_templates.create",
         "output": "json",
@@ -3261,7 +3261,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp message_templates delete",
+        "name": "whatsapp message-templates delete",
         "network": true,
         "operation": "whatsapp.message_templates.delete",
         "output": "json",
@@ -3308,7 +3308,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp message_templates get",
+        "name": "whatsapp message-templates get",
         "network": true,
         "operation": "whatsapp.message_templates.get",
         "output": "json",
@@ -3420,7 +3420,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp message_templates list",
+        "name": "whatsapp message-templates list",
         "network": true,
         "operation": "whatsapp.message_templates.list",
         "output": "json",
@@ -3479,7 +3479,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp message_templates preview",
+        "name": "whatsapp message-templates preview",
         "network": true,
         "operation": "whatsapp.message_templates.preview",
         "output": "json",
@@ -3541,7 +3541,7 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp message_templates update",
+        "name": "whatsapp message-templates update",
         "network": true,
         "operation": "whatsapp.message_templates.update",
         "output": "json",

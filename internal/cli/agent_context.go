@@ -115,9 +115,10 @@ Rules
   refresh an installed skill as below.
 - Skill freshness: an installed skill records the CLI version it was made
   for in its metadata (cli_version). If ` + "`gatherdeal version`" + ` reports a
-  different version (data.version), reinstall the skill before relying on
-  it: run gatherdeal skills install with the same --target and --scope (or
-  --dir) it was installed with, plus --force.
+  different version (data.version), reinstall the skill before using its
+  command paths (for example, crm contact-tags list). Run gatherdeal skills
+  install with the same --target and --scope (or --dir) it was installed
+  with, plus --force.
 - With --target, resolved paths must stay inside the resolved project/home base.
   Explicit --dir follows ancestor symlinks.
 - On CLI_SKILL_CONFLICT from any other install, show the person the paths
@@ -151,7 +152,7 @@ Rules
 var appNotes = map[string]string{
 	"crm": `- gatherdeal crm contacts list [--search TEXT] [--page N | --after CURSOR]
   [--page-size N] [--tag NAME] returns contacts with the general paging rules.
-- gatherdeal crm contact_tags list --search <name> --fields id,name finds tag IDs.
+- gatherdeal crm contact-tags list --search <name> --fields id,name finds tag IDs.
 - gatherdeal crm contacts get <id> [--with-phones] [--with-emails]
   [--with-tags] [--with-attributes] adds the related records it names.
 `,
@@ -162,7 +163,7 @@ var appNotes = map[string]string{
 `,
 	"whatsapp": `- These agents serve the WhatsApp API. They do not appear as messaging inbox
   channels; messaging channels are a separate system.
-- gatherdeal whatsapp chat_messages list --agent-id UUID --after-rev 0 --count 100
+- gatherdeal whatsapp chat-messages list --agent-id UUID --after-rev 0 --count 100
   polls the message ledger. Read data.messages and save data.after_rev for the
   next poll with the same agent and outlet. While data.has_more is true, poll
   again immediately. Use --jq to select members of this revision poll.

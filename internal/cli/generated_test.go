@@ -46,7 +46,7 @@ func TestGeneratedTagList(t *testing.T) {
 		}
 		writeJSON(w, 200, `{"status":"success","tags":{"data":[{"id":"2","name":"VIP2"}],"has_next_page":false}}`)
 	}
-	res := te.run("crm", "contact_tags", "list", "--search", "VIP", "--filter", `{"conjunction":"AND"}`, "--limit", "2", "--fields", "name", "--jq", ".[].name")
+	res := te.run("crm", "contact-tags", "list", "--search", "VIP", "--filter", `{"conjunction":"AND"}`, "--limit", "2", "--fields", "name", "--jq", ".[].name")
 	if res.exit != 0 || res.stdout != "VIP\nVIP2\n" || calls != 2 || clients != 1 {
 		t.Fatal(res.stdout, calls)
 	}
@@ -164,7 +164,7 @@ func TestChatMessagesRevisionPoll(t *testing.T) {
 		}
 		writeJSON(w, 200, `{"status":"success","messages":[],"after_rev":9,"has_more":false}`)
 	}
-	args := []string{"whatsapp", "chat_messages", "list", "--agent-id", waAgentID}
+	args := []string{"whatsapp", "chat-messages", "list", "--agent-id", waAgentID}
 	r := te.run(append(args, "--count", "10", "--after-rev", "7")...)
 	if r.exit != 0 || r.data()["after_rev"] != float64(9) || r.data()["has_more"] != false || !reflect.DeepEqual(r.data()["messages"], []any{}) {
 		t.Fatal(r.stdout)

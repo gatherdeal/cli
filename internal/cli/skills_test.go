@@ -310,6 +310,7 @@ func TestSkillIndexes(t *testing.T) {
 		"- auth: Log in, check or end the access, and list local profiles. Verbs: login, logout, status.\n",
 		"- version: Show the CLI version (no network).\n",
 		"gatherdeal commands --search TEXT",
+		"crm contact-tags list",
 	} {
 		if !strings.Contains(skill, want) {
 			t.Errorf("SKILL.md lacks %q", want)
@@ -318,7 +319,7 @@ func TestSkillIndexes(t *testing.T) {
 	if want := "- whatsapp agents: List, create, pair, update and delete WhatsApp agents. Verbs: create, delete, get, list, pairing, update.\n"; !strings.Contains(content["references/whatsapp.md"], want) {
 		t.Errorf("whatsapp index lacks %q", want)
 	}
-	for _, want := range []string{"whatsapp chat_messages list", "--count", "--after-rev", "data.messages", "data.after_rev", "data.has_more"} {
+	for _, want := range []string{"whatsapp chat-messages list", "--count", "--after-rev", "data.messages", "data.after_rev", "data.has_more"} {
 		if !strings.Contains(content["references/whatsapp.md"], want) {
 			t.Errorf("WhatsApp skill lacks %q", want)
 		}

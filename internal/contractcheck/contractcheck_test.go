@@ -136,8 +136,12 @@ func TestEveryOperationHasACommand(t *testing.T) {
 		for _, op := range b.Operations {
 			known[op.PublicID] = true
 			for _, c := range byOperation[op.PublicID] {
-				if c.App != b.Service || (c.Presentation == nil && c.Name() != op.Command) {
-					t.Errorf("operation %s: app/path = %q/%q, want %q/%q", op.PublicID, c.App, c.Name(), b.Service, op.Command)
+				wantPath := strings.ReplaceAll(op.Command, "_", "-")
+				if c.Presentation != nil {
+					wantPath = strings.ReplaceAll(strings.Join(c.Presentation.Path, " "), "_", "-")
+				}
+				if c.App != b.Service || c.Name() != wantPath {
+					t.Errorf("operation %s: app/path = %q/%q, want %q/%q", op.PublicID, c.App, c.Name(), b.Service, wantPath)
 				}
 			}
 			if n := len(byOperation[op.PublicID]); n != 1 {
