@@ -59,7 +59,7 @@ func TestGeneratedBroadcastRecipientWrite(t *testing.T) {
 	calls := 0
 	f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		if r.Method != http.MethodPost || r.URL.Path != "/whatsapp/v1/broadcasts/"+waAgentID+"/recipients" || r.Header.Get("Idempotency-Key") != "retry-1" {
+		if r.Method != http.MethodPost || r.URL.Path != "/whatsapp/v1/broadcasts/"+waAgentID+"/recipients" || r.Header.Get("Idempotency-Key") != "retry-01" {
 			t.Errorf("unexpected recipient request: %s %s", r.Method, r.URL)
 		}
 		var in struct{ Recipients []struct{ To string } }
@@ -77,7 +77,7 @@ func TestGeneratedBroadcastRecipientWrite(t *testing.T) {
 	if r := te.run("whatsapp", "broadcasts", "recipients", "add", waAgentID, "--input", `{"unexpected":true}`, "--yes"); r.exit != 2 || calls != 0 {
 		t.Fatal(r.stdout)
 	}
-	if r := te.run(append(args, "--yes", "--idempotency-key", "retry-1")...); r.exit != 0 || r.data()["added"] != float64(1) || calls != 1 {
+	if r := te.run(append(args, "--yes", "--idempotency-key", "retry-01")...); r.exit != 0 || r.data()["added"] != float64(1) || calls != 1 {
 		t.Fatal(r.stdout)
 	}
 	if r := te.run("whatsapp", "broadcasts", "start", waAgentID, "--yes"); r.exit != 2 || calls != 1 {

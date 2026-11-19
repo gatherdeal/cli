@@ -356,7 +356,9 @@ Message status describes runtime acceptance, not recipient delivery.
 `--input` accepts inline JSON (starting with `{` or `[` after whitespace), a file path, or `-` for stdin. Writes accept `--dry-run` for a validated
 preview without dispatch. Configuration writes require `--yes`; message
 creation requires `--send`. Agent and message creation accept
-`--idempotency-key`; when omitted the CLI generates one and reports it in
+`--idempotency-key`. Keys must match `^[A-Za-z0-9._:-]{8,128}$` and may
+not contain a credential, even within a longer key or with different casing.
+When the key is omitted the CLI generates one and reports it in
 `meta.write`. Before dispatch with a generated key, the CLI prints an invocation
 ID on stderr and saves the key in `write-<invocation_id>.json` in the CLI config
 directory. If the process stops before printing its result, recover

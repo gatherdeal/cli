@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/gatherdeal/cli/contracts"
@@ -54,9 +55,11 @@ func (inv *Invocation) writeOptions(policy WritePolicy) WriteOptions {
 	return WriteOptions{DryRun: inv.boolean("dry-run"), Confirmed: inv.boolean(string(policy.Confirmation)), IdempotencyKey: inv.str("idempotency-key"), keyProvided: inv.isSet("idempotency-key"), Input: inv.str("input")}
 }
 
+var idempotencyKeyRE = regexp.MustCompile(`^[A-Za-z0-9._:-]{8,128}$`)
+
 // PrepareWrite does not make a request. Call before executing a write; dry-run
 // callers must return a typed preview and never invoke the mutation endpoint.
-func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions, meta *output.Meta) error {
+func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions, meta *output.Meta, red *output.Redactor) error {
 	if policy.Confirmation != ConfirmConfig && policy.Confirmation != ConfirmSend {
 		return usageError("invalid write confirmation policy")
 	}
@@ -67,26 +70,26 @@ func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions,
 		return usageError("external writes require --send")
 	}
 	key := opts.IdempotencyKey
-	if opts.keyProvided && key == "" || output.ContainsCredential(key) {
+	if opts.keyProvided && key == "" {
 		return usageError("invalid --idempotency-key")
 	}
 	if key != "" && op.Idempotency != contracts.IdempotencyKeyed {
 		return usageError("operation %s does not support --idempotency-key", op.PublicID)
 	}
-	if len(key) > 128 || strings.IndexFunc(key, func(r rune) bool { return r < 0x21 || r > 0x7e }) >= 0 {
-		return usageError("invalid --idempotency-key")
-	}
-	meta.Write = &output.WriteMeta{DryRun: opts.DryRun, IdempotencyKey: key}
-	if !opts.DryRun && !opts.Confirmed {
-		return output.Errorf(output.ExitActionRequired, output.CodeWriteConfirmationRequired, "execution requires --%s", policy.Confirmation)
-	}
-	if key == "" && op.Idempotency == contracts.IdempotencyKeyed {
+	generated := key == "" && op.Idempotency == contracts.IdempotencyKeyed && (opts.DryRun || opts.Confirmed)
+	if generated {
 		var bytes [16]byte
 		if _, err := rand.Read(bytes[:]); err != nil {
 			return output.Errorf(output.ExitUnclassified, output.CodeInternal, "cannot generate idempotency key").WithCause(err)
 		}
-		meta.Write.IdempotencyKey = hex.EncodeToString(bytes[:])
-		meta.Write.IdempotencyKeyGenerated = true
+		key = hex.EncodeToString(bytes[:])
+	}
+	if key != "" && (!idempotencyKeyRE.MatchString(key) || red.ContainsCredential(key)) {
+		return usageError("invalid --idempotency-key")
+	}
+	meta.Write = &output.WriteMeta{DryRun: opts.DryRun, IdempotencyKey: key, IdempotencyKeyGenerated: generated}
+	if !opts.DryRun && !opts.Confirmed {
+		return output.Errorf(output.ExitActionRequired, output.CodeWriteConfirmationRequired, "execution requires --%s", policy.Confirmation)
 	}
 	return nil
 }
@@ -163,7 +166,7 @@ func (inv *Invocation) run(ctx context.Context) (any, error) {
 func (inv *Invocation) runWrite(ctx context.Context, op contracts.Operation) (any, error) {
 	policy := inv.Command.Write
 	opts := inv.writeOptions(*policy)
-	if err := PrepareWrite(op, *policy, opts, &inv.Meta); err != nil {
+	if err := PrepareWrite(op, *policy, opts, &inv.Meta, inv.Env.redact()); err != nil {
 		return nil, err
 	}
 	if opts.DryRun {

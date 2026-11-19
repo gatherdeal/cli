@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,32 +18,32 @@ func TestWritePreparation(t *testing.T) {
 	op := contracts.Operation{PublicID: "test.messages.create", Effect: contracts.Effect{Mutation: "additive", Interaction: "external"}, Idempotency: contracts.IdempotencyKeyed}
 	policy := WritePolicy{Confirmation: ConfirmSend}
 	var meta output.Meta
-	err := PrepareWrite(op, policy, WriteOptions{}, &meta)
+	err := PrepareWrite(op, policy, WriteOptions{}, &meta, nil)
 	if output.AsError(err).Exit != output.ExitActionRequired {
 		t.Fatal(err)
 	}
-	if err := PrepareWrite(op, policy, WriteOptions{DryRun: true}, &meta); err != nil {
+	if err := PrepareWrite(op, policy, WriteOptions{DryRun: true}, &meta, nil); err != nil {
 		t.Fatal(err)
 	}
 	if !meta.Write.DryRun || !meta.Write.IdempotencyKeyGenerated || len(meta.Write.IdempotencyKey) != 32 {
 		t.Fatalf("%+v", meta.Write)
 	}
 	key := meta.Write.IdempotencyKey
-	if err := PrepareWrite(op, policy, WriteOptions{Confirmed: true, IdempotencyKey: key}, &meta); err != nil {
+	if err := PrepareWrite(op, policy, WriteOptions{Confirmed: true, IdempotencyKey: key}, &meta, nil); err != nil {
 		t.Fatal(err)
 	}
 	if meta.Write.IdempotencyKey != key || meta.Write.IdempotencyKeyGenerated {
 		t.Fatalf("%+v", meta.Write)
 	}
-	if err := PrepareWrite(op, WritePolicy{Confirmation: ConfirmConfig}, WriteOptions{Confirmed: true}, &meta); err == nil {
+	if err := PrepareWrite(op, WritePolicy{Confirmation: ConfirmConfig}, WriteOptions{Confirmed: true}, &meta, nil); err == nil {
 		t.Fatal("send accepted with config confirmation")
 	}
 	op.Idempotency = "none"
-	if err := PrepareWrite(op, policy, WriteOptions{Confirmed: true, IdempotencyKey: key}, &meta); err == nil {
+	if err := PrepareWrite(op, policy, WriteOptions{Confirmed: true, IdempotencyKey: key}, &meta, nil); err == nil {
 		t.Fatal("unsupported key accepted")
 	}
 	op.Effect.Interaction = "closed"
-	if err := PrepareWrite(op, WritePolicy{Confirmation: ConfirmConfig}, WriteOptions{Confirmed: true}, &meta); err != nil {
+	if err := PrepareWrite(op, WritePolicy{Confirmation: ConfirmConfig}, WriteOptions{Confirmed: true}, &meta, nil); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -163,7 +164,9 @@ func TestKeyedSendRejectsExplicitInvalidKey(t *testing.T) {
 	f, te := loggedIn(t)
 	before := f.requests.Load()
 	args := []string{"whatsapp", "messages", "create", "--input", `{"type":"text","text":{"body":"hello"},"reply_to_id":"` + waAgentID + `"}`}
-	for _, key := range []string{"", f.lastToken(), "gd_dcd_" + strings.Repeat("a", 50)} {
+	device := "gd_dcd_" + strings.Repeat("a", 50)
+	for _, key := range []string{"", "short", strings.Repeat("a", 129), "invalid/key", "invalid key", "invalidé", "[REDACTED]",
+		f.lastToken(), "job" + f.lastToken(), strings.ToUpper(f.lastToken()) + "end", device, "x" + device + "y"} {
 		for _, flags := range [][]string{nil, {"--send"}, {"--dry-run"}} {
 			argv := append(append([]string{}, args...), flags...)
 			r := te.run(append(argv, "--idempotency-key", key)...)
@@ -186,6 +189,46 @@ func TestEmptyOutletStopsBeforeDispatch(t *testing.T) {
 		r := te.run(append(args, "--outlet", "")...)
 		if r.exit != 2 || f.requests.Load() != before {
 			t.Fatal(args, r.stdout)
+		}
+	}
+}
+
+func TestKeyedSendRecoveryKeySurvivesRedaction(t *testing.T) {
+	f, te := loggedIn(t)
+	args := []string{"whatsapp", "messages", "create", "--input", `{"type":"text","text":{"body":"hello"},"reply_to_id":"` + waAgentID + `"}`}
+	for _, key := range []string{"Az9._:-0", strings.Repeat("a", 128)} {
+		var header string
+		f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
+			header = r.Header.Get("Idempotency-Key")
+			writeJSON(w, 200, `{}`) // No receipt. The caller needs the original key to reconcile.
+		}
+		base := append(append([]string{}, args...), "--idempotency-key", key)
+		for _, tc := range []struct {
+			flags []string
+			exit  int
+		}{{nil, 9}, {[]string{"--dry-run"}, 0}, {[]string{"--send"}, 8}} {
+			r := te.run(append(base, tc.flags...)...)
+			if r.exit != tc.exit || r.env["meta"].(map[string]any)["write"].(map[string]any)["idempotency_key"] != key {
+				t.Fatal(r.stdout)
+			}
+		}
+		if header != key {
+			t.Fatalf("dispatched key %q, want %q", header, key)
+		}
+	}
+}
+
+func TestKeyOverlappingMalformedCredential(t *testing.T) {
+	f, te := loggedIn(t)
+	const secret = "broken-secret"
+	args := []string{"whatsapp", "messages", "create", "--input", `{"type":"text","text":{"body":"hello"},"reply_to_id":"` + waAgentID + `"}`, "--send", "--idempotency-key", "job.BROKEN-SECRET"}
+	before := f.requests.Load()
+	te.keyring.items[credentialKey(t, te, "default")] = secret
+	for _, envValue := range []string{"", secret} {
+		te.vars[EnvToken] = envValue
+		r := te.run(args...)
+		if r.exit != 2 || r.env["meta"].(map[string]any)["write"] != nil || f.requests.Load() != before {
+			t.Fatal(r.stdout)
 		}
 	}
 }

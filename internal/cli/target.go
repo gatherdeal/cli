@@ -306,6 +306,11 @@ func (inv *Invocation) loadCredential(t *target) (*credential, error) {
 	inv.credentialSource = string(ref.Store)
 	inv.Env.addSecret(secret)
 	if !server.ValidToken(secret) {
+		// A malformed stored secret has no recognizable format before loading.
+		if w := inv.Meta.Write; w != nil && inv.Env.redact().String(w.IdempotencyKey) != w.IdempotencyKey {
+			inv.Meta.Write = nil
+			return nil, usageError("invalid --idempotency-key")
+		}
 		return nil, output.Errorf(output.ExitAuth, output.CodeTokenInvalid, "the stored credential for profile %q is malformed", t.name).
 			WithHint("Run `gatherdeal auth login" + t.targetFlagsHint() + "`.")
 	}

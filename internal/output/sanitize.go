@@ -19,11 +19,7 @@ const Redacted = "[REDACTED]"
 // delegated-access token (gd_dat_) and of a device code (gd_dcd_).
 const credentialBodyLength = 50
 
-// credentialCandidate finds prefix+body runs; String keeps only runs whose
-// body is exactly credentialBodyLength long and that are not glued to
-// other [a-z0-9] characters, so ordinary text such as "gd_dat_team" is
-// left alone.
-var credentialCandidate = regexp.MustCompile(`gd_(?:dat|dcd)_[a-z0-9]+`)
+var credentialFormat = regexp.MustCompile(`gd_(?:dat|dcd)_[a-z0-9]{` + strconv.Itoa(credentialBodyLength) + `}`)
 
 // Redactor removes credentials from everything the CLI prints. A server
 // can echo the bearer it received in a message, in error details or in a
@@ -89,18 +85,21 @@ func replaceFold(s, secret string) string {
 
 func isAlnum(c byte) bool { return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') }
 
-func ContainsCredential(s string) bool { return replaceFormats(s) != s }
+// ContainsCredential also checks embedded and case-folded formats: a key
+// must remain printable even if the matching credential is registered later.
+func (r *Redactor) ContainsCredential(s string) bool {
+	return credentialFormat.MatchString(asciiLower(s)) || r.String(s) != s
+}
 
 func replaceFormats(s string) string {
-	matches := credentialCandidate.FindAllStringIndex(s, -1)
+	matches := credentialFormat.FindAllStringIndex(s, -1)
 	if matches == nil {
 		return s
 	}
 	var b strings.Builder
 	last := 0
 	for _, m := range matches {
-		bodyLen := m[1] - m[0] - len("gd_dat_")
-		if bodyLen != credentialBodyLength || (m[0] > 0 && isAlnum(s[m[0]-1])) {
+		if (m[0] > 0 && isAlnum(s[m[0]-1])) || (m[1] < len(s) && isAlnum(s[m[1]])) {
 			continue
 		}
 		b.WriteString(s[last:m[0]])
