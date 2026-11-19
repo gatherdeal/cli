@@ -178,6 +178,9 @@ gatherdeal auth logout   # revoke on the server, then delete locally
 never the token itself. You can also see and revoke accesses on the approval
 site under Security › Sessions & devices.
 
+A successful `auth logout` reports `data.logged_in: false` for the local
+profile. The `revoked` and `credential_deleted` fields report the actions taken.
+
 ## Uninstall
 
 `gatherdeal uninstall` removes everything the CLI keeps on this machine.

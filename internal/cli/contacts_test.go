@@ -309,7 +309,7 @@ func TestCommandsListing(t *testing.T) {
 func TestAgentContext(t *testing.T) {
 	te := newTestEnv(t, nil)
 	res := te.run("agent-context")
-	for _, want := range []string{"Never pass --server or --accept-server-risk", "Never print, log or paste a token", "read-only"} {
+	for _, want := range []string{"Never pass --server or --accept-server-risk", "Never print, log or paste a token", "read-only", "auth logout reports data.logged_in=false"} {
 		if !strings.Contains(res.stdout, want) {
 			t.Errorf("agent-context lacks %q", want)
 		}

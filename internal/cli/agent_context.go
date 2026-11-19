@@ -105,6 +105,8 @@ Rules
   A mismatch fails with CLI_PROFILE_ORGANIZATION_MISMATCH or
   CLI_PROFILE_PRINCIPAL_MISMATCH (exit 2); the old credential stays intact.
   To deliberately retarget, auth logout --profile NAME, then log in again.
+- A successful auth logout reports data.logged_in=false for the local profile.
+  data.revoked and data.credential_deleted report the actions taken.
 - meta.context.binding is the cached profile identity, not effective scope.
   meta.context.request.outlet_ids is the requested selection; [] means the
   authorized set. An agent-create preview with an unresolved outlet code
