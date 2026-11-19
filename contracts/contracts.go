@@ -52,15 +52,15 @@ type Bundle struct {
 
 // Operation is one published operation.
 type Operation struct {
-	Effect               Effect         `json:"effect"`
-	Permissions          KeyRequirement `json:"permissions"`
-	OutletScope          OutletPolicy   `json:"outlet_scope"`
-	Idempotency          Idempotency    `json:"idempotency"`
-	PublicID             string         `json:"public_id"`
-	Command              string         `json:"command"`
-	Method               string         `json:"method"`
-	Path                 string         `json:"path"`
-	DelegatedEdgeFilters []string       `json:"delegated_edge_filters"`
+	Effect               Effect          `json:"effect"`
+	Permissions          *KeyRequirement `json:"permissions"`
+	OutletScope          OutletPolicy    `json:"outlet_scope"`
+	Idempotency          Idempotency     `json:"idempotency"`
+	PublicID             string          `json:"public_id"`
+	Command              string          `json:"command"`
+	Method               string          `json:"method"`
+	Path                 string          `json:"path"`
+	DelegatedEdgeFilters []string        `json:"delegated_edge_filters"`
 	// DelegatedExpansions are the with_* query parameters a delegated
 	// access may set; the server refuses every other expansion.
 	DelegatedExpansions []string `json:"delegated_expansions"`
@@ -139,6 +139,9 @@ func Parse(data []byte) (*Manifest, error) {
 		}
 		bundles[key] = true
 		for _, op := range b.Operations {
+			if op.Permissions == nil {
+				return nil, fmt.Errorf("contracts: %s requires a permissions object", op.PublicID)
+			}
 			if seen[op.PublicID] || !strings.HasPrefix(op.PublicID, b.Service+".") {
 				return nil, fmt.Errorf("contracts: duplicate or misowned operation %s", op.PublicID)
 			}
@@ -175,7 +178,7 @@ func parseLegacy(data []byte) (*Manifest, error) {
 			if err != nil {
 				return nil, fmt.Errorf("contracts: manifest.json %s: %w", op.PublicID, err)
 			}
-			op.Permissions = req
+			op.Permissions = &req
 			b.Operations = append(b.Operations, op)
 		}
 		m.Bundles = append(m.Bundles, b)

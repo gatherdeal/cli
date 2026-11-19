@@ -59,6 +59,7 @@ func TestLegacyFormatReadsKeyArraysAsAllOf(t *testing.T) {
 		`{"format_version":1,"bundles":[{"service":"crm","version":"v1","operations":[{"public_id":"crm.contacts.list","permissions":{"allOf":["crm.contact.read"]}}]}]}`,
 		`{"format_version":1,"bundles":[{"service":"crm","version":"v1","operations":[{"public_id":"crm.contacts.list","permissions":["CRM.contact.read"]}]}]}`,
 		`{"format_version":2,"bundles":[{"service":"crm","version":"v1","operations":[{"public_id":"crm.contacts.list","permissions":["crm.contact.read"]}]}]}`,
+		`{"format_version":2,"bundles":[{"service":"crm","operations":[{"public_id":"crm.contacts.list"}]}]}`,
 		`{"format_version":3,"bundles":[]}`,
 	} {
 		if _, err := Parse([]byte(raw)); err == nil {
@@ -75,6 +76,9 @@ func TestKeyRequirementStrictDecode(t *testing.T) {
 		`{}`,
 		`{"allOf":null}`,
 		`{"anyOf":null}`,
+		`{"allOf":[],"anyOf":null}`,
+		`{"allOf":[],"allOf":[]}`,
+		`{"AllOf":[]}`,
 		`{"allOf":["crm.contact.read"],"anyOf":["crm.contact.read","crm.contact.export"]}`,
 		`{"allOf":["crm.contact.read"],"keys":[]}`,
 		`{"anyOf":[]}`,

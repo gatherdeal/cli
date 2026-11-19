@@ -95,32 +95,33 @@ func (r KeyRequirement) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON decodes and validates the closed object.
 func (r *KeyRequirement) UnmarshalJSON(data []byte) error {
-	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
-		return errors.New("contracts: permission requirement must be an object, not null")
-	}
 	dec := json.NewDecoder(bytes.NewReader(data))
-	dec.DisallowUnknownFields()
-	var wire keyRequirementWire
-	if err := dec.Decode(&wire); err != nil {
-		return fmt.Errorf("contracts: permission requirement: %w", err)
+	open, err := dec.Token()
+	if err != nil || open != json.Delim('{') {
+		return errors.New("contracts: permission requirement must be an object")
 	}
-	var (
-		req KeyRequirement
-		err error
-	)
-	switch {
-	case wire.AllOf != nil && wire.AnyOf != nil:
-		return errors.New("contracts: permission requirement sets both allOf and anyOf")
-	case wire.AnyOf != nil:
-		req, err = AnyOf(*wire.AnyOf...)
-	case wire.AllOf != nil:
-		req, err = AllOf(*wire.AllOf...)
-	default:
+	member, err := dec.Token()
+	if err != nil || (member != "anyOf" && member != "allOf") {
 		return errors.New("contracts: permission requirement needs allOf or anyOf")
 	}
-	if err != nil {
+	var keys []string
+	if err := dec.Decode(&keys); err != nil {
+		return fmt.Errorf("contracts: permission requirement: %w", err)
+	}
+	if keys == nil || dec.More() {
+		return errors.New("contracts: permission requirement must contain exactly one key array")
+	}
+	if _, err := dec.Token(); err != nil {
 		return err
 	}
-	*r = req
-	return nil
+	var req KeyRequirement
+	if member == "anyOf" {
+		req, err = AnyOf(keys...)
+	} else {
+		req, err = AllOf(keys...)
+	}
+	if err == nil {
+		*r = req
+	}
+	return err
 }
