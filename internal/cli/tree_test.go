@@ -134,6 +134,25 @@ func TestHelpRespectsFlagOrderAndStringValues(t *testing.T) {
 	}
 }
 
+func TestCommandHelpDescriptionWhitespace(t *testing.T) {
+	var help strings.Builder
+	writeCommandHelp(&help, &Command{
+		Path:    []string{"example"},
+		Summary: "First paragraph.\n\nSecond paragraph.",
+		Args:    []ArgSpec{{Name: "id", Usage: "  Record\r\n\t identifier.  "}},
+		Flags:   []FlagSpec{{Name: "before", Kind: kindString, Usage: "  Previous\n\n  cursor.  "}},
+	})
+	for _, want := range []string{
+		"First paragraph.\n\nSecond paragraph.\n",
+		"Record identifier.\n",
+		"Previous cursor.\n",
+	} {
+		if !strings.Contains(help.String(), want) {
+			t.Errorf("help is missing %q:\n%s", want, help.String())
+		}
+	}
+}
+
 func TestLeadingHelpNeverDispatches(t *testing.T) {
 	f, te := loggedIn(t)
 	t.Chdir(t.TempDir())
