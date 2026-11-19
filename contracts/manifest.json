@@ -9,8 +9,8 @@
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
       "digest": "sha256:3ab7e6e27dfd4dff599e5ae74bc4cd05ed188fb3afaae66fbdd2444a54ab03c2",
-      "source_commit": "c6146bf06d320c4a8f4b4b378bfcd36a84bb9498",
-      "utilities_version": "(devel)",
+      "source_commit": "2c40fabf580b435678e85591eb78e349fe3ee8ac",
+      "utilities_version": "v0.0.0-20261119035543-33746fdc2708",
       "operations": [
         {
           "public_id": "crm.contact_tags.list",
@@ -935,8 +935,8 @@
       "contract": "contracts/identity/v1/openapi.json",
       "go_package": "internal/generated/identity/v1",
       "digest": "sha256:c1f3386aefa73e60370b3cc736dd63ebd8861491b89426eeb0f40a6b879884a5",
-      "source_commit": "b4e702de3b34c98933529dde9080883ed745f072",
-      "utilities_version": "(devel)",
+      "source_commit": "b7e955aa5161c83957b4b23b8639604b3bad0818",
+      "utilities_version": "v0.0.0-20261119035543-33746fdc2708",
       "operations": [
         {
           "public_id": "identity.outlets.list",
@@ -1529,8 +1529,8 @@
       "contract": "contracts/whatsapp/v1/openapi.json",
       "go_package": "internal/generated/whatsapp/v1",
       "digest": "sha256:3ec9c078eb1b10a29733c431562bff2456357ef70eeb9cb5f89aaebe2824e2a0",
-      "source_commit": "cf825a050cf55ecd29f20083f476cf31411bc1e2",
-      "utilities_version": "(devel)",
+      "source_commit": "201d745162307b09762dba466f585cbaefc83fa2",
+      "utilities_version": "v0.0.0-20261119035543-33746fdc2708",
       "operations": [
         {
           "public_id": "whatsapp.agents.create",
