@@ -603,8 +603,12 @@ func TestLogout(t *testing.T) {
 	}
 	tok := fake.lastToken()
 	res := te.run("auth", "logout")
-	if res.exit != 0 || res.data()["revoked"] != true || res.data()["credential_deleted"] != true {
+	data := res.data()
+	if res.exit != 0 || data["logged_in"] != false || data["revoked"] != true || data["credential_deleted"] != true {
 		t.Fatalf("exit %d %s", res.exit, res.stdout)
+	}
+	if !strings.Contains(res.stderr, "Logged out of ") {
+		t.Fatalf("logout confirmation missing: %s", res.stderr)
 	}
 	if len(fake.revokeForms) != 1 || fake.revokeForms[0].Get("token") != tok || fake.revokeForms[0].Get("client_id") != "gatherdeal-cli" {
 		t.Fatalf("revoke form = %v", fake.revokeForms)

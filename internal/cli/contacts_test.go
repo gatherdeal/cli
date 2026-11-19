@@ -309,7 +309,7 @@ func TestCommandsListing(t *testing.T) {
 func TestAgentContext(t *testing.T) {
 	te := newTestEnv(t, nil)
 	res := te.run("agent-context")
-	for _, want := range []string{"Never pass --server or --accept-server-risk", "Never print, log or paste a token", "read-only"} {
+	for _, want := range []string{"Never pass --server or --accept-server-risk", "Never print, log or paste a token", "read-only", "auth logout reports data.logged_in=false"} {
 		if !strings.Contains(res.stdout, want) {
 			t.Errorf("agent-context lacks %q", want)
 		}
@@ -334,18 +334,22 @@ func TestUnknownCommand(t *testing.T) {
 // golden compares got with testdata/name; -update rewrites it.
 func golden(t *testing.T, name, got string) {
 	t.Helper()
-	path := filepath.Join("testdata", name)
 	var v any
 	if err := json.Unmarshal([]byte(got), &v); err != nil {
 		t.Fatal(err)
 	}
 	pretty, _ := json.MarshalIndent(v, "", "  ")
-	pretty = append(pretty, '\n')
+	compareGolden(t, name, string(pretty)+"\n")
+}
+
+func compareGolden(t *testing.T, name, got string) {
+	t.Helper()
+	path := filepath.Join("testdata", name)
 	if *updateGolden {
 		if err := os.MkdirAll("testdata", 0o755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(path, pretty, 0o644); err != nil {
+		if err := os.WriteFile(path, []byte(got), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		return
@@ -354,7 +358,7 @@ func golden(t *testing.T, name, got string) {
 	if err != nil {
 		t.Fatalf("%v (run go test -update)", err)
 	}
-	if string(want) != string(pretty) {
-		t.Fatalf("%s differs from golden:\n%s", name, pretty)
+	if string(want) != got {
+		t.Fatalf("%s differs from golden:\n%s", name, got)
 	}
 }

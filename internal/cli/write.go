@@ -31,28 +31,36 @@ type WritePolicy struct {
 	Preview func(context.Context, *Invocation) (any, error)
 }
 
-func (p WritePolicy) Flags() []FlagSpec {
+func (p WritePolicy) flags(op contracts.Operation) []FlagSpec {
 	if p.Confirmation != ConfirmConfig && p.Confirmation != ConfirmSend {
 		panic("invalid write confirmation policy")
 	}
-	return []FlagSpec{
+	flags := []FlagSpec{
 		{Name: "dry-run", Kind: kindBool, Usage: "Preview the typed request without submitting the write."},
 		{Name: string(p.Confirmation), Kind: kindBool, Usage: "Explicitly confirm execution of this write."},
-		{Name: "idempotency-key", Kind: kindString, Usage: "Stable replay key; preserve it when reconciling an uncertain result."},
-		{Name: "input", Kind: kindString, Usage: "JSON body: inline JSON, a file path, or - for standard input"},
 	}
+	if op.Idempotency == contracts.IdempotencyKeyed {
+		flags = append(flags, FlagSpec{Name: "idempotency-key", Kind: kindString, Usage: "Stable replay key; preserve it when reconciling an uncertain result."})
+	}
+	return flags
 }
+
+var flagInput = FlagSpec{Name: "input", Kind: kindString, Usage: "JSON body: inline JSON, a file path, or - for standard input."}
 
 type WriteOptions struct {
 	DryRun         bool
 	Confirmed      bool
 	IdempotencyKey string
 	keyProvided    bool
-	Input          string
 }
 
 func (inv *Invocation) writeOptions(policy WritePolicy) WriteOptions {
-	return WriteOptions{DryRun: inv.boolean("dry-run"), Confirmed: inv.boolean(string(policy.Confirmation)), IdempotencyKey: inv.str("idempotency-key"), keyProvided: inv.isSet("idempotency-key"), Input: inv.str("input")}
+	opts := WriteOptions{DryRun: inv.boolean("dry-run"), Confirmed: inv.boolean(string(policy.Confirmation))}
+	if inv.isSet("idempotency-key") {
+		opts.IdempotencyKey = inv.str("idempotency-key")
+		opts.keyProvided = true
+	}
+	return opts
 }
 
 var idempotencyKeyRE = regexp.MustCompile(`^[A-Za-z0-9._:-]{8,128}$`)

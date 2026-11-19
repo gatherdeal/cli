@@ -11,7 +11,7 @@ func TestGroupHelp(t *testing.T) {
 		args []string
 		want string
 	}{
-		{nil, "Read CRM contacts."},
+		{nil, "Manage CRM contacts, tags and contact logs."},
 		{nil, "Install or print the GatherDeal agent skill."},
 		{[]string{"skills", "--help"}, "install"},
 		{[]string{"skills", "install", "--help"}, "--scope"},
@@ -43,12 +43,12 @@ func TestUnknownGroupChoices(t *testing.T) {
 		{[]string{"pos"}, "unknown app or command"},
 		{[]string{"contacts", "list"}, "crm"}, // Resources live under their app only.
 		{[]string{"crm", "orders"}, "unknown resource"},
-		{[]string{"crm", "orders"}, "valid choices: contact-tags, contacts"},
-		{[]string{"crm", "contact_tags", "list"}, `unknown resource "contact_tags"; valid choices: contact-tags, contacts`},
+		{[]string{"crm", "orders"}, "valid choices: contact-logs, contact-tags, contacts"},
+		{[]string{"crm", "contact_tags", "list"}, `unknown resource "contact_tags"; valid choices: contact-logs, contact-tags, contacts`},
 		{[]string{"whatsapp", "chat_messages", "list"}, `unknown resource "chat_messages"`},
 		{[]string{"whatsapp", "broadcast_suppressions", "list"}, `unknown resource "broadcast_suppressions"`},
 		{[]string{"whatsapp", "message_templates", "list"}, `unknown resource "message_templates"`},
-		{[]string{"crm", "contacts", "delete"}, "valid choices: get, list"},
+		{[]string{"crm", "contacts", "delete"}, "valid choices: create, get, list, update"},
 		{[]string{"auth", "unknown"}, "valid choices: login, logout, profiles, status"},
 	} {
 		res := newTestEnv(t, nil).run(tc.args...)

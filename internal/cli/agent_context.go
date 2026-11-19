@@ -105,6 +105,8 @@ Rules
   A mismatch fails with CLI_PROFILE_ORGANIZATION_MISMATCH or
   CLI_PROFILE_PRINCIPAL_MISMATCH (exit 2); the old credential stays intact.
   To deliberately retarget, auth logout --profile NAME, then log in again.
+- A successful auth logout reports data.logged_in=false for the local profile.
+  data.revoked and data.credential_deleted report the actions taken.
 - meta.context.binding is the cached profile identity, not effective scope.
   meta.context.request.outlet_ids is the requested selection; [] means the
   authorized set. An agent-create preview with an unresolved outlet code
@@ -155,6 +157,12 @@ var appNotes = map[string]string{
 - gatherdeal crm contact-tags list --search <name> --fields id,name finds tag IDs.
 - gatherdeal crm contacts get <id> [--with-phones] [--with-emails]
   [--with-tags] [--with-attributes] adds the related records it names.
+- gatherdeal crm contact-logs list --contact-id <id> lists notes for one contact.
+- CRM writes require explicit CRM contact-write approval during auth login and
+  use --dry-run to preview or --yes to execute.
+- contacts create, contact-tags assign and contact-logs create use a key from
+  meta.write.idempotency_key. For a retry of the same operation, pass that key
+  with --idempotency-key. Use a fresh key to reassign a tag after removal.
 `,
 	"outlets": `- gatherdeal outlets list [--code CODE] [--id UUID] [--search TEXT] --limit N
   reads only authorized outlets, with the general paging rules.

@@ -107,7 +107,7 @@ func TestWriteDispatch(t *testing.T) {
 	} {
 		previews, writes := 0, 0
 		policy := &WritePolicy{Confirmation: ConfirmConfig, Preview: func(context.Context, *Invocation) (any, error) { previews++; return "preview", nil }}
-		cmd := &Command{Path: []string{"test"}, Write: policy, Flags: policy.Flags(), Run: func(context.Context, *Invocation) (any, error) { writes++; return "accepted", nil }}
+		cmd := &Command{Path: []string{"test"}, Write: policy, Flags: policy.flags(op), Run: func(context.Context, *Invocation) (any, error) { writes++; return "accepted", nil }}
 		inv, err := parse(&Env{}, cmd, tc.args, false)
 		if err != nil {
 			t.Fatal(err)

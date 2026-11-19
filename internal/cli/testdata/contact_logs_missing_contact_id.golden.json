@@ -1,0 +1,13 @@
+{
+  "data": null,
+  "error": {
+    "code": "CLI_USAGE",
+    "message": "flag --contact-id is required",
+    "retryable": false
+  },
+  "exit_code": 2,
+  "hint": "Run `gatherdeal commands` or `gatherdeal \u003ccommand\u003e --help`.",
+  "meta": {},
+  "schema_version": 1,
+  "status": "error"
+}
