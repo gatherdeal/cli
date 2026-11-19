@@ -461,6 +461,6 @@ func (inv *Invocation) resolveCreateOutlet(ctx context.Context, in *wa.CreateAge
 		in.OutletID = *outlet.ID
 	}
 	*inv.strs["outlet"] = in.OutletID
-	inv.Meta.Context.Request.OutletIDs = []string{in.OutletID}
+	inv.Meta.Context.Request = output.ContextRequest{OutletIDs: []string{in.OutletID}}
 	return nil
 }

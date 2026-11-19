@@ -107,7 +107,9 @@ Rules
   To deliberately retarget, auth logout --profile NAME, then log in again.
 - meta.context.binding is the cached profile identity, not effective scope.
   meta.context.request.outlet_ids is the requested selection; [] means the
-  authorized set. Missing binding means unknown (including GATHERDEAL_TOKEN).
+  authorized set. An agent-create preview with an unresolved outlet code
+  reports meta.context.request.outlet_code. Missing binding means unknown
+  (including GATHERDEAL_TOKEN).
   No context means no authenticated context was established.
 - Only run gatherdeal skills install when the person asks for it, or to
   refresh an installed skill as below.

@@ -661,11 +661,12 @@ check; use `auth status --profile NAME` for that.
 
 Authenticated results include typed `meta.context`: `profile`, `server`,
 `issuer`, cached `binding.organization` (`id`, optional `code`/`name`) and
-`binding.principal_id`, plus `request.outlet_ids`. The array is always present
-when context exists: `[]` requests the authorized set, while `[ID]` requests
-that outlet. It is **requested selection**, never server-confirmed effective
-scope. Missing `binding` means unknown; environment tokens never inherit the
-stored profile's binding. Missing context means no authenticated context was
+`binding.principal_id`, plus the requested outlet selection. In
+`request.outlet_ids`, `[]` requests the authorized set and `[ID]` requests
+that outlet. When agent creation previews an unresolved code, the request
+contains only `outlet_code`. Identity determines the effective scope.
+Missing `binding` means unknown; environment tokens never inherit the stored
+profile's binding. Missing context means no authenticated context was
 established. Cached authorized outlet IDs appear in the grant summary, not
 in the request selection.
 

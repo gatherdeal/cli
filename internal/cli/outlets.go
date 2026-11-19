@@ -43,7 +43,7 @@ func (inv *Invocation) identityClient() (*identity.Client, error) {
 		return nil, err
 	}
 	// Lookup runs within the authorized set; a code is never an outlet-id selector.
-	inv.Meta.Context.Request.OutletIDs = []string{}
+	inv.Meta.Context.Request = output.ContextRequest{OutletIDs: []string{}}
 	base, ok := t.disc.ServiceURL("identity")
 	if !ok {
 		return nil, output.Errorf(output.ExitUnclassified, output.CodeServiceMissing, "%s does not advertise the identity API", t.origin)

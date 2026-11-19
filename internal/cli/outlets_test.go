@@ -121,7 +121,12 @@ func TestWhatsAppCreateOutletCode(t *testing.T) {
 			if res.exit != 0 {
 				t.Fatal(res.stdout)
 			}
+			context := res.env["meta"].(map[string]any)["context"].(map[string]any)
+			request := context["request"].(map[string]any)
 			if dryRun {
+				if _, hasIDs := request["outlet_ids"]; hasIDs || request["outlet_code"] != "HQ" {
+					t.Fatal(res.stdout)
+				}
 				if f.requests.Load() != before || res.data()["outlet_code"] != "HQ" || res.data()["outlet_id"] != nil {
 					t.Fatal(res.stdout)
 				}
@@ -129,9 +134,8 @@ func TestWhatsAppCreateOutletCode(t *testing.T) {
 			} else if lookups != 1 || writes != 1 || polls != 1 {
 				t.Fatalf("writes=%d polls=%d", writes, polls)
 			}
-			context := res.env["meta"].(map[string]any)["context"].(map[string]any)
-			ids := context["request"].(map[string]any)["outlet_ids"].([]any)
-			if len(ids) != 1 || ids[0] != waOutletID {
+			ids := request["outlet_ids"].([]any)
+			if len(ids) != 1 || ids[0] != waOutletID || request["outlet_code"] != nil {
 				t.Fatal(res.stdout)
 			}
 		})

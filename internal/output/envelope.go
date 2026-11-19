@@ -235,8 +235,10 @@ type ContextOrganization struct {
 	Name string `json:"name,omitempty"`
 }
 type ContextRequest struct {
-	// Empty means the authorized set; absence of context means no auth context.
-	OutletIDs []string `json:"outlet_ids"`
+	// An empty array requests the authorized set. An unresolved outlet code
+	// stands alone, with OutletIDs left nil so the array is omitted.
+	OutletIDs  []string `json:"outlet_ids,omitzero"`
+	OutletCode string   `json:"outlet_code,omitempty"`
 }
 
 // WriteMeta is reported on previews, successes and failures once a write is
