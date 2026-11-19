@@ -7,10 +7,12 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/gatherdeal/cli/contracts"
 	"github.com/gatherdeal/cli/internal/output"
+	"github.com/gatherdeal/cli/internal/store"
 )
 
 // Confirmation identifies the explicit execution opt-in. It is not authorization.
@@ -45,16 +47,19 @@ type WriteOptions struct {
 	DryRun         bool
 	Confirmed      bool
 	IdempotencyKey string
+	keyProvided    bool
 	Input          string
 }
 
 func (inv *Invocation) writeOptions(policy WritePolicy) WriteOptions {
-	return WriteOptions{DryRun: inv.boolean("dry-run"), Confirmed: inv.boolean(string(policy.Confirmation)), IdempotencyKey: inv.str("idempotency-key"), Input: inv.str("input")}
+	return WriteOptions{DryRun: inv.boolean("dry-run"), Confirmed: inv.boolean(string(policy.Confirmation)), IdempotencyKey: inv.str("idempotency-key"), keyProvided: inv.isSet("idempotency-key"), Input: inv.str("input")}
 }
+
+var idempotencyKeyRE = regexp.MustCompile(`^[A-Za-z0-9._:-]{8,128}$`)
 
 // PrepareWrite does not make a request. Call before executing a write; dry-run
 // callers must return a typed preview and never invoke the mutation endpoint.
-func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions, meta *output.Meta) error {
+func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions, meta *output.Meta, red *output.Redactor) error {
 	if policy.Confirmation != ConfirmConfig && policy.Confirmation != ConfirmSend {
 		return usageError("invalid write confirmation policy")
 	}
@@ -65,24 +70,43 @@ func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions,
 		return usageError("external writes require --send")
 	}
 	key := opts.IdempotencyKey
+	if opts.keyProvided && key == "" {
+		return usageError("invalid --idempotency-key")
+	}
 	if key != "" && op.Idempotency != contracts.IdempotencyKeyed {
 		return usageError("operation %s does not support --idempotency-key", op.PublicID)
 	}
-	if strings.TrimSpace(key) != key || strings.ContainsAny(key, "\r\n") {
-		return usageError("invalid --idempotency-key")
-	}
-	meta.Write = &output.WriteMeta{DryRun: opts.DryRun, IdempotencyKey: key}
-	if !opts.DryRun && !opts.Confirmed {
-		return output.Errorf(output.ExitActionRequired, output.CodeWriteConfirmationRequired, "execution requires --%s", policy.Confirmation)
-	}
-	if key == "" && op.Idempotency == contracts.IdempotencyKeyed {
+	generated := key == "" && op.Idempotency == contracts.IdempotencyKeyed && (opts.DryRun || opts.Confirmed)
+	if generated {
 		var bytes [16]byte
 		if _, err := rand.Read(bytes[:]); err != nil {
 			return output.Errorf(output.ExitUnclassified, output.CodeInternal, "cannot generate idempotency key").WithCause(err)
 		}
-		meta.Write.IdempotencyKey = hex.EncodeToString(bytes[:])
-		meta.Write.IdempotencyKeyGenerated = true
+		key = hex.EncodeToString(bytes[:])
 	}
+	if key != "" && (!idempotencyKeyRE.MatchString(key) || red.ContainsCredential(key)) {
+		return usageError("invalid --idempotency-key")
+	}
+	meta.Write = &output.WriteMeta{DryRun: opts.DryRun, IdempotencyKey: key, IdempotencyKeyGenerated: generated}
+	if !opts.DryRun && !opts.Confirmed {
+		return output.Errorf(output.ExitActionRequired, output.CodeWriteConfirmationRequired, "execution requires --%s", policy.Confirmation)
+	}
+	return nil
+}
+
+// recordWriteKey runs after validation and scope resolution, immediately
+// before dispatch. Caller-supplied keys already have a recovery path.
+func (inv *Invocation) recordWriteKey() error {
+	meta := inv.Meta.Write
+	if !meta.IdempotencyKeyGenerated {
+		return nil
+	}
+	id, err := store.RecordWriteKey(inv.target.root, meta.IdempotencyKey)
+	if err != nil {
+		return storeError(err, inv.target)
+	}
+	meta.InvocationID = id
+	inv.Env.stderrf("Write invocation %s: recovery key saved in write-%s.json in the CLI config directory.\n", id, id)
 	return nil
 }
 
@@ -142,7 +166,7 @@ func (inv *Invocation) run(ctx context.Context) (any, error) {
 func (inv *Invocation) runWrite(ctx context.Context, op contracts.Operation) (any, error) {
 	policy := inv.Command.Write
 	opts := inv.writeOptions(*policy)
-	if err := PrepareWrite(op, *policy, opts, &inv.Meta); err != nil {
+	if err := PrepareWrite(op, *policy, opts, &inv.Meta, inv.Env.redact()); err != nil {
 		return nil, err
 	}
 	if opts.DryRun {

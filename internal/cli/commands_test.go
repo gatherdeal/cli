@@ -25,7 +25,7 @@ func TestCommandsPrefix(t *testing.T) {
 		args []string
 		want []string
 	}{
-		{[]string{"crm"}, []string{"crm contacts list", "crm contacts get"}},
+		{[]string{"crm"}, []string{"crm contacts list", "crm contacts get", "crm contact_tags list"}},
 		{[]string{"crm", "contacts"}, []string{"crm contacts list", "crm contacts get"}},
 		{[]string{"whatsapp", "messages"}, []string{"whatsapp messages list", "whatsapp messages get", "whatsapp messages create"}},
 		{[]string{"whatsapp", "agents", "create"}, []string{"whatsapp agents create"}},
@@ -57,7 +57,7 @@ func TestCommandsUnknownPrefix(t *testing.T) {
 		want string
 	}{
 		{[]string{"pos"}, `unknown command path "pos"; valid next segments: agent-context, auth, commands, crm, outlets, skills, uninstall, update, version, whatsapp`},
-		{[]string{"crm", "orders"}, `unknown command path "crm orders"; valid next segments: contacts`},
+		{[]string{"crm", "orders"}, `unknown command path "crm orders"; valid next segments: contact_tags, contacts`},
 		{[]string{"whatsapp", "agents", "send"}, `unknown command path "whatsapp agents send"; valid next segments: create, delete, get, list, pairing, update`},
 		{[]string{"version", "extra"}, `"version" is a command and has no subcommands`},
 	} {
@@ -81,7 +81,7 @@ func TestCommandsSearch(t *testing.T) {
 		// Resource summary: "List, show and send WhatsApp messages."
 		{[]string{"--search", "show and send"}, []string{"whatsapp messages list", "whatsapp messages get", "whatsapp messages create"}},
 		// Combined with a prefix.
-		{[]string{"whatsapp", "--search", "recipient"}, []string{"whatsapp messages create"}},
+		{[]string{"whatsapp", "--search", "recipient"}, []string{"whatsapp messages create", "whatsapp broadcasts recipients add", "whatsapp broadcasts recipients delete", "whatsapp broadcasts recipients list"}},
 		{[]string{"crm", "--search", "outlet"}, []string{"crm contacts list"}},
 		// No match is an empty success.
 		{[]string{"--search", "no such command"}, []string{}},

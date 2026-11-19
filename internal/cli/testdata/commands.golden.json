@@ -217,6 +217,11 @@
             "usage": "Return at most this many contacts (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
           },
           {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the contact selection and output fields without reading contacts."
+          },
+          {
             "name": "search",
             "type": "string",
             "usage": "Server-side free-text search."
@@ -308,7 +313,8 @@
           "emails",
           "attributes",
           "person",
-          "company"
+          "company",
+          "capabilities"
         ],
         "summary": "List CRM contacts in the outlets this access may read."
       },
@@ -404,7 +410,8 @@
           "emails",
           "attributes",
           "person",
-          "company"
+          "company",
+          "capabilities"
         ],
         "summary": "Show one CRM contact."
       },
@@ -676,7 +683,6 @@
           "egress",
           "id",
           "phone",
-          "mode",
           "status",
           "create_at",
           "update_at",
@@ -688,6 +694,9 @@
           "description",
           "error_message",
           "wa_version",
+          "phone_last_seen_at",
+          "phone_last_pinged_at",
+          "phone_activity",
           "last_heartbeat_at",
           "status_changed_at",
           "stop_reason",
@@ -753,7 +762,6 @@
           "egress",
           "id",
           "phone",
-          "mode",
           "status",
           "create_at",
           "update_at",
@@ -765,6 +773,9 @@
           "description",
           "error_message",
           "wa_version",
+          "phone_last_seen_at",
+          "phone_last_pinged_at",
+          "phone_activity",
           "last_heartbeat_at",
           "status_changed_at",
           "stop_reason",
@@ -863,7 +874,8 @@
               "pending",
               "delivered",
               "cancelled",
-              "error"
+              "error",
+              "expired"
             ]
           },
           {
@@ -893,6 +905,7 @@
         "output": "json",
         "read_only": true,
         "record_fields": [
+          "template",
           "id",
           "agent_id",
           "organization_id",
@@ -900,12 +913,22 @@
           "to",
           "type",
           "text",
+          "reply_to_id",
+          "target_id",
+          "reaction",
           "redacted",
           "status",
+          "send_window",
+          "not_before",
+          "not_after",
+          "priority",
+          "priority_offset",
           "error",
           "create_at",
           "update_at",
-          "delivered_at"
+          "delivered_at",
+          "receipt",
+          "broadcast_id"
         ],
         "summary": "List WhatsApp messages in the outlets this access may read."
       },
@@ -960,6 +983,7 @@
         "output": "json",
         "read_only": true,
         "record_fields": [
+          "template",
           "id",
           "agent_id",
           "organization_id",
@@ -967,12 +991,22 @@
           "to",
           "type",
           "text",
+          "reply_to_id",
+          "target_id",
+          "reaction",
           "redacted",
           "status",
+          "send_window",
+          "not_before",
+          "not_after",
+          "priority",
+          "priority_offset",
           "error",
           "create_at",
           "update_at",
-          "delivered_at"
+          "delivered_at",
+          "receipt",
+          "broadcast_id"
         ],
         "summary": "Show one WhatsApp message and its status."
       },
@@ -1160,7 +1194,7 @@
         "operation": "whatsapp.agents.update",
         "output": "json",
         "read_only": false,
-        "summary": "Change a WhatsApp agent's mode or outlet."
+        "summary": "Change a WhatsApp agent's outlet."
       },
       {
         "app": "whatsapp",
@@ -1499,6 +1533,2020 @@
           "owner"
         ],
         "summary": "Show one outlet this access may read, by id or code."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Tags per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching tags (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all tags in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: tags created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many tags (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "search",
+            "type": "string",
+            "usage": "Server-side free-text search."
+          },
+          {
+            "name": "sort",
+            "type": "string",
+            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "values": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "filter",
+            "type": "string",
+            "usage": "JSON value for filter."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm contact_tags list",
+        "network": true,
+        "operation": "crm.contact_tags.list",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "name",
+          "description",
+          "is_archived",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "Fetch Contact Tags."
+      },
+      {
+        "app": "whatsapp",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcast_suppressions add",
+        "network": true,
+        "operation": "whatsapp.broadcast_suppressions.add",
+        "output": "json",
+        "read_only": false,
+        "summary": "Add Broadcast Suppressions."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "suppression-id",
+            "usage": "suppression id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcast_suppressions delete",
+        "network": true,
+        "operation": "whatsapp.broadcast_suppressions.delete",
+        "output": "json",
+        "read_only": false,
+        "summary": "Delete Broadcast Suppression."
+      },
+      {
+        "app": "whatsapp",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Suppressions per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching suppressions (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all suppressions in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: suppressions created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many suppressions (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "sort",
+            "type": "string",
+            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "values": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "to",
+            "type": "string",
+            "usage": "to."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcast_suppressions list",
+        "network": true,
+        "operation": "whatsapp.broadcast_suppressions.list",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "to",
+          "note",
+          "create_at"
+        ],
+        "summary": "Fetch Broadcast Suppressions."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts cancel",
+        "network": true,
+        "operation": "whatsapp.broadcasts.cancel",
+        "output": "json",
+        "read_only": false,
+        "summary": "Cancel Broadcast."
+      },
+      {
+        "app": "whatsapp",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts create",
+        "network": true,
+        "operation": "whatsapp.broadcasts.create",
+        "output": "json",
+        "read_only": false,
+        "summary": "Create Broadcast."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts get",
+        "network": true,
+        "operation": "whatsapp.broadcasts.get",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "organization_id",
+          "name",
+          "status",
+          "pause_reason",
+          "content",
+          "distribution",
+          "affinity_fallback",
+          "interval",
+          "sender_daily_limit",
+          "priority_offset",
+          "send_window",
+          "not_before",
+          "not_after",
+          "started_at",
+          "completed_at",
+          "senders",
+          "progress",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "Broadcast Path."
+      },
+      {
+        "app": "whatsapp",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Broadcasts per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching broadcasts (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all broadcasts in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: broadcasts created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many broadcasts (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "sort",
+            "type": "string",
+            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "values": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "usage": "status.",
+            "values": [
+              "draft",
+              "scheduled",
+              "running",
+              "paused",
+              "completed",
+              "canceled"
+            ]
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts list",
+        "network": true,
+        "operation": "whatsapp.broadcasts.list",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "organization_id",
+          "name",
+          "status",
+          "pause_reason",
+          "content",
+          "distribution",
+          "affinity_fallback",
+          "interval",
+          "sender_daily_limit",
+          "priority_offset",
+          "send_window",
+          "not_before",
+          "not_after",
+          "started_at",
+          "completed_at",
+          "senders",
+          "progress",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "Fetch Broadcasts."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts pause",
+        "network": true,
+        "operation": "whatsapp.broadcasts.pause",
+        "output": "json",
+        "read_only": false,
+        "summary": "Pause Broadcast."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts recipients add",
+        "network": true,
+        "operation": "whatsapp.broadcasts.recipients.add",
+        "output": "json",
+        "read_only": false,
+        "summary": "Add Broadcast Recipients."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          },
+          {
+            "name": "recipient-id",
+            "usage": "recipient id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts recipients delete",
+        "network": true,
+        "operation": "whatsapp.broadcasts.recipients.delete",
+        "output": "json",
+        "read_only": false,
+        "summary": "Delete Broadcast Recipient."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Recipients per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching recipients (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all recipients in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: recipients created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many recipients (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "sort",
+            "type": "string",
+            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "values": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "usage": "status.",
+            "values": [
+              "pending",
+              "queued",
+              "delivered",
+              "failed",
+              "expired",
+              "canceled",
+              "suppressed"
+            ]
+          },
+          {
+            "name": "agent-id",
+            "type": "string",
+            "usage": "agent id."
+          },
+          {
+            "name": "to",
+            "type": "string",
+            "usage": "to."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts recipients list",
+        "network": true,
+        "operation": "whatsapp.broadcasts.recipients.list",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "position",
+          "to",
+          "params",
+          "status",
+          "error",
+          "preferred_agent_id",
+          "agent_id",
+          "message_id",
+          "settled_at",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "Fetch Broadcast Recipients."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "send",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts resume",
+        "network": true,
+        "operation": "whatsapp.broadcasts.resume",
+        "output": "json",
+        "read_only": false,
+        "summary": "Resume Broadcast."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "send",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts start",
+        "network": true,
+        "operation": "whatsapp.broadcasts.start",
+        "output": "json",
+        "read_only": false,
+        "summary": "Start Broadcast."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "broadcast id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts update",
+        "network": true,
+        "operation": "whatsapp.broadcasts.update",
+        "output": "json",
+        "read_only": false,
+        "summary": "Update Broadcast."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "id",
+            "usage": "id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp chat_messages get",
+        "network": true,
+        "operation": "whatsapp.chat_messages.get",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "rev",
+          "merged_into_id",
+          "agent_id",
+          "chat_id",
+          "sender",
+          "origin",
+          "source",
+          "wid",
+          "content",
+          "quoted_id",
+          "target_id",
+          "sent_at",
+          "edited_at",
+          "revoked_at",
+          "expires_at",
+          "view_once",
+          "reactions",
+          "receipt"
+        ],
+        "summary": "Fetch Chat Message."
+      },
+      {
+        "app": "whatsapp",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "agent-id",
+            "type": "string",
+            "usage": "The agent whose ledger to read."
+          },
+          {
+            "name": "after-rev",
+            "type": "int",
+            "usage": "Return messages whose revision is above this one; 0 starts from the\nbeginning."
+          },
+          {
+            "name": "count",
+            "type": "int",
+            "usage": "At most this many messages (default 100)."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp chat_messages list",
+        "network": true,
+        "operation": "whatsapp.chat_messages.list",
+        "output": "json",
+        "read_only": true,
+        "summary": "Poll Chat Messages."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "chat-id",
+            "usage": "chat id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp chats get",
+        "network": true,
+        "operation": "whatsapp.chats.get",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "agent_id",
+          "type",
+          "user",
+          "group_jid",
+          "name",
+          "ephemeral_seconds",
+          "last_message_at",
+          "merged_into_id",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "Chat Path."
+      },
+      {
+        "app": "whatsapp",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Chats per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching chats (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all chats in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: chats created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many chats (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "agent-id",
+            "type": "string",
+            "usage": "The agent whose chats to list."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "sort",
+            "type": "string",
+            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "values": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp chats list",
+        "network": true,
+        "operation": "whatsapp.chats.list",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "agent_id",
+          "type",
+          "user",
+          "group_jid",
+          "name",
+          "ephemeral_seconds",
+          "last_message_at",
+          "merged_into_id",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "Fetch Chats."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "chat-id",
+            "usage": "chat id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Messages per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching messages (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all messages in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: messages created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many messages (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp chats messages",
+        "network": true,
+        "operation": "whatsapp.chats.messages",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "rev",
+          "merged_into_id",
+          "agent_id",
+          "chat_id",
+          "sender",
+          "origin",
+          "source",
+          "wid",
+          "content",
+          "quoted_id",
+          "target_id",
+          "sent_at",
+          "edited_at",
+          "revoked_at",
+          "expires_at",
+          "view_once",
+          "reactions",
+          "receipt"
+        ],
+        "summary": "Fetch Chat Messages."
+      },
+      {
+        "app": "whatsapp",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "send",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp message_templates create",
+        "network": true,
+        "operation": "whatsapp.message_templates.create",
+        "output": "json",
+        "read_only": false,
+        "summary": "Create Message Template."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "template-id",
+            "usage": "template id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "send",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp message_templates delete",
+        "network": true,
+        "operation": "whatsapp.message_templates.delete",
+        "output": "json",
+        "read_only": false,
+        "summary": "Delete Message Template."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "template-id",
+            "usage": "template id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp message_templates get",
+        "network": true,
+        "operation": "whatsapp.message_templates.get",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "organization_id",
+          "name",
+          "description",
+          "locale",
+          "timezone",
+          "params",
+          "variants",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "Fetch Message Template."
+      },
+      {
+        "app": "whatsapp",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Templates per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching templates (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all templates in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: templates created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many templates (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "sort",
+            "type": "string",
+            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "values": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "usage": "name."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp message_templates list",
+        "network": true,
+        "operation": "whatsapp.message_templates.list",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "organization_id",
+          "name",
+          "description",
+          "locale",
+          "timezone",
+          "params",
+          "variants",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "Fetch Message Templates."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "template-id",
+            "usage": "template id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON request body, inline, from a file, or - for standard input."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp message_templates preview",
+        "network": true,
+        "operation": "whatsapp.message_templates.preview",
+        "output": "json",
+        "read_only": true,
+        "summary": "Preview Message Template."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "template-id",
+            "usage": "template id."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "send",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input"
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp message_templates update",
+        "network": true,
+        "operation": "whatsapp.message_templates.update",
+        "output": "json",
+        "read_only": false,
+        "summary": "Update Message Template."
       }
     ],
     "envelope_schema_version": 1,

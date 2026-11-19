@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -26,47 +28,56 @@ type fakeServer struct {
 	srv    *httptest.Server
 	origin string // the origin the CLI believes it talks to
 
-	mu              sync.Mutex
-	tokens          []string // issued tokens, in order
-	pendingPolls    int      // authorization_pending answers before approval
-	slowDownOnce    bool
-	tokenError      string // RFC 8628 error to answer instead of approving
-	authorizeCalls  int
-	authorizeForm   url.Values
-	tokenCalls      int
-	revokeForms     []url.Values
-	revokeStatus    int
-	revokeFailToken string // this token's revoke answers HTTP 503
-	revoked         map[string]bool
-	statusCalls     int
-	statusError     string // raw response body for the status endpoint
-	statusErrorCode int
-	lifetimeNever   bool
-	verificationURI string
-	discoveryJSON   string // overrides the discovery document
-	redirectAll     bool
-	contactsQuery   url.Values
-	contactsAuth    string
-	contactsLang    string // Accept-Language of the last CRM request
-	contactsBody    string
-	contactsPages   map[string]string // list bodies by the after cursor; overrides contactsBody
-	contactsStatus  int
-	echoAuth        bool   // status and contacts echo the Authorization header
-	authInterval    *int   // overrides the device interval
-	authExpiresIn   *int   // overrides the device expires_in
-	revokeBody      string // overrides the HTTP 200 revoke body
-	onToken         func() // runs at the start of every token poll
-	onStatus        func() // runs once, unlocked, at the start of the next status call
-	tokenDelay      time.Duration
-	orgID           string
-	principalID     string
-	orgName         string // overrides the organization name
-	whatsapp        http.HandlerFunc
-	outlets         http.HandlerFunc
+	requests           atomic.Uint64
+	mu                 sync.Mutex
+	tokens             []string // issued tokens, in order
+	pendingPolls       int      // authorization_pending answers before approval
+	slowDownOnce       bool
+	tokenError         string // RFC 8628 error to answer instead of approving
+	authorizeCalls     int
+	authorizeForm      url.Values
+	tokenCalls         int
+	revokeForms        []url.Values
+	revokeStatus       int
+	revokeFailToken    string // this token's revoke answers HTTP 503
+	revoked            map[string]bool
+	statusCalls        int
+	statusError        string // raw response body for the status endpoint
+	statusErrorCode    int
+	outletScopeVersion int
+	restricted         bool
+	allowedOutlets     []string
+	statusOutletIDs    []string
+	allOutlets         bool
+	outletIDs          []string
+	lifetimeNever      bool
+	verificationURI    string
+	discoveryJSON      string // overrides the discovery document
+	redirectAll        bool
+	contactsQuery      url.Values
+	contactsAuth       string
+	contactsLang       string // Accept-Language of the last CRM request
+	contactsBody       string
+	contactsPages      map[string]string // list bodies by the after cursor; overrides contactsBody
+	contactsStatus     int
+	echoAuth           bool   // status and contacts echo the Authorization header
+	authInterval       *int   // overrides the device interval
+	authExpiresIn      *int   // overrides the device expires_in
+	revokeBody         string // overrides the HTTP 200 revoke body
+	onToken            func() // runs at the start of every token poll
+	onStatus           func() // runs once, unlocked, at the start of the next status call
+	tokenDelay         time.Duration
+	orgID              string
+	principalID        string
+	orgName            string // overrides the organization name
+	contactTags        http.HandlerFunc
+	whatsapp           http.HandlerFunc
+	outlets            http.HandlerFunc
 }
 
 func newFake(t *testing.T, origin string) *fakeServer {
-	f := &fakeServer{t: t, origin: origin, revoked: map[string]bool{}, revokeStatus: 200}
+	f := &fakeServer{t: t, origin: origin, revoked: map[string]bool{}, revokeStatus: 200,
+		outletIDs: []string{"33333333-3333-3333-3333-333333333333"}}
 	f.srv = httptest.NewServer(http.HandlerFunc(f.handle))
 	t.Cleanup(f.srv.Close)
 	if origin == "" {
@@ -84,6 +95,7 @@ func newFake(t *testing.T, origin string) *fakeServer {
 func (f *fakeServer) transport() http.RoundTripper {
 	target, _ := url.Parse(f.srv.URL)
 	return roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		f.requests.Add(1)
 		r2 := r.Clone(r.Context())
 		r2.URL.Scheme, r2.URL.Host = target.Scheme, target.Host
 		r2.Host = r.URL.Host
@@ -157,7 +169,7 @@ func (f *fakeServer) access() map[string]any {
 	a := map[string]any{
 		"id": "11111111-1111-1111-1111-111111111111", "credential_kind": "bearer", "restriction_version": 1,
 		"client_id": "gatherdeal-cli", "organization_id": f.organizationID(),
-		"outlet_ids": []string{"33333333-3333-3333-3333-333333333333"}, "permissions": []string{"crm.contact.read"},
+		"outlet_ids": f.outletIDs, "permissions": []string{"crm.contact.read"},
 		"effect_ceiling": map[string]any{"max_mutation": "none", "allow_external": false, "allowed_risks": []string{}},
 		"lifetime":       "30d", "expire_at": "2030-01-01T00:00:00Z", "idle_expire_at": "2029-12-01T00:00:00Z",
 	}
@@ -177,6 +189,8 @@ func (f *fakeServer) handle(w http.ResponseWriter, r *http.Request) {
 	}
 	_ = r.ParseForm()
 	switch {
+	case r.URL.Path == "/crm/v1/contact-tags" && f.contactTags != nil:
+		f.contactTags(w, r)
 	case r.URL.Path == "/identity/v1/outlets" && f.outlets != nil:
 		f.outlets(w, r)
 	case strings.HasPrefix(r.URL.Path, "/whatsapp/") && f.whatsapp != nil:
@@ -296,11 +310,17 @@ func (f *fakeServer) handle(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, 401, problemJSON(401, "UNAUTHORIZED", "Authentication is required.", nil))
 			return
 		}
+		access := f.access()
+		access["all_outlets"] = f.allOutlets
+		if f.statusOutletIDs != nil {
+			access["outlet_ids"] = f.statusOutletIDs
+		}
 		writeJSON(w, 200, map[string]any{
 			"status":                            "success",
 			"user":                              map[string]any{"id": f.userID(), "username": "staff1", "name": "Staff One"},
 			"organization":                      map[string]any{"id": f.organizationID(), "code": "acme", "name": f.organizationName()},
-			"delegated_access_contract_version": 1, "delegated_access": f.access(),
+			"delegated_access_contract_version": 1, "delegated_access": access,
+			"outlet_scope_version": f.outletScopeVersion, "user_outlet_restricted": f.restricted, "user_allowed_outlet_ids": f.allowedOutlets,
 		})
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/crm/v1/contacts"):
 		f.contactsQuery = r.URL.Query()
@@ -420,18 +440,10 @@ func (te *testEnv) run(args ...string) result {
 	res := result{exit: code, stdout: stdout.String(), stderr: stderr.String()}
 	node, rest, resolveErr := commandTree(Commands()).resolve(args)
 	// Text commands print an envelope only on failure.
-	textOutput := resolveErr == nil && (node.command == nil || (node.command.Output == "text" && code == 0))
-	for _, arg := range rest {
-		if arg == "--" {
-			break
-		}
-		if arg == "--help" || arg == "-h" || arg == "-help" {
-			textOutput = true
-		}
-		// A successful --jq prints its results, not an envelope.
-		if (arg == "--jq" || strings.HasPrefix(arg, "--jq=")) && code == 0 {
-			textOutput = true
-		}
+	textOutput := (code == 0 && len(args) > 0 && args[0] == "help") || resolveErr == nil && (node.command == nil || (node.command.Output == "text" && code == 0))
+	if code == 0 && resolveErr == nil && node.command != nil {
+		inv, parseErr := parse(env, node.command, rest, false)
+		textOutput = textOutput || errors.Is(parseErr, flag.ErrHelp) || inv != nil && inv.isSet("jq")
 	}
 	if !textOutput {
 		if strings.Count(res.stdout, "\n") != 1 {

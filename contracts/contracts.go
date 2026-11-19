@@ -11,6 +11,7 @@ package contracts
 import (
 	"embed"
 	"encoding/json"
+	jsonv2 "encoding/json/v2"
 	"fmt"
 	"strings"
 	"sync"
@@ -52,15 +53,15 @@ type Bundle struct {
 
 // Operation is one published operation.
 type Operation struct {
-	Effect               Effect       `json:"effect"`
-	Permissions          []string     `json:"permissions"`
-	OutletScope          OutletPolicy `json:"outlet_scope"`
-	Idempotency          Idempotency  `json:"idempotency"`
-	PublicID             string       `json:"public_id"`
-	Command              string       `json:"command"`
-	Method               string       `json:"method"`
-	Path                 string       `json:"path"`
-	DelegatedEdgeFilters []string     `json:"delegated_edge_filters"`
+	Effect               Effect          `json:"effect"`
+	Permissions          *KeyRequirement `json:"permissions"`
+	OutletScope          OutletPolicy    `json:"outlet_scope"`
+	Idempotency          Idempotency     `json:"idempotency"`
+	PublicID             string          `json:"public_id"`
+	Command              string          `json:"command"`
+	Method               string          `json:"method"`
+	Path                 string          `json:"path"`
+	DelegatedEdgeFilters []string        `json:"delegated_edge_filters"`
 	// DelegatedExpansions are the with_* query parameters a delegated
 	// access may set; the server refuses every other expansion.
 	DelegatedExpansions []string `json:"delegated_expansions"`
@@ -73,12 +74,33 @@ type Operation struct {
 	OutputType string           `json:"output_type"`
 }
 
+// UnmarshalJSON rejects duplicate members and aliases of the policy field.
+// Other unknown members remain available for future generator additions.
+func (op *Operation) UnmarshalJSON(data []byte) error {
+	type fields Operation
+	var wire struct {
+		fields
+		Extra map[string]json.RawMessage `json:",embed"`
+	}
+	if err := jsonv2.Unmarshal(data, &wire); err != nil {
+		return err
+	}
+	for name := range wire.Extra {
+		if strings.EqualFold(name, "permissions") {
+			return fmt.Errorf("contracts: expected permissions, got %q", name)
+		}
+	}
+	*op = Operation(wire.fields)
+	return nil
+}
+
 // PaginationAdaptive is the only list style this CLI speaks: page numbers
 // and cursors on the same route.
 const PaginationAdaptive = "adaptive"
 
 // Pagination describes a list operation's paging parameters and limits.
 type Pagination struct {
+	ResultField     string `json:"result_field"`
 	Style           string `json:"style"`
 	PageParam       string `json:"page_param"`
 	PageSizeParam   string `json:"page_size_param"`
@@ -96,8 +118,9 @@ type OperationError struct {
 	Retryable bool   `json:"retryable"`
 }
 
-// SupportedFormatVersion is the manifest format this package reads.
-const SupportedFormatVersion = 1
+// SupportedFormatVersion is the manifest format the contract generator
+// writes: permissions are the closed {"allOf"}|{"anyOf"} object.
+const SupportedFormatVersion = 2
 
 var load = sync.OnceValues(func() (*Manifest, error) { return Parse(ManifestJSON) })
 
@@ -119,6 +142,9 @@ func Parse(data []byte) (*Manifest, error) {
 		}
 		bundles[key] = true
 		for _, op := range b.Operations {
+			if op.Permissions == nil {
+				return nil, fmt.Errorf("contracts: %s requires a permissions object", op.PublicID)
+			}
 			if seen[op.PublicID] || !strings.HasPrefix(op.PublicID, b.Service+".") {
 				return nil, fmt.Errorf("contracts: duplicate or misowned operation %s", op.PublicID)
 			}

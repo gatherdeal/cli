@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/gatherdeal/cli/internal/output"
@@ -115,20 +116,26 @@ func TestWhatsAppCreateOutletCode(t *testing.T) {
 			} else {
 				args = append(args, "--yes")
 			}
+			before := f.requests.Load()
 			res := te.run(args...)
-			if res.exit != 0 || lookups != 1 {
+			if res.exit != 0 {
 				t.Fatal(res.stdout)
 			}
+			context := res.env["meta"].(map[string]any)["context"].(map[string]any)
+			request := context["request"].(map[string]any)
 			if dryRun {
-				if writes != 0 || polls != 0 || res.data()["outlet_id"] != waOutletID {
+				if _, hasIDs := request["outlet_ids"]; hasIDs || request["outlet_code"] != "HQ" {
 					t.Fatal(res.stdout)
 				}
-			} else if writes != 1 || polls != 1 {
+				if f.requests.Load() != before || res.data()["outlet_code"] != "HQ" || res.data()["outlet_id"] != nil {
+					t.Fatal(res.stdout)
+				}
+				return
+			} else if lookups != 1 || writes != 1 || polls != 1 {
 				t.Fatalf("writes=%d polls=%d", writes, polls)
 			}
-			context := res.env["meta"].(map[string]any)["context"].(map[string]any)
-			ids := context["request"].(map[string]any)["outlet_ids"].([]any)
-			if len(ids) != 1 || ids[0] != waOutletID {
+			ids := request["outlet_ids"].([]any)
+			if len(ids) != 1 || ids[0] != waOutletID || request["outlet_code"] != nil {
 				t.Fatal(res.stdout)
 			}
 		})
@@ -155,5 +162,40 @@ func TestWhatsAppOutletCodeAndInputMustAgree(t *testing.T) {
 				t.Fatalf("writes=%d %s", writes, res.stdout)
 			}
 		})
+	}
+}
+
+func TestRecordReadsPreserveNull(t *testing.T) {
+	f, te := loggedIn(t)
+	f.outlets = func(w http.ResponseWriter, _ *http.Request) {
+		writeJSON(w, 200, `{"status":"success","outlets":{"data":[{"business_hours":null}]}}`)
+	}
+	for _, tc := range []struct {
+		resource, field string
+		prefix          []string
+	}{
+		{"outlets", "business_hours", []string{"outlets"}},
+		{"agents", "outlet_id", []string{"whatsapp", "agents"}},
+		{"messages", "text", []string{"whatsapp", "messages"}},
+	} {
+		f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
+			record := `{"` + tc.field + `":null}`
+			if strings.HasSuffix(r.URL.Path, "/"+waAgentID) {
+				writeJSON(w, 200, `{"status":"success","`+strings.TrimSuffix(tc.resource, "s")+`":`+record+`}`)
+				return
+			}
+			writeJSON(w, 200, `{"status":"success","`+tc.resource+`":{"data":[`+record+`]}}`)
+		}
+		for _, cmd := range [][]string{{"list"}, {"list", "--all"}, {"get", waAgentID}} {
+			query := `has("` + tc.field + `")`
+			if cmd[0] == "list" {
+				query = ".[0] | " + query
+			}
+			args := append(append([]string{}, tc.prefix...), cmd...)
+			r := te.run(append(args, "--fields", tc.field, "--jq", query)...)
+			if r.exit != 0 || r.stdout != "true\n" {
+				t.Fatal(args, r.stdout)
+			}
+		}
 	}
 }

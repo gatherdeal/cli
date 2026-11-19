@@ -69,6 +69,15 @@ func cliError(t *testing.T, err error) *output.Error {
 	return e
 }
 
+func decodeContact(t *testing.T, raw json.RawMessage) Contact {
+	t.Helper()
+	var c Contact
+	if err := json.Unmarshal(raw, &c); err != nil {
+		t.Fatal(err)
+	}
+	return c
+}
+
 func TestListContactsPage(t *testing.T) {
 	f := &crmFake{body: `{"status":"success","correlation_id":"corr-body","contacts":{"data":[` +
 		`{"id":"` + contactID + `","kind":"personal","name":"Ali","is_verified":true,` +
@@ -105,7 +114,7 @@ func TestListContactsPage(t *testing.T) {
 		len(res.Contacts) != 1 || res.CorrelationID != "corr-header" {
 		t.Fatalf("result %+v", res)
 	}
-	got := res.Contacts[0]
+	got := decodeContact(t, res.Contacts[0])
 	if got.Name != "Ali" || !got.IsVerified || len(got.Phones) != 1 || got.Tags[0].Name != "VIP" {
 		t.Fatalf("contact %+v", got)
 	}
@@ -182,7 +191,7 @@ func TestListAllContacts(t *testing.T) {
 	}
 	c, queries = pagedFake(t, pages)
 	res, err = c.ListAllContacts(t.Context(), ListContactsParams{After: "c1"}, 1)
-	if err != nil || len(res.Contacts) != 1 || res.Contacts[0].ID != "c" || !res.Truncated || len(*queries) != 1 {
+	if err != nil || len(res.Contacts) != 1 || decodeContact(t, res.Contacts[0]).ID != "c" || !res.Truncated || len(*queries) != 1 {
 		t.Fatalf("resume capped: %+v %v (%d requests)", res, err, len(*queries))
 	}
 }
@@ -231,7 +240,7 @@ func TestGetContact(t *testing.T) {
 	if f.path != "/crm/v1/contacts/"+contactID || f.query.Get("with_emails") != "true" || f.query.Has("outlet_id") {
 		t.Fatalf("request %s?%s", f.path, f.query.Encode())
 	}
-	if res.Contact.ID != contactID || len(res.Contact.Emails) != 1 {
+	if c := decodeContact(t, res.Contact); c.ID != contactID || len(c.Emails) != 1 {
 		t.Fatalf("contact %+v", res.Contact)
 	}
 }
@@ -497,8 +506,8 @@ func TestListAllContactsResume(t *testing.T) {
 		t.Fatalf("contacts %v", all)
 	}
 	for i, contact := range all {
-		if contact.ID != strconv.Itoa(i) {
-			t.Fatalf("item %d: %s", i, contact.ID)
+		if id := decodeContact(t, contact).ID; id != strconv.Itoa(i) {
+			t.Fatalf("item %d: %s", i, id)
 		}
 	}
 }
@@ -510,7 +519,7 @@ func TestListAllContactsOverfilledPage(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !res.Truncated || res.NextCursor != "" || len(res.Contacts) != 1 || res.Contacts[0].ID != "a" || (*queries)[0].Get("count") != "1" {
+		if !res.Truncated || res.NextCursor != "" || len(res.Contacts) != 1 || decodeContact(t, res.Contacts[0]).ID != "a" || (*queries)[0].Get("count") != "1" {
 			t.Fatalf("overfilled: %+v queries %v", res, queries)
 		}
 	}

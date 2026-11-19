@@ -6,7 +6,20 @@ generator: it merges the service/version into the shared manifest and writes
 `contracts/<service>/<version>/openapi.json` and
 `internal/generated/<service>/<version>`. Commit those artifacts unchanged.
 Do not hand-write API clients, invent operations, or fetch contracts at
-runtime. The CRM, identity, and WhatsApp bundles are installed.
+runtime. The CRM, Identity and WhatsApp bundles are installed.
+
+### Manifest v2 release pins
+
+The bundles were regenerated from the released producer commits with
+`GOWORK=off` and compared against CLI `v0.1.2`. All three producers pin the
+released utilities generator at `33746fdc2708af24b6fdbf21f4ba500ed837b86d`
+(`v0.0.0-20261119035543-33746fdc2708`).
+
+| Producer | Released commit | Public operations |
+| --- | --- | ---: |
+| CRM | `2c40fabf580b435678e85591eb78e349fe3ee8ac` | 3 |
+| Identity | `b7e955aa5161c83957b4b23b8639604b3bad0818` | 1 |
+| WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
 
 All OpenAPI documents are embedded automatically. Contract checks enumerate
 all bundles, verify disk/embedded/generated digests, service/version constants
@@ -19,7 +32,7 @@ that binding: `outlets list` belongs to `identity.outlets.list`.
 There is no second inventory and presentation never changes service ownership.
 `outlets get` is a convenience lookup through the published list's ID/code
 filters, not an additional public operation. WhatsApp agent creation resolves
-outlet codes through the same scoped list before preview or execution.
+outlet codes through the same scoped list during execution. Offline previews show the unresolved code.
 
 Every command needs a one-sentence `Summary` that says what it does in plain
 language (for example "List CRM contacts in the outlets this access may
@@ -95,3 +108,23 @@ There are no automatic retries. Even a transient failure or an idempotency
 key is not evidence that replay is safe: reconcile the outcome and rely on the
 server's declared replay guarantee. WhatsApp configuration and message writes
 use these policies.
+
+## Tech debt
+
+The recovery filename for a generated idempotency key can be lost on power
+failure after server acceptance. Windows flushes the temporary file and then
+uses an ordinary rename. Use a write-through rename before dispatch. On Unix,
+first use with an environment token can create the config directory without
+syncing its entry in its parent. Sync newly created parent directory entries
+before dispatch. Verify both cases on their respective platforms.
+
+Agent creation with an outlet code opens a WhatsApp client and then opens an
+Identity client for the lookup. Each resolves the profile independently. A
+concurrent profile rebind can therefore resolve the code under a different
+credential from the one used for creation. Bind both service clients to the
+same profile and credential when revisiting cross-service writes.
+
+Some published success schemas make the result optional. For example,
+`BroadcastOutput` permits a missing or null `broadcast`. The producer contract
+would need to require that member for schema validation to distinguish a
+missing broadcast from a valid receipt.

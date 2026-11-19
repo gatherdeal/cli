@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 	"testing"
@@ -100,6 +101,75 @@ func TestLoginProductionKeyring(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(te.root, "credentials")); !os.IsNotExist(err) {
 		t.Fatal("keyring login created a credentials directory")
+	}
+}
+
+func TestDelegationOutletScope(t *testing.T) {
+	for _, tc := range []struct {
+		name, consent, want    string
+		allOutlets, restricted bool
+		version                int
+		allowed                []string
+	}{
+		{name: "all with one effective outlet", consent: "all", want: "1 outlet(s)", allOutlets: true, restricted: true, version: 1, allowed: []string{waOutletID}},
+		{name: "restricted empty", consent: "listed", want: "0 outlet(s)", restricted: true, version: 1},
+		{name: "unrestricted", consent: "all", want: "unrestricted", allOutlets: true, version: 1},
+		{name: "unversioned", consent: "all", want: "unknown", allOutlets: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fake := newFake(t, server.ProductionOrigin)
+			fake.allOutlets = tc.allOutlets
+			fake.restricted, fake.outletScopeVersion, fake.allowedOutlets = tc.restricted, tc.version, tc.allowed
+			fake.statusOutletIDs = []string{waOutletID, waAgentID}
+			te := newTestEnv(t, fake)
+			// Each completed login path uses the same scope summary.
+			for _, args := range [][]string{
+				{"auth", "login"},
+				{"auth", "login", "--no-wait"},
+				{"auth", "login", "--continue"},
+				{"auth", "login"},
+				{"auth", "status"},
+				{"auth", "profiles", "list"},
+			} {
+				res := te.run(args...)
+				if args[len(args)-1] == "--no-wait" {
+					if res.exit != 9 {
+						t.Fatalf("%v: exit %d: %s", args, res.exit, res.stdout)
+					}
+					continue
+				}
+				if res.exit != 0 {
+					t.Fatalf("%v: exit %d: %s", args, res.exit, res.stdout)
+				}
+				if args[1] == "login" && !strings.Contains(res.stderr, "(outlet consent "+tc.consent+", effective outlet scope "+tc.want+", 1 permission(s), lifetime 30d)") {
+					t.Errorf("%v: scope summary = %s", args, res.stderr)
+				}
+				var access map[string]any
+				if args[1] == "profiles" {
+					access = res.env["data"].([]any)[0].(map[string]any)["cached_grant"].(map[string]any)
+				} else {
+					access = res.data()["delegated_access"].(map[string]any)
+				}
+				if access["outlet_consent_mode"] != tc.consent || !reflect.DeepEqual(access["outlet_ids"], []any{waOutletID, waAgentID}) {
+					t.Fatal(args, res.stdout)
+				}
+				eff, ok := access["effective_outlets"].(map[string]any)
+				if ok != (tc.version == 1) {
+					t.Fatal(args, res.stdout)
+				}
+				if ok {
+					ids := eff["outlet_ids"].([]any)
+					if eff["restricted"] != tc.restricted || len(ids) != len(tc.allowed) {
+						t.Fatal(args, res.stdout)
+					}
+					for i, id := range tc.allowed {
+						if ids[i] != id {
+							t.Fatal(args, res.stdout)
+						}
+					}
+				}
+			}
+		})
 	}
 }
 

@@ -2,12 +2,15 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
+	jsonv2 "encoding/json/v2"
 	"net/url"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/gatherdeal/cli/internal/auth"
+	identityv1 "github.com/gatherdeal/cli/internal/generated/identity/v1"
 	wa "github.com/gatherdeal/cli/internal/generated/whatsapp/v1"
 	"github.com/gatherdeal/cli/internal/output"
 	"github.com/gatherdeal/cli/internal/whatsapp"
@@ -19,7 +22,7 @@ var whatsappSummaries = map[string]string{
 	"agents.get":      "Show one WhatsApp agent.",
 	"agents.pairing":  "Check a WhatsApp agent's pairing once, without requesting a new code.",
 	"agents.create":   "Create a WhatsApp agent and return its pairing instructions.",
-	"agents.update":   "Change a WhatsApp agent's mode or outlet.",
+	"agents.update":   "Change a WhatsApp agent's outlet.",
 	"agents.delete":   "Delete a WhatsApp agent and unlink its device.",
 	"messages.list":   "List WhatsApp messages in the outlets this access may read.",
 	"messages.get":    "Show one WhatsApp message and its status.",
@@ -190,11 +193,6 @@ func whatsappInput(inv *Invocation) (any, error) {
 		if in.Revision.IsZero() {
 			return nil, usageError("input revision is required")
 		}
-		if in.Mode.Present {
-			if err := in.Mode.Value.Validate(); err != nil {
-				return nil, usageError("%v", err)
-			}
-		}
 		if in.OutletID.Present && in.OutletID.Value != nil && !uuidRE.MatchString(*in.OutletID.Value) {
 			return nil, usageError("input outlet_id must be a UUID or null")
 		}
@@ -212,32 +210,44 @@ func whatsappInput(inv *Invocation) (any, error) {
 		if err := validateOutlet(inv); err != nil {
 			return nil, err
 		}
-		in, err := ReadBody[wa.CreateMessageInput](inv.str("input"), inv.Env.Stdin)
+		raw, err := ReadBody[json.RawMessage](inv.str("input"), inv.Env.Stdin)
 		if err != nil {
 			return nil, err
 		}
-		if !uuidRE.MatchString(in.AgentID) {
-			return nil, usageError("input agent_id must be a UUID")
+		// The discriminated schema requires the selected payload, rejects
+		// null and mismatched variants, and checks its required members.
+		if err := validateJSON(*raw, writeContracts()[inv.Command.Operation].request); err != nil {
+			return nil, usageError("invalid --input: %v", err)
 		}
-		if !e164RE.MatchString(in.To) {
-			return nil, usageError("input to must be E.164 with a leading +")
+		var in wa.CreateMessageInput
+		if err := jsonv2.Unmarshal(*raw, &in, jsonv2.RejectUnknownMembers(true)); err != nil {
+			return nil, usageError("invalid --input: %v", err)
 		}
-		if err := in.Type.Validate(); err != nil {
-			return nil, usageError("%v", err)
+		const zeroUUID = "00000000-0000-0000-0000-000000000000"
+		if in.ReplyToID == zeroUUID {
+			return nil, usageError("reply_to_id must be a nonzero UUID")
 		}
-		if in.Text.Body == "" {
-			return nil, usageError("input text.body is required")
+		if (in.Reaction != nil && in.Reaction.TargetID == zeroUUID) ||
+			(in.Edit != nil && in.Edit.TargetID == zeroUUID) ||
+			(in.Revoke != nil && in.Revoke.TargetID == zeroUUID) {
+			return nil, usageError("target_id must be a nonzero UUID")
 		}
-		if in.Strategy != "" {
-			if err := in.Strategy.Validate(); err != nil {
-				return nil, usageError("%v", err)
+		direct := in.Type == wa.CreateMessageTypeText || in.Type == wa.CreateMessageTypeTemplate
+		if !direct && in.ReplyToID != "" {
+			return nil, usageError("reply_to_id requires a text or template message")
+		}
+		if direct && in.ReplyToID == "" {
+			if in.AgentID == "" || in.To == "" {
+				return nil, usageError("input agent_id and to are required for a new chat message")
 			}
+		} else if in.Strategy != "" {
+			return nil, usageError("strategy cannot be combined with a referenced chat message")
 		}
-		return in, nil
+		return &in, nil
 	}
 	panic("unknown WhatsApp write")
 }
-func previewWhatsAppWrite(ctx context.Context, inv *Invocation) (any, error) {
+func previewWhatsAppWrite(_ context.Context, inv *Invocation) (any, error) {
 	in, err := whatsappInput(inv)
 	if err != nil {
 		return nil, err
@@ -249,9 +259,14 @@ func previewWhatsAppWrite(ctx context.Context, inv *Invocation) (any, error) {
 		if _, err = pairingPage(inv, "preview"); err != nil {
 			return nil, err
 		}
-		if err = inv.resolveCreateOutlet(ctx, create); err != nil {
-			return nil, err
+		if code := inv.str("outlet"); code != "" && !uuidRE.MatchString(code) {
+			return struct {
+				OutletCode string `json:"outlet_code"`
+				OutletID   string `json:"outlet_id,omitempty"`
+				Phone      string `json:"phone,omitempty"`
+			}{code, create.OutletID, create.Phone}, nil
 		}
+		inv.Meta.Context.Request.OutletIDs = []string{create.OutletID}
 	}
 	return in, nil
 }
@@ -264,15 +279,20 @@ func runWhatsAppWrite(ctx context.Context, inv *Invocation) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	var data any
-	switch in := in.(type) {
-	case *wa.CreateAgentInput:
+	if create, ok := in.(*wa.CreateAgentInput); ok {
 		if _, err = pairingPage(inv, "preview"); err != nil {
 			return nil, err
 		}
-		if err = inv.resolveCreateOutlet(ctx, in); err != nil {
+		if err = inv.resolveCreateOutlet(ctx, create); err != nil {
 			return nil, err
 		}
+	}
+	if err := inv.recordWriteKey(); err != nil {
+		return nil, err
+	}
+	var data any
+	switch in := in.(type) {
+	case *wa.CreateAgentInput:
 		var out *wa.CreateAgentOutput
 		out, inv.Meta.CorrelationID, err = c.CreateAgent(ctx, in, in.OutletID, inv.Meta.Write.IdempotencyKey)
 		if err != nil {
@@ -424,16 +444,23 @@ func awaitPairing(ctx context.Context, inv *Invocation, c *whatsapp.Client, id s
 
 func (inv *Invocation) resolveCreateOutlet(ctx context.Context, in *wa.CreateAgentInput) error {
 	if value := inv.str("outlet"); value != "" && !uuidRE.MatchString(value) {
-		outlet, err := inv.resolveOutlet(ctx, value)
+		raw, err := inv.resolveOutlet(ctx, value)
 		if err != nil {
 			return err
 		}
-		if in.OutletID != "" && in.OutletID != outlet.ID {
+		var outlet identityv1.Outlet
+		if err := json.Unmarshal(raw, &outlet); err != nil {
+			return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "invalid outlet record").WithCause(err)
+		}
+		if outlet.ID == nil || *outlet.ID == "" {
+			return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "the outlet lookup returned no outlet id")
+		}
+		if in.OutletID != "" && in.OutletID != *outlet.ID {
 			return usageError("--outlet differs from input outlet_id")
 		}
-		in.OutletID = outlet.ID
+		in.OutletID = *outlet.ID
 	}
 	*inv.strs["outlet"] = in.OutletID
-	inv.Meta.Context.Request.OutletIDs = []string{in.OutletID}
+	inv.Meta.Context.Request = output.ContextRequest{OutletIDs: []string{in.OutletID}}
 	return nil
 }

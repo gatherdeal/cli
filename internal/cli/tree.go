@@ -43,15 +43,22 @@ func (n *commandNode) choices() []string {
 // groupSummaries describes each command group, keyed by its path. Every
 // group of the registry needs an entry; TestEveryGroupHasSummary checks it.
 var groupSummaries = map[string]string{
-	"auth":              "Log in, check or end the access, and list local profiles.",
-	"auth profiles":     "Inspect local profiles.",
-	"crm":               "Read CRM contacts.",
-	"crm contacts":      "List and show CRM contacts.",
-	"outlets":           "List and look up the outlets this access may read.",
-	"skills":            "Install or print the GatherDeal agent skill.",
-	"whatsapp":          "Manage WhatsApp agents and send WhatsApp messages.",
-	"whatsapp agents":   "List, create, pair, update and delete WhatsApp agents.",
-	"whatsapp messages": "List, show and send WhatsApp messages.",
+	"auth":                            "Log in, check or end the access, and list local profiles.",
+	"auth profiles":                   "Inspect local profiles.",
+	"crm":                             "Read CRM contacts.",
+	"crm contact_tags":                "List CRM contact tag definitions.",
+	"crm contacts":                    "List and show CRM contacts.",
+	"outlets":                         "List and look up the outlets this access may read.",
+	"skills":                          "Install or print the GatherDeal agent skill.",
+	"whatsapp":                        "Manage WhatsApp agents and send WhatsApp messages.",
+	"whatsapp agents":                 "List, create, pair, update and delete WhatsApp agents.",
+	"whatsapp broadcast_suppressions": "Manage numbers excluded from broadcasts.",
+	"whatsapp broadcasts":             "Create, schedule and manage WhatsApp broadcasts.",
+	"whatsapp broadcasts recipients":  "Manage recipients for a broadcast.",
+	"whatsapp chat_messages":          "Read messages and poll for changes.",
+	"whatsapp chats":                  "Read WhatsApp conversations and their messages.",
+	"whatsapp message_templates":      "Manage and preview WhatsApp message templates.",
+	"whatsapp messages":               "List, show and send WhatsApp messages.",
 }
 
 func (n *commandNode) summary() string {
@@ -65,9 +72,6 @@ func (n *commandNode) summary() string {
 }
 
 func (n *commandNode) resolve(args []string) (*commandNode, []string, error) {
-	if len(args) > 0 && args[0] == "help" {
-		args = append(append([]string{}, args[1:]...), "--help")
-	}
 	for len(args) > 0 && n.command == nil {
 		part := args[0]
 		if len(args) == 1 && (part == "--help" || part == "-h" || part == "-help") {

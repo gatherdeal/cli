@@ -56,6 +56,9 @@ publish or contact GitHub or npm.
 `contracts/` holds the public contract of every API the CLI calls:
 `manifest.json` (operations, permissions, and the expansions and edge filters
 a delegated access may use) and one OpenAPI document per service version.
+Manifest `format_version` 2 gives each operation's `permissions` as the closed
+`{"allOf":[...]}` or `{"anyOf":[...]}` requirement (any-of: at least one of
+two or more keys), decoded strictly. The CLI requires manifest v2.
 `internal/generated/<service>/<version>/` is the client generated from it,
 standard library only. Both are exported by GatherDeal's contract generator,
 and `contracts/testdata/problem-conformance/` holds the decode fixtures that
@@ -77,7 +80,7 @@ to the contract, service discovery, shared pagination and write policies.
 ## Compatibility rules
 
 - Persisted and published formats are versioned: the profile store
-  (`profiles.json`), the skill install record (`skills.json`), credential
+  (`profiles.json`), the skill install record (`skills.json`), write recovery records (`write-<invocation_id>.json`), credential
   files, discovery documents and the signed `release.json`. Unknown schema versions, unknown restriction versions and
   unsupported API versions are refused, never guessed. Any new persisted field
   raises the schema version so an older binary cannot silently discard it.

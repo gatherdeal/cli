@@ -28,6 +28,7 @@ func Commands() []*Command {
 	listFlags := append([]FlagSpec{}, targetFlags...)
 	listFlags = append(listFlags, pageFlags(crm.ListOperation, "contacts")...)
 	listFlags = append(listFlags,
+		FlagSpec{Name: "dry-run", Kind: kindBool, Usage: "Preview the contact selection and output fields without reading contacts."},
 		flagSearch,
 		FlagSpec{Name: "sort", Kind: kindString, Usage: "Field to sort by, e.g. create_at or name."},
 		FlagSpec{Name: "order", Kind: kindString, Values: []string{"asc", "desc"}, Usage: "Sort direction."},
@@ -90,6 +91,7 @@ func Commands() []*Command {
 	}
 	cmds = append(cmds, whatsappCommands()...)
 	cmds = append(cmds, outletCommands()...)
+	cmds = append(cmds, generatedCommands(cmds)...)
 	// API paths and app ownership come from the published contracts.
 	m, err := contracts.Load()
 	if err != nil {

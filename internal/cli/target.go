@@ -306,6 +306,11 @@ func (inv *Invocation) loadCredential(t *target) (*credential, error) {
 	inv.credentialSource = string(ref.Store)
 	inv.Env.addSecret(secret)
 	if !server.ValidToken(secret) {
+		// A malformed stored secret has no recognizable format before loading.
+		if w := inv.Meta.Write; w != nil && inv.Env.redact().String(w.IdempotencyKey) != w.IdempotencyKey {
+			inv.Meta.Write = nil
+			return nil, usageError("invalid --idempotency-key")
+		}
 		return nil, output.Errorf(output.ExitAuth, output.CodeTokenInvalid, "the stored credential for profile %q is malformed", t.name).
 			WithHint("Run `gatherdeal auth login" + t.targetFlagsHint() + "`.")
 	}
@@ -451,9 +456,12 @@ func (inv *Invocation) fetchDiscovery(ctx context.Context, t *target) (server.Di
 func (inv *Invocation) noteContext(t *target, stored bool) {
 	c := &output.Context{Profile: t.name, Server: t.origin, Issuer: t.disc.Issuer,
 		Request: output.ContextRequest{OutletIDs: []string{}}}
-	// An outlet code is resolved before it becomes a requested UUID selection.
-	if outlet := inv.strs["outlet"]; outlet != nil && uuidRE.MatchString(*outlet) {
-		c.Request.OutletIDs = []string{*outlet}
+	if outlet := inv.strs["outlet"]; outlet != nil && *outlet != "" {
+		if uuidRE.MatchString(*outlet) {
+			c.Request.OutletIDs = []string{*outlet}
+		} else if inv.Command.Operation == "whatsapp.agents.create" {
+			c.Request = output.ContextRequest{OutletCode: inv.Env.redact().String(*outlet)}
+		}
 	}
 	if stored && t.profile != nil && t.profile.Binding != nil {
 		b := t.profile.Binding

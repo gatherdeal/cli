@@ -3,6 +3,7 @@ package identity
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -60,50 +61,34 @@ func (c call) apiError(ctx context.Context, err error) error {
 	}
 	return httpx.TransportError(ctx, err)
 }
-func missing() error {
-	return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "identity response is missing its result")
+func readBinding(id string) identityv1.CLIBinding {
+	for _, b := range identityv1.CLIBindings() {
+		if b.PublicID == id {
+			return b
+		}
+	}
+	panic("missing generated binding: " + id)
 }
-func (c *Client) FetchOutlets(ctx context.Context, in identityv1.FetchOutletsInput, all bool, maxItems int) ([]*identityv1.Outlet, output.PageInfo, string, error) {
+
+var listOutlets = readBinding("identity.outlets.list")
+
+func (c *Client) FetchOutlets(ctx context.Context, in identityv1.FetchOutletsInput, all bool, maxItems int) ([]json.RawMessage, output.PageInfo, string, error) {
 	call := c.call()
 	if all {
-		hadAfter := in.After != ""
 		in.Page, in.Total = 0, identityv1.TotalModeNone
-		if in.PageSize == 0 {
-			in.PageSize = contracts.MustOperation(ListOperation).Pagination.MaxPageSize
-		}
-		res, err := paging.Walk(ctx, "outlets", in.After, in.PageSize, maxItems, func(ctx context.Context, after string, size int) (paging.Page[*identityv1.Outlet], error) {
-			in.After, in.PageSize = after, size
-			out, err := call.api.FetchOutlets(ctx, &in)
-			if err != nil {
-				return paging.Page[*identityv1.Outlet]{}, call.apiError(ctx, err)
-			}
-			if out.Outlets == nil {
-				return paging.Page[*identityv1.Outlet]{}, missing()
-			}
-			p := out.Outlets
-			return paging.Page[*identityv1.Outlet]{Items: p.Data, HasNextPage: p.HasNextPage, NextCursor: p.NextCursor, CorrelationID: call.d.CorrelationID}, nil
-		})
+	}
+	return paging.Records(ctx, contracts.MustOperation(listOutlets.PublicID).Pagination, in.After, in.PageSize, all, maxItems, func(after string, size int) ([]byte, string, error) {
+		in.After, in.PageSize = after, size
+		raw, err := listOutlets.Invoke(ctx, call.api, &in, "")
 		if err != nil {
-			return nil, output.PageInfo{}, "", err
+			err = call.apiError(ctx, err)
 		}
-		return res.Items, output.PageInfo{HasNextPage: res.Truncated, NextCursor: res.NextCursor, HasPrevPage: hadAfter}, res.CorrelationID, nil
-	}
-	out, err := call.api.FetchOutlets(ctx, &in)
-	if err != nil {
-		return nil, output.PageInfo{}, call.d.CorrelationID, call.apiError(ctx, err)
-	}
-	if out.Outlets == nil {
-		return nil, output.PageInfo{}, call.d.CorrelationID, missing()
-	}
-	p := out.Outlets
-	if p.Data == nil {
-		p.Data = []*identityv1.Outlet{}
-	}
-	return p.Data, output.PageInfo{PageSize: p.PageSize, HasNextPage: p.HasNextPage, HasPrevPage: p.HasPrevPage, NextCursor: p.NextCursor, PrevCursor: p.PrevCursor, Page: p.Page, TotalItems: p.TotalItems, TotalPages: p.TotalPages}, call.d.CorrelationID, nil
+		return raw, call.d.CorrelationID, err
+	})
 }
 
 // GetOutlet resolves an exact ID/code filter through the sole published list operation.
-func (c *Client) GetOutlet(ctx context.Context, in identityv1.FetchOutletsInput) (*identityv1.Outlet, string, error) {
+func (c *Client) GetOutlet(ctx context.Context, in identityv1.FetchOutletsInput) (json.RawMessage, string, error) {
 	in.PageSize, in.Total = 1, identityv1.TotalModeNone
 	items, _, correlation, err := c.FetchOutlets(ctx, in, false, 0)
 	if err != nil {

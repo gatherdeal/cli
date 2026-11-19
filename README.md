@@ -237,10 +237,13 @@ limits it to one resource (see [Command catalog](#command-catalog)).
 ```sh
 gatherdeal crm contacts list --search ali --page 1 --page-size 20
 gatherdeal crm contacts list --search ali --after <next_cursor>
+gatherdeal crm contact_tags list --search VIP --fields id,name
 gatherdeal crm contacts list --tag VIP --limit 500
 gatherdeal crm contacts list --tag VIP --all
 gatherdeal crm contacts get <contact-id> --with-emails --with-tags
 ```
+
+Use `--dry-run` on `crm contacts list` to preview the selection, walk limit and output fields without reading any contacts.
 
 `crm contacts list` returns one page. `meta.page_info` carries the API's page
 fields: `page_size`, `has_next_page`, `has_prev_page`, and when present
@@ -298,6 +301,12 @@ Keep the same profile; never retry a denial or not-found in another organization
 
 ## WhatsApp API
 
+Use `gatherdeal commands whatsapp` to find broadcast, recipient,
+suppression, chat and message-template commands. For example,
+`gatherdeal whatsapp broadcasts recipients list <broadcast-id> --limit 20`
+lists recipients. Write commands accept `--dry-run`. Starting or resuming
+a broadcast requires `--send`.
+
 These commands manage WhatsApp API agents. They do not create messaging inbox
 channels; those are a separate system. Registered agents consume paid quota
 slots. Deleting an agent unlinks its device and releases
@@ -329,13 +338,15 @@ stops creation before dispatch; log in to establish the profile. Environment
 tokens have no cached profile binding.
 
 An update body includes the agent's `update_at` as `revision`, and optional
-`mode` (`resident` or `on_demand`) and `outlet_id` (UUID or null). For example:
+`outlet_id` (UUID or null). For example:
 
 ```json
-{"revision":"2026-10-29T10:00:00Z","mode":"on_demand"}
+{"revision":"2026-10-29T10:00:00Z","outlet_id":"55555555-5555-4555-8555-555555555555"}
 ```
 
-A message body names one agent and recipient; creating it sends the message:
+A new text or template message names an agent and recipient. A reply can use
+`reply_to_id` for its chat, and a reaction, edit, or revoke uses its payload’s
+`target_id`. For example, this body sends a new text message.
 
 ```json
 {"agent_id":"55555555-5555-5555-5555-555555555555","to":"+60123456789","type":"text","text":{"body":"Hello"}}
@@ -345,17 +356,32 @@ Message status describes runtime acceptance, not recipient delivery.
 `--input` accepts inline JSON (starting with `{` or `[` after whitespace), a file path, or `-` for stdin. Writes accept `--dry-run` for a validated
 preview without dispatch. Configuration writes require `--yes`; message
 creation requires `--send`. Agent and message creation accept
-`--idempotency-key`; when omitted the CLI generates one and reports it in
-`meta.write`. Preserve that key. `CLI_WRITE_OUTCOME_UNKNOWN` (exit 8) means the
+`--idempotency-key`. Keys must match `^[A-Za-z0-9._:-]{8,128}$` and may
+not contain a credential, even within a longer key or with different casing.
+When the key is omitted the CLI generates one and reports it in
+`meta.write`. Before dispatch with a generated key, the CLI prints an invocation
+ID on stderr and saves the key in `write-<invocation_id>.json` in the CLI config
+directory. If the process stops before printing its result, recover
+`idempotency_key` from that file. The file contains only the format version
+and key. It stays until you remove it or uninstall. After reconciling an
+uncertain outcome, pass that same key with `--idempotency-key` for a deliberate
+retry of the same request. Preserve caller-supplied keys yourself. `CLI_WRITE_OUTCOME_UNKNOWN` (exit 8) means the
 write may have succeeded: reconcile before retrying. There are no automatic
 write retries.
 
-Lists use the same bounded cursor pagination as CRM, including `--all`,
-`--limit`, and `--after`. WhatsApp lists have no server-side search. Keep the same profile and outlet selection.
+Paginated record lists support `--all`, `--limit`, and `--after`. Keep the same
+profile, outlet, and filters when continuing a list.
 
-Agent creation accepts an outlet UUID or code with `--outlet`. Codes are
-resolved through the authorized outlets list before preview or execution;
-the resolved UUID is used for the request body, outlet selection and pairing
+`gatherdeal whatsapp chat_messages list --agent-id <uuid> --after-rev 0 --count 100`
+polls the agent's message ledger from the beginning. `--count` sets the maximum
+messages per poll (default 100). The `data` object contains `messages`,
+`after_rev`, and `has_more`. Save `data.after_rev` and pass it to `--after-rev`
+on the next poll with the same agent and outlet. Poll again immediately while
+`data.has_more` is true. Use `--jq '.messages[]'` to select individual messages.
+
+Agent creation accepts an outlet UUID or code with `--outlet`. An offline preview shows the unresolved code in `outlet_code`. Execution
+resolves it through the authorized outlets list and uses that UUID for
+the request body, outlet selection and pairing
 polls. A missing or out-of-scope code stops creation with exit 5. JSON input
 `outlet_id` remains a UUID; when combined with `--outlet`, both must resolve to
 the same outlet.
@@ -403,8 +429,8 @@ instructions go to stderr only.
 
 ### Shaping the output
 
-Every command that prints a JSON envelope takes `--jq <expr>`; list and get
-commands also take `--fields a,b,c`. Both apply only to a successful result.
+Every command that prints a JSON envelope takes `--jq <expr>`. Commands with
+`record_fields` in the catalog also take `--fields a,b,c`. Both apply only to a successful result.
 
 ```sh
 gatherdeal crm contacts list --search ali --fields id,name
@@ -415,8 +441,7 @@ gatherdeal whatsapp messages list --agent <agent-id> --fields id,status --jq '.[
 
 - `--fields` keeps only the named top-level members of each record: the
   `data` object of a get, or each element of the `data` array of a list. The
-  envelope (`meta`, `page_info` and so on) stays. A record that lacks a field
-  (empty values are omitted) leaves it absent. An unknown name is a usage
+  envelope (`meta`, `page_info` and so on) stays. Absent fields stay absent, and explicit nulls stay null. An unknown name is a usage
   error (exit 2) that lists the available names; `record_fields` in
   `gatherdeal commands` lists them too.
 - `--jq` evaluates a [jq](https://jqlang.org/manual/) expression, with an
@@ -636,11 +661,12 @@ check; use `auth status --profile NAME` for that.
 
 Authenticated results include typed `meta.context`: `profile`, `server`,
 `issuer`, cached `binding.organization` (`id`, optional `code`/`name`) and
-`binding.principal_id`, plus `request.outlet_ids`. The array is always present
-when context exists: `[]` requests the authorized set, while `[ID]` requests
-that outlet. It is **requested selection**, never server-confirmed effective
-scope. Missing `binding` means unknown; environment tokens never inherit the
-stored profile's binding. Missing context means no authenticated context was
+`binding.principal_id`, plus the requested outlet selection. In
+`request.outlet_ids`, `[]` requests the authorized set and `[ID]` requests
+that outlet. When agent creation previews an unresolved code, the request
+contains only `outlet_code`. Identity determines the effective scope.
+Missing `binding` means unknown; environment tokens never inherit the stored
+profile's binding. Missing context means no authenticated context was
 established. Cached authorized outlet IDs appear in the grant summary, not
 in the request selection.
 
@@ -648,7 +674,14 @@ Keep the same profile and outlet selection across pagination, retries,
 login continuation and multi-step work. Never retry a denial or not-found
 in another organization or profile.
 
-The profile store uses schema 1. Every binding requires both organization
+Login and status report `outlet_consent_mode` (`all` or `listed`) and the
+consent's live `outlet_ids`. Identity intersects that consent with the member's
+outlet access. The `restricted` and `outlet_ids` fields under `effective_outlets`
+describe the resulting selection for the delegated session. An absent effective
+scope is unknown. The offline grant caches these values at login.
+
+The profile store uses schema 2. Schema 1 profiles remain readable and upgrade
+on the next save. Their cached scope stays unknown until the next login. Every binding requires both organization
 and principal IDs. Unsupported schemas are refused for both reads and writes
 with `CLI_PROFILE_SCHEMA` (exit 9); use a CLI supporting that schema and do
 not delete credentials.

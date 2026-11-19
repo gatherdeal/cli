@@ -18,6 +18,11 @@
         "tags": [
           "outlets"
         ],
+        "x-filter-limits": {
+          "max_depth": 5,
+          "max_rules": 50,
+          "max_in_size": 100
+        },
         "x-filter-fields": [
           {
             "name": "code",
@@ -159,15 +164,24 @@
             ]
           }
         ],
+        "x-sortable-fields": [
+          "id",
+          "create_at",
+          "update_at",
+          "name",
+          "code"
+        ],
         "x-gd-public-id": "identity.outlets.list",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
           "risks": []
         },
-        "x-required-permissions": [
-          "identity.outlet.read"
-        ],
+        "x-required-permissions": {
+          "allOf": [
+            "identity.outlet.read"
+          ]
+        },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-delegated-expansions": [
@@ -196,6 +210,14 @@
           "total_pages_field": "total_pages"
         },
         "parameters": [
+          {
+            "name": "organization_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "id",
             "in": "query",
@@ -449,7 +471,7 @@
             }
           },
           "403": {
-            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN, IDENTITY_OUTLET_MEMBERSHIP_REQUIRED)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -490,6 +512,9 @@
                       "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
                     },
                     {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
                     },
                     {
@@ -509,6 +534,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/ForbiddenProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdentityOutletMembershipRequiredProblem"
                     }
                   ],
                   "discriminator": {
@@ -521,13 +549,53 @@
                       "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
                       "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
                       "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
                       "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
                       "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
                       "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
                       "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
                       "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
                       "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
-                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem"
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem",
+                      "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED": "#/components/schemas/IdentityOutletMembershipRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found: problem document (IDENTITY_DISTRIBUTION_NOT_FOUND, IDENTITY_ORGANIZATION_NOT_FOUND)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/IdentityDistributionNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdentityOrganizationNotFoundProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "IDENTITY_DISTRIBUTION_NOT_FOUND": "#/components/schemas/IdentityDistributionNotFoundProblem",
+                      "IDENTITY_ORGANIZATION_NOT_FOUND": "#/components/schemas/IdentityOrganizationNotFoundProblem"
                     }
                   }
                 }
@@ -1236,7 +1304,8 @@
             "type": "array",
             "description": "MissingPermissions lists the permission keys the access lacks (reason\nmissing_permissions).",
             "items": {
-              "$ref": "#/components/schemas/PermissionKey"
+              "type": "string",
+              "pattern": "^[a-z]+(_[a-z]+)*\\.[a-z]+(_[a-z]+)*\\.[a-z]+(_[a-z]+)*$"
             }
           }
         },
@@ -1260,7 +1329,8 @@
           "expansion_not_allowed",
           "impersonation_not_allowed",
           "credential_location",
-          "principal_inactive"
+          "principal_inactive",
+          "organization_key_not_admitted"
         ],
         "description": "DelegatedAccessDenyReason names why the delegated-access gate refused a\nrequest. It is the wire reason of every 403 DELEGATED_ACCESS_* code (and of\nthe 401 DELEGATED_ACCESS_CREDENTIAL_LOCATION)."
       },
@@ -1632,6 +1702,59 @@
           "code": {
             "type": "string",
             "const": "DELEGATED_ACCESS_KIND_NOT_ALLOWED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          },
+          "details": {
+            "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable",
+          "details"
+        ]
+      },
+      "DelegatedAccessOrganizationKeyNotAdmittedProblem": {
+        "type": "object",
+        "description": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED (403): This operation is not available to organization API keys.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This operation is not available to organization API keys.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED"
           },
           "retryable": {
             "type": "boolean",
@@ -2166,6 +2289,153 @@
           }
         }
       },
+      "IdentityDistributionNotFoundProblem": {
+        "type": "object",
+        "description": "IDENTITY_DISTRIBUTION_NOT_FOUND (404): Distribution not found.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/IDENTITY_DISTRIBUTION_NOT_FOUND",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Distribution not found.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 404
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "IDENTITY_DISTRIBUTION_NOT_FOUND"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
+      "IdentityOrganizationNotFoundProblem": {
+        "type": "object",
+        "description": "IDENTITY_ORGANIZATION_NOT_FOUND (404): Organization not found.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/IDENTITY_ORGANIZATION_NOT_FOUND",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Organization not found.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 404
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "IDENTITY_ORGANIZATION_NOT_FOUND"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
+      "IdentityOutletMembershipRequiredProblem": {
+        "type": "object",
+        "description": "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED (403): User is not outlet owner or staff.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"User is not outlet owner or staff.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 403
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "InternalErrorProblem": {
         "type": "object",
         "description": "INTERNAL_ERROR (500): Internal server error.",
@@ -2300,7 +2570,10 @@
         "description": "Outlet is the API response shape for an outlet entity.",
         "properties": {
           "id": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
           "create_at": {
@@ -2316,10 +2589,16 @@
             "format": "date-time"
           },
           "code": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "name": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "description": {
             "type": "string"
@@ -2382,7 +2661,10 @@
             }
           },
           "timezone": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Timezone override for this outlet; empty inherits the organization's value (see embedded organization)."
           },
           "currency": {
@@ -2410,10 +2692,16 @@
             "format": "int64"
           },
           "is_master": {
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "organization_id": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
           "organization": {
@@ -2449,18 +2737,117 @@
         "type": "object",
         "description": "OutletOrganization is a lightweight representation of an outlet's organization.",
         "properties": {
-          "id": {
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "phone",
+            "pattern": "^(?:\\+[1-9][0-9]+|(?:\\([1-9][0-9]*\\)|\\+[1-9][0-9]*[ -])(?:[ .-]*(?:[0-9]+|\\([ .-]*[0-9][0-9 .-]*\\)))+[ .-]*)$",
+            "examples": [
+              "+60 123456789",
+              "+60 12-345 6789",
+              "(60)123456789"
+            ],
+            "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "attention": {
+                "type": "string"
+              },
+              "phone": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "phone",
+                "pattern": "^(?:\\+[1-9][0-9]+|(?:\\([1-9][0-9]*\\)|\\+[1-9][0-9]*[ -])(?:[ .-]*(?:[0-9]+|\\([ .-]*[0-9][0-9 .-]*\\)))+[ .-]*)$",
+                "examples": [
+                  "+60 123456789",
+                  "+60 12-345 6789",
+                  "(60)123456789"
+                ],
+                "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+              },
+              "address": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "city": {
+                "type": "string"
+              },
+              "zip_code": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "country": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "ISO 3166-1 alpha-2"
+              },
+              "latitude": {
+                "type": "string",
+                "format": "decimal"
+              },
+              "longitude": {
+                "type": "string",
+                "format": "decimal"
+              },
+              "place_id": {
+                "type": "string"
+              }
+            }
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "website": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "distribution_id": {
             "type": "string",
             "format": "uuid"
           },
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
           "code": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "name": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "timezone": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Organization timezone used as the fallback when the outlet's timezone is empty."
           },
           "currency": {
@@ -2656,20 +3043,6 @@
           "total_invalid"
         ],
         "description": "PaginationParamsReason refines PAGINATION_PARAMS_INVALID."
-      },
-      "PermissionKey": {
-        "type": "string",
-        "enum": [
-          "crm.contact.read",
-          "identity.outlet.read",
-          "whatsapp.agent.create",
-          "whatsapp.agent.delete",
-          "whatsapp.agent.read",
-          "whatsapp.agent.update",
-          "whatsapp.message.create",
-          "whatsapp.message.read"
-        ],
-        "description": "Key identifies a cataloged service permission\n(\"<service>.<resource>.<action>\")."
       },
       "ProblemParameter": {
         "type": "object",
@@ -3053,6 +3426,39 @@
   },
   "x-gd-errors": [
     {
+      "code": "IDENTITY_DISTRIBUTION_NOT_FOUND",
+      "type": "https://docs.gatherdeal.ai/errors/IDENTITY_DISTRIBUTION_NOT_FOUND",
+      "status": 404,
+      "retryable": false,
+      "title": "Distribution not found.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/IdentityDistributionNotFoundProblem"
+      }
+    },
+    {
+      "code": "IDENTITY_ORGANIZATION_NOT_FOUND",
+      "type": "https://docs.gatherdeal.ai/errors/IDENTITY_ORGANIZATION_NOT_FOUND",
+      "status": 404,
+      "retryable": false,
+      "title": "Organization not found.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/IdentityOrganizationNotFoundProblem"
+      }
+    },
+    {
+      "code": "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
+      "type": "https://docs.gatherdeal.ai/errors/IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
+      "status": 403,
+      "retryable": false,
+      "title": "User is not outlet owner or staff.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/IdentityOutletMembershipRequiredProblem"
+      }
+    },
+    {
       "code": "BAD_REQUEST",
       "type": "https://docs.gatherdeal.ai/errors/BAD_REQUEST",
       "status": 400,
@@ -3363,6 +3769,19 @@
       },
       "problem": {
         "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+      }
+    },
+    {
+      "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+      "type": "https://docs.gatherdeal.ai/errors/DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+      "status": 403,
+      "retryable": false,
+      "title": "This operation is not available to organization API keys.",
+      "details": {
+        "$ref": "#/components/schemas/DelegatedAccessDeniedDetails"
+      },
+      "problem": {
+        "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
       }
     }
   ]

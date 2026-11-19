@@ -229,6 +229,10 @@ func Run(ctx context.Context, env *Env, args []string) int {
 	if env.Getenv != nil {
 		env.addSecret(env.Getenv("GATHERDEAL_TOKEN"))
 	}
+	helpMode := len(args) > 0 && args[0] == "help"
+	if helpMode {
+		args = args[1:]
+	}
 	node, rest, err := commandTree(Commands()).resolve(args)
 	if err != nil {
 		return emitError(env, output.Meta{}, err)
@@ -238,16 +242,11 @@ func Run(ctx context.Context, env *Env, args []string) int {
 		return int(output.ExitOK)
 	}
 	cmd := node.command
-	for _, a := range rest {
-		if a == "-h" || a == "--help" || a == "-help" {
-			writeCommandHelp(env.Stdout, cmd)
-			return int(output.ExitOK)
-		}
-		if a == "--" {
-			break
-		}
+	inv, err := parse(env, cmd, rest, helpMode)
+	if errors.Is(err, flag.ErrHelp) {
+		writeCommandHelp(env.Stdout, cmd)
+		return int(output.ExitOK)
 	}
-	inv, err := parse(env, cmd, rest)
 	if err != nil {
 		return emitError(env, output.Meta{}, err)
 	}
@@ -301,7 +300,7 @@ func usageError(format string, args ...any) *output.Error {
 }
 
 // parse binds flags (which may appear before or after positional args).
-func parse(env *Env, cmd *Command, args []string) (*Invocation, error) {
+func parse(env *Env, cmd *Command, args []string, helpMode bool) (*Invocation, error) {
 	inv := &Invocation{
 		Env: env, Command: cmd,
 		strs: map[string]*string{}, bools: map[string]*bool{}, ints: map[string]*int{},
@@ -309,6 +308,11 @@ func parse(env *Env, cmd *Command, args []string) (*Invocation, error) {
 	}
 	fs := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
+	if helpMode {
+		// Parse past additional help flags so later unknown flags still fail.
+		fs.Bool("h", false, "")
+		fs.Bool("help", false, "")
+	}
 	for _, f := range cmd.Flags {
 		switch f.Kind {
 		case kindString:
@@ -325,22 +329,34 @@ func parse(env *Env, cmd *Command, args []string) (*Invocation, error) {
 		}
 	}
 	var positional []string
-	for {
-		if err := fs.Parse(args); err != nil {
+	for len(args) > 0 {
+		arg := args[0]
+		if arg == "--" {
+			positional = append(positional, args[1:]...)
+			break
+		}
+		if arg == "-" || !strings.HasPrefix(arg, "-") {
+			positional = append(positional, arg)
+			args = args[1:]
+			continue
+		}
+		// Let FlagSet parse one option, including its separate value (which
+		// can itself be "--"). Options with "=value" occupy one argument.
+		n := 1
+		name := strings.TrimLeft(arg, "-")
+		if len(args) > 1 && (inv.strs[name] != nil || inv.ints[name] != nil || inv.lists[name] != nil) {
+			n++
+		}
+		if err := fs.Parse(args[:n]); err != nil {
+			if errors.Is(err, flag.ErrHelp) {
+				return nil, err
+			}
 			return nil, usageError("%s: %v", cmd.Name(), err)
 		}
-		rest := fs.Args()
-		if len(rest) == 0 {
-			break
-		}
-		// fs.Parse stops at the first non-flag or after "--".
-		consumed := len(args) - len(rest)
-		if consumed > 0 && args[consumed-1] == "--" {
-			positional = append(positional, rest...)
-			break
-		}
-		positional = append(positional, rest[0])
-		args = rest[1:]
+		args = args[n:]
+	}
+	if helpMode {
+		return nil, flag.ErrHelp
 	}
 	fs.Visit(func(f *flag.Flag) { inv.set[f.Name] = true })
 	required, most := len(cmd.Args), len(cmd.Args)

@@ -41,11 +41,15 @@ func TestInspectAndRemoveRoot(t *testing.T) {
 		t.Fatalf("missing root: %v %v", foreign, err)
 	}
 	populate(t, root)
+	id, err := RecordWriteKey(root, "generated-key")
+	if err != nil {
+		t.Fatal(err)
+	}
 	c, err := InspectRoot(root)
 	if err != nil || !c.Exists || len(c.Foreign) != 0 {
 		t.Fatalf("inspect %+v %v", c, err)
 	}
-	want := []string{".lock", "profiles.json", "skills.json", "credentials/" + filepath.Base(NewFileStore(root).Path("account")), "credentials"}
+	want := []string{".lock", "profiles.json", "skills.json", "write-" + id + ".json", "credentials/" + filepath.Base(NewFileStore(root).Path("account")), "credentials"}
 	if !reflect.DeepEqual(c.Owned, want) {
 		t.Fatalf("owned %v", c.Owned)
 	}

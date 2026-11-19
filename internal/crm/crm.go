@@ -3,11 +3,13 @@
 // The commands depend only on the Contacts interface below. Client
 // implements it over the generated, dependency-free client in
 // internal/generated/crm/v1. Request parameters are CLI-shaped; payloads are
-// the generated DTOs.
+// the record JSON returned through the generated bindings.
 package crm
 
 import (
 	"context"
+	"encoding/json"
+	"encoding/json/jsontext"
 
 	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
 	"github.com/gatherdeal/cli/internal/output"
@@ -22,6 +24,7 @@ import (
 //     (httpx.ProblemError), so the exit code follows the problem's status
 //     and its retryable member decides retryability.
 type Contacts interface {
+	InvokeRead(context.Context, crmv1.CLIBinding, any) (jsontext.Value, string, error)
 	ListContacts(ctx context.Context, p ListContactsParams) (*ListContactsResult, error)
 	// ListAllContacts walks forward through every page with cursors (the
 	// shared bounded walker: total=none, 100 per page unless p.PageSize is
@@ -43,27 +46,27 @@ type Expansions []string
 type ListContactsParams struct {
 	// Page is 1-based; 0 means the server default (page 1, or cursor mode
 	// with After).
-	Page int
+	Page int `json:"page,omitempty"`
 	// PageSize is 1..100; 0 means the server default.
-	PageSize int
+	PageSize int `json:"page_size,omitempty"`
 	// After is an opaque cursor (a previous page's next_cursor): the page
 	// after it. Exclusive with Page.
-	After string
+	After string `json:"after,omitempty"`
 	// Total selects whether the server counts the rows ("exact" or "none");
 	// empty means the server default (exact in page mode, none with After).
-	Total crmv1.TotalMode
+	Total crmv1.TotalMode `json:"total,omitempty"`
 	// Search is free text matched by the server.
-	Search string
+	Search string `json:"search,omitempty"`
 	// SortBy is a field name; SortOrder is "asc" or "desc".
-	SortBy    string
-	SortOrder string
+	SortBy    string `json:"sort,omitempty"`
+	SortOrder string `json:"order,omitempty"`
 	// OutletID narrows the request to one outlet of the access.
-	OutletID string
-	Expand   Expansions
+	OutletID string     `json:"outlet_id,omitempty"`
+	Expand   Expansions `json:"expansions,omitempty"`
 	// TagIDs and TagNames filter by tag through the TagsEdge edge filter
 	// (any match).
-	TagIDs   []string
-	TagNames []string
+	TagIDs   []string `json:"tag_ids,omitempty"`
+	TagNames []string `json:"tag_names,omitempty"`
 }
 
 // GetContactParams selects one contact.
@@ -74,11 +77,11 @@ type GetContactParams struct {
 }
 
 // Contact is the generated contact DTO.
-type Contact = crmv1.Contact
+type Contact = crmv1.ContactView
 
 // ListContactsResult is one page of contacts.
 type ListContactsResult struct {
-	Contacts []*Contact
+	Contacts []json.RawMessage
 	// PageInfo is the page's ListPage fields other than its items.
 	PageInfo      output.PageInfo
 	CorrelationID string
@@ -86,7 +89,7 @@ type ListContactsResult struct {
 
 // ListAllContactsResult is every contact a forward walk returned.
 type ListAllContactsResult struct {
-	Contacts []*Contact
+	Contacts []json.RawMessage
 	// Truncated is true when maxItems stopped the walk before the end.
 	Truncated bool
 	// NextCursor is absent if the server overfilled a page and the cap cut it.
@@ -96,6 +99,6 @@ type ListAllContactsResult struct {
 
 // GetContactResult is one contact.
 type GetContactResult struct {
-	Contact       *Contact
+	Contact       json.RawMessage
 	CorrelationID string
 }

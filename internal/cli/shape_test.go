@@ -189,7 +189,7 @@ func TestShapingFlagsInCatalog(t *testing.T) {
 		got = append(got, name)
 	}
 	slices.Sort(got)
-	want := []string{"crm contacts get", "crm contacts list", "outlets get", "outlets list", "whatsapp agents get", "whatsapp agents list", "whatsapp messages get", "whatsapp messages list"}
+	want := []string{"crm contact_tags list", "crm contacts get", "crm contacts list", "outlets get", "outlets list", "whatsapp agents get", "whatsapp agents list", "whatsapp broadcast_suppressions list", "whatsapp broadcasts get", "whatsapp broadcasts list", "whatsapp broadcasts recipients list", "whatsapp chat_messages get", "whatsapp chats get", "whatsapp chats list", "whatsapp chats messages", "whatsapp message_templates get", "whatsapp message_templates list", "whatsapp messages get", "whatsapp messages list"}
 	if !slices.Equal(got, want) {
 		t.Fatalf("--fields on %v, want %v", got, want)
 	}

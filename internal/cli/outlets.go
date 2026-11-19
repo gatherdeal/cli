@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	"github.com/gatherdeal/cli/contracts"
@@ -42,7 +43,7 @@ func (inv *Invocation) identityClient() (*identity.Client, error) {
 		return nil, err
 	}
 	// Lookup runs within the authorized set; a code is never an outlet-id selector.
-	inv.Meta.Context.Request.OutletIDs = []string{}
+	inv.Meta.Context.Request = output.ContextRequest{OutletIDs: []string{}}
 	base, ok := t.disc.ServiceURL("identity")
 	if !ok {
 		return nil, output.Errorf(output.ExitUnclassified, output.CodeServiceMissing, "%s does not advertise the identity API", t.origin)
@@ -81,7 +82,7 @@ func runOutletsList(ctx context.Context, inv *Invocation) (any, error) {
 	inv.Meta.PageInfo = &page
 	return items, nil
 }
-func (inv *Invocation) resolveOutlet(ctx context.Context, idOrCode string) (*identityv1.Outlet, error) {
+func (inv *Invocation) resolveOutlet(ctx context.Context, idOrCode string) (json.RawMessage, error) {
 	if strings.TrimSpace(idOrCode) == "" {
 		return nil, usageError("outlet id or code is required")
 	}

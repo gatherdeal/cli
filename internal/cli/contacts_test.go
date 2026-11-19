@@ -6,6 +6,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -61,6 +62,25 @@ func TestContactsList(t *testing.T) {
 		t.Fatal("credential not attached to the CRM call")
 	}
 	golden(t, "contacts_list.golden.json", res.stdout)
+}
+
+func TestContactsListDryRun(t *testing.T) {
+	fake := newFake(t, server.ProductionOrigin)
+	te := newTestEnv(t, fake)
+	res := te.run("crm", "contacts", "list", "--dry-run", "--tag", "VIP", "--fields", "id,name")
+	if res.exit != 0 || fake.contactsQuery != nil || fake.statusCalls != 0 {
+		t.Fatal(res.stdout)
+	}
+	data := res.data()
+	selection := data["selection"].(map[string]any)
+	if !reflect.DeepEqual(selection["tag_names"], []any{"VIP"}) || !reflect.DeepEqual(data["fields"], []any{"id", "name"}) {
+		t.Fatal(res.stdout)
+	}
+	for _, args := range [][]string{{"--fields", "missing"}, {"--tag-id", "invalid"}, {"--unknown"}} {
+		if res := te.run(append([]string{"crm", "contacts", "list", "--dry-run"}, args...)...); res.exit != 2 {
+			t.Fatal(res.stdout)
+		}
+	}
 }
 
 func TestContactsListValidation(t *testing.T) {

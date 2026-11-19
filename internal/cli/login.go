@@ -43,19 +43,34 @@ type loginData struct {
 
 // accessView is how the CLI presents a delegated access.
 type accessView struct {
-	ID            string                   `json:"id"`
-	ClientID      string                   `json:"client_id,omitempty"`
-	Organization  *auth.StatusOrganization `json:"organization"`
-	OutletIDs     []string                 `json:"outlet_ids"`
-	Permissions   []string                 `json:"permissions"`
-	EffectCeiling *auth.EffectCeiling      `json:"effect_ceiling,omitempty"`
-	Lifetime      string                   `json:"lifetime"`
-	ExpireAt      *time.Time               `json:"expire_at"`
-	NeverExpires  bool                     `json:"never_expires"`
-	IdleExpireAt  time.Time                `json:"idle_expire_at"`
+	ID                string                   `json:"id"`
+	ClientID          string                   `json:"client_id,omitempty"`
+	Organization      *auth.StatusOrganization `json:"organization"`
+	OutletConsentMode string                   `json:"outlet_consent_mode"`
+	EffectiveOutlets  *store.EffectiveOutlets  `json:"effective_outlets,omitempty"`
+	OutletIDs         []string                 `json:"outlet_ids"`
+	Permissions       []string                 `json:"permissions"`
+	EffectCeiling     *auth.EffectCeiling      `json:"effect_ceiling,omitempty"`
+	Lifetime          string                   `json:"lifetime"`
+	ExpireAt          *time.Time               `json:"expire_at"`
+	NeverExpires      bool                     `json:"never_expires"`
+	IdleExpireAt      time.Time                `json:"idle_expire_at"`
 }
 
-func newAccessView(d *auth.DelegatedAccess, org *auth.StatusOrganization) accessView {
+func newAccessView(st *auth.StatusResult) accessView {
+	d, org := st.DelegatedAccess, st.Organization
+	consent := "listed"
+	if d.AllOutlets {
+		consent = "all"
+	}
+	var effective *store.EffectiveOutlets
+	if st.OutletScopeVersion == 1 {
+		ids := st.UserAllowedOutletIDs
+		if ids == nil {
+			ids = []string{}
+		}
+		effective = &store.EffectiveOutlets{Restricted: st.UserOutletRestricted, OutletIDs: ids}
+	}
 	if org == nil {
 		org = &auth.StatusOrganization{ID: d.OrganizationID}
 	}
@@ -68,7 +83,7 @@ func newAccessView(d *auth.DelegatedAccess, org *auth.StatusOrganization) access
 		perms = []string{}
 	}
 	return accessView{
-		ID: d.ID, ClientID: d.ClientID, Organization: org, OutletIDs: outlets, Permissions: perms,
+		ID: d.ID, ClientID: d.ClientID, Organization: org, OutletConsentMode: consent, EffectiveOutlets: effective, OutletIDs: outlets, Permissions: perms,
 		EffectCeiling: &ceiling, Lifetime: d.Lifetime, ExpireAt: d.ExpireAt, NeverExpires: d.ExpireAt == nil,
 		IdleExpireAt: d.IdleExpireAt,
 	}
@@ -438,6 +453,7 @@ func (inv *Invocation) finishLogin(ctx context.Context, t *target, secrets store
 		return nil, statusErr
 	}
 	user, org := st.User, st.Organization
+	access := newAccessView(st)
 
 	var oldToken string
 	err := inv.withLock(t, func(tx *stateTx, p *store.Profiles, prof *store.Profile) error {
@@ -500,9 +516,10 @@ func (inv *Invocation) finishLogin(ctx context.Context, t *target, secrets store
 		prof.Login = nil
 		summary := &store.AccessSummary{
 			ID: tr.DelegatedAccess.ID, OrganizationID: tr.DelegatedAccess.OrganizationID,
-			OutletIDs: tr.DelegatedAccess.OutletIDs, Permissions: tr.DelegatedAccess.Permissions,
-			Lifetime: tr.DelegatedAccess.Lifetime, ExpireAt: tr.DelegatedAccess.ExpireAt,
-			IdleExpireAt: tr.DelegatedAccess.IdleExpireAt, TokenHint: server.TokenHint(tr.AccessToken),
+			OutletConsentMode: access.OutletConsentMode, EffectiveOutlets: access.EffectiveOutlets,
+			OutletIDs: access.OutletIDs, Permissions: access.Permissions,
+			Lifetime: access.Lifetime, ExpireAt: access.ExpireAt,
+			IdleExpireAt: access.IdleExpireAt, TokenHint: server.TokenHint(tr.AccessToken),
 			LoggedInAt: inv.Env.now().UTC(),
 		}
 		if org != nil {
@@ -531,7 +548,7 @@ func (inv *Invocation) finishLogin(ctx context.Context, t *target, secrets store
 	data := loginData{
 		Profile: t.name, Server: t.origin, CredentialStore: secrets.Kind(),
 		TokenHint: server.TokenHint(tr.AccessToken), User: user,
-		DelegatedAccess: newAccessView(&tr.DelegatedAccess, org),
+		DelegatedAccess: access,
 	}
 	// Renewal: revoke the previous access once the new one is stored.
 	if oldToken != "" && oldToken != tr.AccessToken {
@@ -546,8 +563,15 @@ func (inv *Invocation) finishLogin(ctx context.Context, t *target, secrets store
 	if org != nil && org.Name != "" {
 		orgLabel = org.Name
 	}
-	inv.Env.stderrf("Logged in to %s for %s (%d outlet(s), %d permission(s), lifetime %s).\n",
-		t.origin, orgLabel, len(tr.DelegatedAccess.OutletIDs), len(tr.DelegatedAccess.Permissions), tr.DelegatedAccess.Lifetime)
+	outletScope := "unknown"
+	if eff := access.EffectiveOutlets; eff != nil {
+		outletScope = "unrestricted"
+		if eff.Restricted {
+			outletScope = fmt.Sprintf("%d outlet(s)", len(eff.OutletIDs))
+		}
+	}
+	inv.Env.stderrf("Logged in to %s for %s (outlet consent %s, effective outlet scope %s, %d permission(s), lifetime %s).\n",
+		t.origin, orgLabel, access.OutletConsentMode, outletScope, len(st.DelegatedAccess.Permissions), st.DelegatedAccess.Lifetime)
 	if tr.DelegatedAccess.ExpireAt == nil {
 		inv.Env.stderrf(neverExpiresNote)
 	}

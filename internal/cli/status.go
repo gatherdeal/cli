@@ -39,7 +39,7 @@ func runStatus(ctx context.Context, inv *Invocation) (any, error) {
 	return statusData{
 		Profile: t.name, Server: t.origin, CredentialSource: cred.source,
 		TokenHint: server.TokenHint(cred.token), User: st.User,
-		DelegatedAccess: newAccessView(st.DelegatedAccess, st.Organization),
+		DelegatedAccess: newAccessView(st),
 	}, nil
 }
 

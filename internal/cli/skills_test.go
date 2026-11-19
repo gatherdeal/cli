@@ -318,6 +318,14 @@ func TestSkillIndexes(t *testing.T) {
 	if want := "- whatsapp agents: List, create, pair, update and delete WhatsApp agents. Verbs: create, delete, get, list, pairing, update.\n"; !strings.Contains(content["references/whatsapp.md"], want) {
 		t.Errorf("whatsapp index lacks %q", want)
 	}
+	for _, want := range []string{"whatsapp chat_messages list", "--count", "--after-rev", "data.messages", "data.after_rev", "data.has_more"} {
+		if !strings.Contains(content["references/whatsapp.md"], want) {
+			t.Errorf("WhatsApp skill lacks %q", want)
+		}
+	}
+	if !strings.Contains(skill, "Paging (paginated record lists)") {
+		t.Error("general skill does not scope cursor paging")
+	}
 	// Every command appears as exactly one index entry: an app command as a
 	// verb in its app's resource index, a core command in SKILL.md.
 	for _, c := range Commands() {
