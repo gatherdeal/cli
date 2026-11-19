@@ -108,3 +108,12 @@ There are no automatic retries. Even a transient failure or an idempotency
 key is not evidence that replay is safe: reconcile the outcome and rely on the
 server's declared replay guarantee. WhatsApp configuration and message writes
 use these policies.
+
+## Tech debt
+
+The recovery filename for a generated idempotency key can be lost on power
+failure after server acceptance. Windows flushes the temporary file and then
+uses an ordinary rename. Use a write-through rename before dispatch. On Unix,
+first use with an environment token can create the config directory without
+syncing its entry in its parent. Sync newly created parent directory entries
+before dispatch. Verify both cases on their respective platforms.
