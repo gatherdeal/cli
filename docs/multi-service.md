@@ -12,14 +12,17 @@ runtime. The CRM, Identity and WhatsApp bundles are installed.
 
 The bundles were regenerated from the pinned producer commits with
 `GOWORK=off`. The CRM candidate uses utilities
-`v0.0.0-20261119164439-98728874d429`. Identity and WhatsApp use
+`v0.0.0-20261119192914-fb05de4996af`. Identity and WhatsApp use
 `v0.0.0-20261119035543-33746fdc2708`.
 
 | Producer | Pinned commit | Public operations |
 | --- | --- | ---: |
-| CRM | `632cabcdff0c60573d2a646c0796a0611e3cebd9` | 12 |
+| CRM | `4128f9aa2cf1fe73681784a90b5f45781c9dd141` | 12 |
 | Identity | `b7e955aa5161c83957b4b23b8639604b3bad0818` | 1 |
 | WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
+
+The CRM producer pin points to the local `chore/utilities-public-filter` branch
+until the CRM revision is released.
 
 All OpenAPI documents are embedded automatically. Contract checks enumerate
 all bundles, verify disk/embedded/generated digests, service/version constants

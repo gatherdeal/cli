@@ -9,8 +9,8 @@
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
       "digest": "sha256:972edfe8bc73c93e40d8c9004f14b9dc99823b73321c393fba84744df43b9da1",
-      "source_commit": "632cabcdff0c60573d2a646c0796a0611e3cebd9",
-      "utilities_version": "v0.0.0-20261119164439-98728874d429",
+      "source_commit": "4128f9aa2cf1fe73681784a90b5f45781c9dd141",
+      "utilities_version": "v0.0.0-20261119192914-fb05de4996af",
       "operations": [
         {
           "public_id": "crm.contact_logs.create",

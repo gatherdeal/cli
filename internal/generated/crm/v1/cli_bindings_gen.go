@@ -34,6 +34,11 @@ type CLIBinding struct {
 	Keyed     bool
 	Bind      func(arguments map[string]jsontext.Value, body jsontext.Value) (any, error)
 	Invoke    func(ctx context.Context, client *Client, input any, key string, opts ...RequestOption) (jsontext.Value, error)
+
+	// FilterFields maps wire field names to explicit allowed operators in declaration order.
+	// It is nil when the operation has no explicit allowlist.
+	// A missing field has no explicit operator restriction.
+	FilterFields map[string][]string
 }
 
 // CLIBindings returns a fresh descriptor for each published operation.
@@ -121,6 +126,11 @@ func CLIBindings() []CLIBinding {
 				var output FetchContactLogsOutput
 				err := client.callFetchContactLogs(ctx, request, &output, &raw, opts)
 				return raw, err
+			},
+			FilterFields: map[string][]string{
+				"contact_id": {"EQ", "IN"},
+				"create_at":  {"GTE", "LTE"},
+				"id":         {"EQ", "IN"},
 			},
 		},
 		{
@@ -530,6 +540,11 @@ func CLIBindings() []CLIBinding {
 				err := client.callListDeals(ctx, request, &output, &raw, opts)
 				return raw, err
 			},
+			FilterFields: map[string][]string{
+				"id":          {"EQ", "IN"},
+				"pipeline_id": {"EQ", "IN"},
+				"stage_id":    {"EQ", "IN"},
+			},
 		},
 		{
 			PublicID: "crm.sales_pipelines.list",
@@ -582,6 +597,10 @@ func CLIBindings() []CLIBinding {
 				var output ListPipelinesOutput
 				err := client.callListPipelines(ctx, request, &output, &raw, opts)
 				return raw, err
+			},
+			FilterFields: map[string][]string{
+				"id":   {"EQ", "IN"},
+				"name": {"EQ_FOLD", "CONTAINS_FOLD"},
 			},
 		},
 	}
