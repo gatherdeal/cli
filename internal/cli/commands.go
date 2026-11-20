@@ -10,6 +10,7 @@ import (
 
 	"github.com/gatherdeal/cli/internal/buildinfo"
 	"github.com/gatherdeal/cli/internal/crm"
+	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
 	"github.com/gatherdeal/cli/internal/output"
 	"github.com/gatherdeal/cli/internal/update"
 )
@@ -116,6 +117,10 @@ func Commands() []*Command {
 		}
 		if len(c.Path) == 0 || (c.Presentation == nil && (len(c.Path) < 3 || c.Path[0] != c.App)) {
 			panic("contract command path must start with its app: " + c.Operation)
+		}
+		// Only CRM bindings pass --if-match to their generated client.
+		if c.App != crmv1.Service && requiresIfMatch(c.Operation) {
+			panic("bind the If-Match option of the generated client for " + c.Operation)
 		}
 	}
 	// Keep the published spelling in the contract and use kebab-case in the CLI.

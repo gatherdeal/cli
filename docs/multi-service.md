@@ -130,7 +130,19 @@ Idempotency support is taken from the manifest. Keyed writes generate a random
 key if omitted; `meta.write` reports the key and whether it was generated on
 success, preview and failure. The binding must pass that exact key to the API.
 Confirmation is mistake prevention, not authorization; previews do not reserve
-resources. The binding is responsible for server scope/revision preconditions.
+resources. The binding is responsible for server scope preconditions.
+
+Revision preconditions come from the contract. When an operation's OpenAPI
+document declares a required `If-Match` header, the write policy adds a
+required `--if-match` flag, so help, `gatherdeal commands` and the skill show
+it. The CLI checks that the value is a strong entity tag (quotes included,
+no `W/` or `*`) before dispatch, the preview reports it as `if_match`, and
+the generated binding sends it unchanged through the client's `WithIfMatch`
+option. The CLI never reads or caches revisions itself. A stale or missing
+tag is a definite server rejection (HTTP 412, `PRECONDITION_FAILED`, exit 6)
+mapped through ordinary problem handling; the caller reads the resource
+again. Only CRM bindings pass the option today; `Commands()` panics if
+another service's contract requires `If-Match` before its binding passes it.
 
 After dispatch may have begun, ambiguous transport/response failures must use
 `output.UnknownWriteOutcome`: `CLI_WRITE_OUTCOME_UNKNOWN`, exit 8,

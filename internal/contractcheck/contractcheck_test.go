@@ -278,6 +278,7 @@ func TestRequestFlagsMatchContracts(t *testing.T) {
 				if hasKey != keyed {
 					t.Errorf("%s: --idempotency-key present=%v, manifest keyed=%v", c.Name(), hasKey, keyed)
 				}
+				ifMatch := false
 				for _, p := range route.Parameters {
 					if p.In == "query" && p.Required {
 						name := strings.ReplaceAll(p.Name, "_", "-")
@@ -285,6 +286,10 @@ func TestRequestFlagsMatchContracts(t *testing.T) {
 							t.Errorf("%s: required query parameter %s has no required flag", c.Name(), p.Name)
 						}
 					}
+					ifMatch = ifMatch || p.In == "header" && p.Name == "If-Match" && p.Required
+				}
+				if flag, ok := flags["if-match"]; ok != ifMatch || flag.Required != ifMatch {
+					t.Errorf("%s: --if-match present=%v required=%v, OpenAPI requires If-Match=%v", c.Name(), ok, flag.Required, ifMatch)
 				}
 			}
 		}

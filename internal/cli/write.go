@@ -42,8 +42,17 @@ func (p WritePolicy) flags(op contracts.Operation) []FlagSpec {
 	if op.Idempotency == contracts.IdempotencyKeyed {
 		flags = append(flags, FlagSpec{Name: "idempotency-key", Kind: kindString, Usage: "Stable replay key; preserve it when reconciling an uncertain result."})
 	}
+	if requiresIfMatch(op.PublicID) {
+		flags = append(flags, flagIfMatch)
+	}
 	return flags
 }
+
+var flagIfMatch = FlagSpec{Name: "if-match", Kind: kindString, Required: true, Usage: "Revision from the latest read, quotes included, sent unchanged as If-Match. A stale revision fails with PRECONDITION_FAILED; read again before retrying."}
+
+// entityTagRE is a strong entity tag (RFC 9110). If-Match compares strongly,
+// so a weak tag never matches and * would skip the revision check.
+var entityTagRE = regexp.MustCompile(`^"[\x21\x23-\x7e]*"$`)
 
 var flagInput = FlagSpec{Name: "input", Kind: kindString, Usage: "JSON body: inline JSON, a file path, or - for standard input."}
 
@@ -52,10 +61,15 @@ type WriteOptions struct {
 	Confirmed      bool
 	IdempotencyKey string
 	keyProvided    bool
+	// IfMatch is the caller's entity tag for operations that require If-Match.
+	IfMatch string
 }
 
 func (inv *Invocation) writeOptions(policy WritePolicy) WriteOptions {
 	opts := WriteOptions{DryRun: inv.boolean("dry-run"), Confirmed: inv.boolean(string(policy.Confirmation))}
+	if inv.isSet("if-match") {
+		opts.IfMatch = inv.str("if-match")
+	}
 	if inv.isSet("idempotency-key") {
 		opts.IdempotencyKey = inv.str("idempotency-key")
 		opts.keyProvided = true
@@ -83,6 +97,16 @@ func PrepareWrite(op contracts.Operation, policy WritePolicy, opts WriteOptions,
 	}
 	if key != "" && op.Idempotency != contracts.IdempotencyKeyed {
 		return usageError("operation %s does not support --idempotency-key", op.PublicID)
+	}
+	switch {
+	case !requiresIfMatch(op.PublicID):
+		if opts.IfMatch != "" {
+			return usageError("operation %s does not support --if-match", op.PublicID)
+		}
+	case opts.IfMatch == "":
+		return usageError("flag --if-match is required: pass the revision from the latest read")
+	case !entityTagRE.MatchString(opts.IfMatch):
+		return usageError(`invalid --if-match: pass the revision unchanged, quotes included (for example '"r1"')`)
 	}
 	generated := key == "" && op.Idempotency == contracts.IdempotencyKeyed && (opts.DryRun || opts.Confirmed)
 	if generated {

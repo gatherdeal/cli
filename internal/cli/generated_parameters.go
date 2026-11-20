@@ -25,11 +25,13 @@ type parameterSchema struct {
 
 type wireParameter struct {
 	Name, In, Description string
+	Required              bool
 	Schema                parameterSchema
 }
 
 // Generated argument descriptors name the parameter. Its scalar type, enum
-// and help text live in the same bundle's embedded OpenAPI document.
+// and help text live in the same bundle's embedded OpenAPI document, as do
+// the request headers an operation requires (see requiresIfMatch).
 var parameterIndex = sync.OnceValue(func() map[string]map[string]wireParameter {
 	index := make(map[string]map[string]wireParameter)
 	m, err := contracts.Load()
@@ -55,7 +57,7 @@ var parameterIndex = sync.OnceValue(func() map[string]map[string]wireParameter {
 			for _, op := range path {
 				params := map[string]wireParameter{}
 				for _, p := range op.Parameters {
-					if p.In != "query" && p.In != "path" {
+					if p.In != "query" && p.In != "path" && p.In != "header" {
 						continue
 					}
 					s := p.Schema
@@ -122,4 +124,11 @@ func parameterFor(op contracts.Operation, a bindingArgument) commandParameter {
 	}
 	p.flag.Required = a.Required
 	return p
+}
+
+// requiresIfMatch reports whether the operation's contract requires an
+// If-Match header. Such a write takes a required --if-match flag (see
+// WritePolicy.flags), and the binding sends its value unchanged.
+func requiresIfMatch(publicID string) bool {
+	return parameterIndex()[publicID]["header/If-Match"].Required
 }
