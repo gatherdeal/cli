@@ -41,14 +41,15 @@ type Manifest struct {
 
 // Bundle is one service version's contract.
 type Bundle struct {
-	Service     string      `json:"service"`
-	Version     string      `json:"version"`
-	Server      string      `json:"server"`
-	ServicePath string      `json:"service_path"`
-	Contract    string      `json:"contract"`
-	GoPackage   string      `json:"go_package"`
-	Digest      string      `json:"digest"`
-	Operations  []Operation `json:"operations"`
+	Service           string      `json:"service"`
+	Version           string      `json:"version"`
+	Server            string      `json:"server"`
+	ServicePath       string      `json:"service_path"`
+	Contract          string      `json:"contract"`
+	GoPackage         string      `json:"go_package"`
+	Digest            string      `json:"digest"`
+	GeneratedGoDigest string      `json:"generated_go_digest"`
+	Operations        []Operation `json:"operations"`
 }
 
 // Operation is one published operation.

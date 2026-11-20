@@ -70,9 +70,12 @@ The commands derive their app, command path and declared flags from the
 manifest, including the `--with-*` flags of `crm contacts list` and
 `crm contacts get`. The tests of `internal/httpx` and `internal/crm` run every
 conformance fixture. `go test ./internal/contractcheck` checks that each
-generated package's `BundleDigest` matches the committed contract, that every
-manifest operation has exactly one command, that command flags stay within the
-manifest, and that generated code imports only the standard library.
+generated package's `BundleDigest` matches the committed OpenAPI document and
+that its Go source matches the manifest's `generated_go_digest`. It also
+checks that every manifest operation has exactly one command, that command
+flags stay within the manifest, and that generated code imports only the
+standard library. Manifest v2 remains readable by the CLI without the new
+field. The contract check requires it on every bundle.
 
 See [Adding a service binding](docs/multi-service.md) for how commands bind
 to the contract, service discovery, shared pagination and write policies.
