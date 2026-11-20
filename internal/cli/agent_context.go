@@ -164,11 +164,26 @@ var appNotes = map[string]string{
   If CRM_SALES_PIPELINE_STAGE_LIMIT occurs, omit --with-stages to list pipelines.
 - gatherdeal crm deals list [--pipeline-id UUID] [--stage-id UUID] [--search TEXT]
   narrows the deal list. Use gatherdeal crm deals get <id> for one deal.
-- CRM writes require explicit CRM contact-write approval during auth login and
-  use --dry-run to preview or --yes to execute.
-- contacts create, contact-tags assign and contact-logs create use a key from
-  meta.write.idempotency_key. For a retry of the same operation, pass that key
-  with --idempotency-key. Use a fresh key to reassign a tag after removal.
+- CRM writes require the matching CRM write approval (contacts or deals)
+  during auth login and use --dry-run to preview or --yes to execute.
+- contacts create, contact-tags assign, contact-logs create and deals create
+  use a key from meta.write.idempotency_key. For a retry of the same operation,
+  pass that key with --idempotency-key; IDEMPOTENCY_KEY_CONFLICT means the key
+  was used for other input. Use a fresh key to reassign a tag after removal.
+- gatherdeal crm deals create --outlet <id> --input <json> --yes creates a deal
+  in that outlet from {"pipeline_id":"…","stage_id":"…"} plus optional type,
+  priority and remark; CRM names it and returns data.id. Without --outlet, CRM
+  uses the access's only deal-write outlet or fails with
+  CRM_DEAL_OUTLET_REQUIRED.
+- deals move-stage and deals update need the deal's current revision. Read
+  data.revision with gatherdeal crm deals get <id> (--jq .revision prints it)
+  and pass it unchanged, quotes included, as --if-match: for example
+  --if-match '"r1"'. A successful move or update returns data.revision for the
+  next write. PRECONDITION_FAILED (exit 6) means the deal changed since that
+  read: read it again before deciding whether to repeat the change.
+- deals update --input takes priority, type and remark: omit a member to keep
+  it, null clears it. deals move-stage --input takes {"stage_id":"…"} from
+  the deal's own pipeline.
 `,
 	"outlets": `- gatherdeal outlets list [--code CODE] [--id UUID] [--search TEXT] --limit N
   reads only authorized outlets, with the general paging rules.

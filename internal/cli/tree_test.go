@@ -11,7 +11,7 @@ func TestGroupHelp(t *testing.T) {
 		args []string
 		want string
 	}{
-		{nil, "Manage CRM contacts, tags and contact logs, and read sales pipelines and deals."},
+		{nil, "Manage CRM contacts, tags, contact logs and deals, and read sales pipelines."},
 		{nil, "Install or print the GatherDeal agent skill."},
 		{[]string{"skills", "--help"}, "install"},
 		{[]string{"skills", "install", "--help"}, "--scope"},

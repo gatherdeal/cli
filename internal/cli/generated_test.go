@@ -199,7 +199,7 @@ func TestChatMessagesRevisionPoll(t *testing.T) {
 
 func TestGeneratedCRMHelp(t *testing.T) {
 	te := newTestEnv(t, nil)
-	for _, name := range []string{"contacts update", "contact-tags assign", "contact-tags remove", "contact-logs list", "sales-pipelines list", "deals list", "deals get"} {
+	for _, name := range []string{"contacts update", "contact-tags assign", "contact-tags remove", "contact-logs list", "sales-pipelines list", "deals list", "deals get", "deals create", "deals move-stage", "deals update"} {
 		t.Run(name, func(t *testing.T) {
 			args := append([]string{"crm"}, strings.Fields(name)...)
 			res := te.run(append(args, "--help")...)
@@ -390,5 +390,108 @@ func TestGeneratedCRMWrites(t *testing.T) {
 				t.Fatal(res.stdout, keys)
 			}
 		})
+	}
+}
+
+func TestGeneratedCRMDealPreconditions(t *testing.T) {
+	const deal = "44444444-4444-4444-8444-444444444444"
+	const stage = "55555555-5555-4555-8555-555555555555"
+	const revision = `"r1:AbC-9"`
+	for _, tc := range []struct {
+		name, method, path, body string
+		args                     []string
+	}{
+		{"move stage", http.MethodPut, "/crm/v1/deals/" + deal + "/stage", `{"stage_id":"` + stage + `"}`, []string{"move-stage", deal}},
+		{"update", http.MethodPatch, "/crm/v1/deals/" + deal + "/fields", `{"priority":"high","remark":null}`, []string{"update", deal}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f, te := loggedIn(t)
+			var tags []string
+			status := http.StatusOK
+			f.crm = func(w http.ResponseWriter, r *http.Request) {
+				tags = append(tags, strings.Join(r.Header.Values("If-Match"), "|"))
+				var sent, want map[string]any
+				if err := json.NewDecoder(r.Body).Decode(&sent); err != nil || json.Unmarshal([]byte(tc.body), &want) != nil || !reflect.DeepEqual(sent, want) {
+					t.Errorf("body %v, want %s: %v", sent, tc.body, err)
+				}
+				if r.Method != tc.method || r.URL.Path != tc.path || r.Header.Get("Idempotency-Key") != "" {
+					t.Errorf("unexpected deal write: %s %s", r.Method, r.URL)
+				}
+				if status != http.StatusOK {
+					writeJSON(w, status, problemJSON(status, "PRECONDITION_FAILED", "The deal changed.", nil))
+					return
+				}
+				writeJSON(w, http.StatusOK, `{"status":"success","revision":"\"r2\""}`)
+			}
+			args := append([]string{"crm", "deals"}, tc.args...)
+			args = append(args, "--input", tc.body)
+			for _, bad := range [][]string{
+				{"--yes"}, {"--dry-run"}, {"--yes", "--if-match", ""},
+				{"--yes", "--if-match", "r1"}, {"--yes", "--if-match", `W/"r1"`}, {"--yes", "--if-match", "*"},
+				{"--yes", "--if-match", revision, "--idempotency-key", "caller-key-1"},
+			} {
+				if r := te.run(append(args, bad...)...); r.exit != 2 || r.errorCode() != "CLI_USAGE" || len(tags) != 0 {
+					t.Fatal(bad, r.stdout, r.stderr)
+				}
+			}
+			args = append(args, "--if-match", revision)
+			if r := te.run(args...); r.exit != 9 || r.errorCode() != "CLI_WRITE_CONFIRMATION_REQUIRED" || len(tags) != 0 {
+				t.Fatal(r.stdout)
+			}
+			preview := te.run(append(args, "--dry-run")...)
+			if preview.exit != 0 || preview.data()["if_match"] != revision || len(tags) != 0 {
+				t.Fatal(preview.stdout)
+			}
+			r := te.run(append(args, "--yes")...)
+			if r.exit != 0 || r.data()["revision"] != `"r2"` || !reflect.DeepEqual(tags, []string{revision}) {
+				t.Fatal(r.stdout, tags)
+			}
+			status = http.StatusPreconditionFailed
+			r = te.run(append(args, "--yes")...)
+			if r.exit != 6 || r.errorCode() != "PRECONDITION_FAILED" || len(tags) != 2 || tags[1] != revision {
+				t.Fatal(r.stdout, tags)
+			}
+		})
+	}
+}
+
+func TestGeneratedCRMDealCreate(t *testing.T) {
+	const deal = "44444444-4444-4444-8444-444444444444"
+	const outlet = "33333333-3333-3333-3333-333333333333"
+	const body = `{"pipeline_id":"01234567-89ab-4cde-8fab-0123456789ab","stage_id":"55555555-5555-4555-8555-555555555555","priority":"low"}`
+	f, te := loggedIn(t)
+	var keys []string
+	conflict := false
+	f.crm = func(w http.ResponseWriter, r *http.Request) {
+		keys = append(keys, r.Header.Get("Idempotency-Key"))
+		if r.Method != http.MethodPost || r.URL.Path != "/crm/v1/deals" || r.URL.Query().Get("outlet_id") != outlet || r.Header.Get("If-Match") != "" {
+			t.Errorf("unexpected deal create: %s %s", r.Method, r.URL)
+		}
+		if conflict {
+			writeJSON(w, http.StatusConflict, problemJSON(http.StatusConflict, "IDEMPOTENCY_KEY_CONFLICT", "The key was used for other input.", nil))
+			return
+		}
+		writeJSON(w, http.StatusOK, `{"status":"success","id":"`+deal+`"}`)
+	}
+	args := []string{"crm", "deals", "create", "--outlet", outlet, "--input", body}
+	if r := te.run(args...); r.exit != 9 || len(keys) != 0 {
+		t.Fatal(r.stdout)
+	}
+	if r := te.run(append(args, "--yes", "--if-match", `"r1"`)...); r.exit != 2 || !strings.Contains(r.stderr, "flag provided but not defined: -if-match") || len(keys) != 0 {
+		t.Fatal(r.stdout, r.stderr)
+	}
+	if r := te.run(append(args, "--dry-run")...); r.exit != 0 || len(keys) != 0 {
+		t.Fatal(r.stdout)
+	}
+	r := te.run(append(args, "--yes")...)
+	meta := r.env["meta"].(map[string]any)["write"].(map[string]any)
+	if r.exit != 0 || r.data()["id"] != deal || len(keys) != 1 || keys[0] == "" || meta["idempotency_key"] != keys[0] || meta["idempotency_key_generated"] != true {
+		t.Fatal(r.stdout, keys)
+	}
+	conflict = true
+	r = te.run(append(args, "--yes", "--idempotency-key", keys[0])...)
+	meta = r.env["meta"].(map[string]any)["write"].(map[string]any)
+	if r.exit != 6 || r.errorCode() != "IDEMPOTENCY_KEY_CONFLICT" || len(keys) != 2 || keys[1] != keys[0] || meta["idempotency_key"] != keys[0] || meta["idempotency_key_generated"] != nil {
+		t.Fatal(r.stdout, keys)
 	}
 }
