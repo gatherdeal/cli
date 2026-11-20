@@ -9,13 +9,13 @@
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
       "digest": "sha256:d72481953ce8e9702eb14b0bc81b027a0c811c9abdc7a643716eaa4b0846d586",
-      "generated_go_digest": "sha256:29fd418834f8d62048e2bc412576c8de7b4215dc265aaa6e33a2abee105acc48",
+      "generated_go_digest": "sha256:7e213d97f6b2dcf481c3c19a5ae739156f2d742385d952064bb5a25513c1b8b7",
       "source_commit": "e352008cba8720d776f572e37eb3006513a633fe",
-      "utilities_version": "v0.0.0-20261120015501-6888178c5586",
+      "utilities_version": "v0.0.0-20261120025032-9afde6f86130",
       "operations": [
         {
           "public_id": "crm.contact_logs.create",
-          "command": "crm contact_logs create",
+          "command": "crm contact-logs create",
           "tool": "crm_contact_logs_create",
           "method": "POST",
           "path": "/v1/contact-logs",
@@ -185,7 +185,7 @@
         },
         {
           "public_id": "crm.contact_logs.list",
-          "command": "crm contact_logs list",
+          "command": "crm contact-logs list",
           "tool": "crm_contact_logs_list",
           "method": "GET",
           "path": "/v1/contact-logs",
@@ -394,7 +394,7 @@
         },
         {
           "public_id": "crm.contact_tags.assign",
-          "command": "crm contact_tags assign",
+          "command": "crm contact-tags assign",
           "tool": "crm_contact_tags_assign",
           "method": "PUT",
           "path": "/v1/contacts/:contact_id/tags/:tag_id",
@@ -559,7 +559,7 @@
         },
         {
           "public_id": "crm.contact_tags.list",
-          "command": "crm contact_tags list",
+          "command": "crm contact-tags list",
           "tool": "crm_contact_tags_list",
           "method": "GET",
           "path": "/v1/contact-tags",
@@ -789,7 +789,7 @@
         },
         {
           "public_id": "crm.contact_tags.remove",
-          "command": "crm contact_tags remove",
+          "command": "crm contact-tags remove",
           "tool": "crm_contact_tags_remove",
           "method": "DELETE",
           "path": "/v1/contacts/:contact_id/tags/:tag_id",
@@ -2302,7 +2302,7 @@
         },
         {
           "public_id": "crm.deals.move_stage",
-          "command": "crm deals move_stage",
+          "command": "crm deals move-stage",
           "tool": "crm_deals_move_stage",
           "method": "PUT",
           "path": "/v1/deals/:id/stage",
@@ -2622,7 +2622,7 @@
         },
         {
           "public_id": "crm.sales_pipelines.list",
-          "command": "crm sales_pipelines list",
+          "command": "crm sales-pipelines list",
           "tool": "crm_sales_pipelines_list",
           "method": "GET",
           "path": "/v1/sales-pipelines",
@@ -4807,7 +4807,7 @@
         },
         {
           "public_id": "whatsapp.broadcast_suppressions.add",
-          "command": "whatsapp broadcast_suppressions add",
+          "command": "whatsapp broadcast-suppressions add",
           "tool": "whatsapp_broadcast_suppressions_add",
           "method": "POST",
           "path": "/v1/broadcast-suppressions",
@@ -4961,7 +4961,7 @@
         },
         {
           "public_id": "whatsapp.broadcast_suppressions.delete",
-          "command": "whatsapp broadcast_suppressions delete",
+          "command": "whatsapp broadcast-suppressions delete",
           "tool": "whatsapp_broadcast_suppressions_delete",
           "method": "DELETE",
           "path": "/v1/broadcast-suppressions/:suppression_id",
@@ -5111,7 +5111,7 @@
         },
         {
           "public_id": "whatsapp.broadcast_suppressions.list",
-          "command": "whatsapp broadcast_suppressions list",
+          "command": "whatsapp broadcast-suppressions list",
           "tool": "whatsapp_broadcast_suppressions_list",
           "method": "GET",
           "path": "/v1/broadcast-suppressions",
@@ -7113,7 +7113,7 @@
         },
         {
           "public_id": "whatsapp.chat_messages.get",
-          "command": "whatsapp chat_messages get",
+          "command": "whatsapp chat-messages get",
           "tool": "whatsapp_chat_messages_get",
           "method": "GET",
           "path": "/v1/chat-messages/:id",
@@ -7263,7 +7263,7 @@
         },
         {
           "public_id": "whatsapp.chat_messages.list",
-          "command": "whatsapp chat_messages list",
+          "command": "whatsapp chat-messages list",
           "tool": "whatsapp_chat_messages_list",
           "method": "GET",
           "path": "/v1/chat-messages",
@@ -7927,7 +7927,7 @@
         },
         {
           "public_id": "whatsapp.message_templates.create",
-          "command": "whatsapp message_templates create",
+          "command": "whatsapp message-templates create",
           "tool": "whatsapp_message_templates_create",
           "method": "POST",
           "path": "/v1/message-templates",
@@ -8083,7 +8083,7 @@
         },
         {
           "public_id": "whatsapp.message_templates.delete",
-          "command": "whatsapp message_templates delete",
+          "command": "whatsapp message-templates delete",
           "tool": "whatsapp_message_templates_delete",
           "method": "DELETE",
           "path": "/v1/message-templates/:template_id",
@@ -8234,7 +8234,7 @@
         },
         {
           "public_id": "whatsapp.message_templates.get",
-          "command": "whatsapp message_templates get",
+          "command": "whatsapp message-templates get",
           "tool": "whatsapp_message_templates_get",
           "method": "GET",
           "path": "/v1/message-templates/:template_id",
@@ -8384,7 +8384,7 @@
         },
         {
           "public_id": "whatsapp.message_templates.list",
-          "command": "whatsapp message_templates list",
+          "command": "whatsapp message-templates list",
           "tool": "whatsapp_message_templates_list",
           "method": "GET",
           "path": "/v1/message-templates",
@@ -8563,7 +8563,7 @@
         },
         {
           "public_id": "whatsapp.message_templates.preview",
-          "command": "whatsapp message_templates preview",
+          "command": "whatsapp message-templates preview",
           "tool": "whatsapp_message_templates_preview",
           "method": "POST",
           "path": "/v1/message-templates/:template_id/preview",
@@ -8718,7 +8718,7 @@
         },
         {
           "public_id": "whatsapp.message_templates.update",
-          "command": "whatsapp message_templates update",
+          "command": "whatsapp message-templates update",
           "tool": "whatsapp_message_templates_update",
           "method": "PUT",
           "path": "/v1/message-templates/:template_id",

@@ -12,7 +12,7 @@ runtime. The CRM, Identity and WhatsApp bundles are installed.
 
 The bundles were regenerated from the pinned producer commits with
 `GOWORK=off`. The CRM candidate uses utilities
-`v0.0.0-20261120015501-6888178c5586`. Identity and WhatsApp use
+`v0.0.0-20261120025032-9afde6f86130`. Identity and WhatsApp use
 `v0.0.0-20261119035543-33746fdc2708`.
 
 | Producer | Pinned commit | Public operations |
@@ -22,7 +22,10 @@ The bundles were regenerated from the pinned producer commits with
 | WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
 
 The CRM producer pin points to the local `feat/crm-wave4a` branch until the
-CRM revision is released.
+CRM revision is released. The CRM bundle uses the kebab-case emitter from the
+utilities version above. Identity and WhatsApp were re-exported with the
+`apigen.CommandPath` fix applied to temporary copies of their pinned utilities
+version. The re-exports reproduced all three OpenAPI digests.
 
 All OpenAPI documents are embedded automatically. Contract checks enumerate
 all bundles, verify disk/embedded/generated digests, service/version constants
@@ -32,7 +35,8 @@ effects, permissions, outlet policy and idempotency for metadata and skills;
 API `ReadOnly` is derived from the effect. Catalog and skills derive from the
 installed commands. A top-level presentation is a `CommandPresentation{Path: ...}` on
 that binding: `outlets list` belongs to `identity.outlets.list`.
-The CLI renders underscores as hyphens in command path segments.
+The generator publishes kebab-case CLI paths. The full published path
+`identity outlets list` also resolves to the top-level command.
 There is no second inventory and presentation never changes service ownership.
 `outlets get` is a convenience lookup through the published list's ID/code
 filters, not an additional public operation. WhatsApp agent creation resolves

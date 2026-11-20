@@ -4,14 +4,17 @@
 package contractcheck
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -20,6 +23,9 @@ import (
 	"github.com/gatherdeal/cli/contracts"
 	"github.com/gatherdeal/cli/internal/cli"
 	"github.com/gatherdeal/cli/internal/crm"
+	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
+	identityv1 "github.com/gatherdeal/cli/internal/generated/identity/v1"
+	whatsappv1 "github.com/gatherdeal/cli/internal/generated/whatsapp/v1"
 )
 
 const expansionPrefix = "with_"
@@ -137,9 +143,9 @@ func TestEveryOperationHasACommand(t *testing.T) {
 		for _, op := range b.Operations {
 			known[op.PublicID] = true
 			for _, c := range byOperation[op.PublicID] {
-				wantPath := strings.ReplaceAll(op.Command, "_", "-")
+				wantPath := op.Command
 				if c.Presentation != nil {
-					wantPath = strings.ReplaceAll(strings.Join(c.Presentation.Path, " "), "_", "-")
+					wantPath = strings.Join(c.Presentation.Path, " ")
 				}
 				if c.App != b.Service || c.Name() != wantPath {
 					t.Errorf("operation %s: app/path = %q/%q, want %q/%q", op.PublicID, c.App, c.Name(), b.Service, wantPath)
@@ -155,6 +161,56 @@ func TestEveryOperationHasACommand(t *testing.T) {
 		if !known[id] {
 			t.Errorf("a command names operation %s, which the manifest lacks", id)
 		}
+	}
+}
+
+// Every generated binding and manifest entry must agree on a published path
+// that parses as the runtime command for that operation.
+func TestBindingCommandPaths(t *testing.T) {
+	commandPattern := regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*( [a-z0-9]+(-[a-z0-9]+)*)*$`)
+	runtimePaths := map[string]string{}
+	for _, c := range cli.Commands() {
+		runtimePaths[c.Operation] = c.Name()
+	}
+	bindings := map[string]string{}
+	recordBinding := func(id, path string) {
+		if _, duplicate := bindings[id]; duplicate {
+			t.Errorf("duplicate generated binding %s", id)
+		}
+		bindings[id] = path
+	}
+	for _, b := range crmv1.CLIBindings() {
+		recordBinding(b.PublicID, b.Command)
+	}
+	for _, b := range identityv1.CLIBindings() {
+		recordBinding(b.PublicID, b.Command)
+	}
+	for _, b := range whatsappv1.CLIBindings() {
+		recordBinding(b.PublicID, b.Command)
+	}
+	for _, b := range manifest(t).Bundles {
+		for _, op := range b.Operations {
+			t.Run(op.PublicID, func(t *testing.T) {
+				if !commandPattern.MatchString(op.Command) {
+					t.Errorf("invalid CLI path %q", op.Command)
+				}
+				if got, ok := bindings[op.PublicID]; !ok || got != op.Command {
+					t.Errorf("generated path = %q, want %q", got, op.Command)
+				}
+				delete(bindings, op.PublicID)
+				var stdout bytes.Buffer
+				args := append(strings.Fields(op.Command), "--help")
+				exit := cli.Run(t.Context(), &cli.Env{Stdout: &stdout, Stderr: io.Discard}, args)
+				firstLine, _, _ := strings.Cut(stdout.String(), "\n")
+				want := "gatherdeal " + runtimePaths[op.PublicID]
+				if exit != 0 || (firstLine != want && !strings.HasPrefix(firstLine, want+" ")) {
+					t.Errorf("%q --help exited %d and printed %q, want help for %q", op.Command, exit, firstLine, want)
+				}
+			})
+		}
+	}
+	for id := range bindings {
+		t.Errorf("generated binding %s lacks a manifest operation", id)
 	}
 }
 

@@ -46,7 +46,7 @@ func CLIBindings() []CLIBinding {
 	return []CLIBinding{
 		{
 			PublicID: "crm.contact_logs.create",
-			Command:  "crm contact_logs create",
+			Command:  "crm contact-logs create",
 			Summary:  "Create Contact Log",
 			HasBody:  true,
 			Keyed:    true,
@@ -77,7 +77,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "crm.contact_logs.list",
-			Command:  "crm contact_logs list",
+			Command:  "crm contact-logs list",
 			Summary:  "Fetch Contact Logs",
 			HasBody:  false,
 			Keyed:    false,
@@ -135,7 +135,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "crm.contact_tags.assign",
-			Command:  "crm contact_tags assign",
+			Command:  "crm contact-tags assign",
 			Summary:  "Assign Contact Tag",
 			HasBody:  false,
 			Keyed:    true,
@@ -173,7 +173,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "crm.contact_tags.list",
-			Command:  "crm contact_tags list",
+			Command:  "crm contact-tags list",
 			Summary:  "Fetch Contact Tags",
 			HasBody:  false,
 			Keyed:    false,
@@ -224,7 +224,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "crm.contact_tags.remove",
-			Command:  "crm contact_tags remove",
+			Command:  "crm contact-tags remove",
 			Summary:  "Remove Contact Tag",
 			HasBody:  false,
 			Keyed:    false,
@@ -579,7 +579,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "crm.deals.move_stage",
-			Command:  "crm deals move_stage",
+			Command:  "crm deals move-stage",
 			Summary:  "Move Deal Stage",
 			HasBody:  true,
 			Keyed:    false,
@@ -649,7 +649,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "crm.sales_pipelines.list",
-			Command:  "crm sales_pipelines list",
+			Command:  "crm sales-pipelines list",
 			Summary:  "List Pipelines",
 			HasBody:  false,
 			Keyed:    false,
