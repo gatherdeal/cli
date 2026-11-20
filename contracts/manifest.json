@@ -3226,6 +3226,7 @@
       "contract": "contracts/identity/v1/openapi.json",
       "go_package": "internal/generated/identity/v1",
       "digest": "sha256:c1f3386aefa73e60370b3cc736dd63ebd8861491b89426eeb0f40a6b879884a5",
+      "generated_go_digest": "sha256:ecdcaee122b64f47f45557916c6aa7db22c938fa766e4cc69401c19d88d81d41",
       "source_commit": "b7e955aa5161c83957b4b23b8639604b3bad0818",
       "utilities_version": "v0.0.0-20261119035543-33746fdc2708",
       "operations": [
@@ -3820,6 +3821,7 @@
       "contract": "contracts/whatsapp/v1/openapi.json",
       "go_package": "internal/generated/whatsapp/v1",
       "digest": "sha256:3ec9c078eb1b10a29733c431562bff2456357ef70eeb9cb5f89aaebe2824e2a0",
+      "generated_go_digest": "sha256:65aec499f1980c33f4c92ace2481655af21718caac2ef727c041effd51cea598",
       "source_commit": "201d745162307b09762dba466f585cbaefc83fa2",
       "utilities_version": "v0.0.0-20261119035543-33746fdc2708",
       "operations": [

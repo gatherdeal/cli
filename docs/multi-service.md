@@ -47,9 +47,12 @@ Keep `digest` and the generated `BundleDigest` as the OpenAPI digest. Preserve
 `generated_go_digest` on other bundle entries when merging an export into the
 shared manifest. The field is additive in format v2, and older v2 readers can
 ignore it. Runtime loading still accepts earlier v2 manifests. The contract
-check fails with a re-export message if a bundle lacks the field. Re-export
-CRM, Identity and WhatsApp with the updated utilities before merging the CLI
-change.
+check fails with a re-export message if a bundle lacks the field.
+
+The digest re-exports used Identity's `origin/dev` commit `bd32b69e` and
+WhatsApp's `origin/dev` commit `1de40918`. A temporary copy of the digest-enabled
+generator used the release's public Go and OpenAPI renderers. Both exports
+reproduced the pinned OpenAPI and Go files byte for byte.
 
 ## Command bindings
 
