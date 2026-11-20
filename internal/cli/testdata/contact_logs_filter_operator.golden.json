@@ -1,0 +1,21 @@
+{
+  "data": null,
+  "error": {
+    "code": "CLI_USAGE",
+    "details": {
+      "allowed_operators": [
+        "GTE",
+        "LTE"
+      ],
+      "field": "create_at",
+      "operator": "EQ"
+    },
+    "message": "--filter operator \"EQ\" is invalid for field \"create_at\". Allowed operators are GTE, LTE.",
+    "retryable": false
+  },
+  "exit_code": 2,
+  "hint": "Run `gatherdeal commands` or `gatherdeal \u003ccommand\u003e --help`.",
+  "meta": {},
+  "schema_version": 1,
+  "status": "error"
+}

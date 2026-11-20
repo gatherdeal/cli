@@ -29,6 +29,8 @@ Look up commands one layer at a time instead of reading the whole catalog:
 3. Command: ` + "`gatherdeal commands <app> <resource>`" + ` (for example
    ` + "`gatherdeal commands crm contacts`" + `) prints the exact arguments,
    flags, record_fields and read_only of each verb, plus the exit codes.
+   When filter_fields is present, use its allowed --filter operators for the
+   listed root fields, including rules inside nested boolean groups.
 4. Run it.
 - When the app is unknown, ` + "`gatherdeal commands --search TEXT`" + ` lists the
   commands whose path, summary or resource summary contains TEXT
@@ -158,11 +160,30 @@ var appNotes = map[string]string{
 - gatherdeal crm contacts get <id> [--with-phones] [--with-emails]
   [--with-tags] [--with-attributes] adds the related records it names.
 - gatherdeal crm contact-logs list --contact-id <id> lists notes for one contact.
-- CRM writes require explicit CRM contact-write approval during auth login and
-  use --dry-run to preview or --yes to execute.
-- contacts create, contact-tags assign and contact-logs create use a key from
-  meta.write.idempotency_key. For a retry of the same operation, pass that key
-  with --idempotency-key. Use a fresh key to reassign a tag after removal.
+- gatherdeal crm sales-pipelines list --with-stages finds pipeline and stage IDs.
+  If CRM_SALES_PIPELINE_STAGE_LIMIT occurs, omit --with-stages to list pipelines.
+- gatherdeal crm deals list [--pipeline-id UUID] [--stage-id UUID] [--search TEXT]
+  narrows the deal list. Use gatherdeal crm deals get <id> for one deal.
+- CRM writes require the matching CRM write approval (contacts or deals)
+  during auth login and use --dry-run to preview or --yes to execute.
+- contacts create, contact-tags assign, contact-logs create and deals create
+  use a key from meta.write.idempotency_key. For a retry of the same operation,
+  pass that key with --idempotency-key; IDEMPOTENCY_KEY_CONFLICT means the key
+  was used for other input. Use a fresh key to reassign a tag after removal.
+- gatherdeal crm deals create --outlet <id> --input <json> --yes creates a deal
+  in that outlet from {"pipeline_id":"…","stage_id":"…"} plus optional type,
+  priority and remark; CRM names it and returns data.id. Without --outlet, CRM
+  uses the access's only deal-write outlet or fails with
+  CRM_DEAL_OUTLET_REQUIRED.
+- deals move-stage and deals update need the deal's current revision. Read
+  data.revision with gatherdeal crm deals get <id> (--jq .revision prints it)
+  and pass it unchanged, quotes included, as --if-match: for example
+  --if-match '"r1"'. A successful move or update returns data.revision for the
+  next write. PRECONDITION_FAILED (exit 6) means the deal changed since that
+  read: read it again before deciding whether to repeat the change.
+- deals update --input takes priority, type and remark: omit a member to keep
+  it, null clears it. deals move-stage --input takes {"stage_id":"…"} from
+  the deal's own pipeline.
 `,
 	"outlets": `- gatherdeal outlets list [--code CODE] [--id UUID] [--search TEXT] --limit N
   reads only authorized outlets, with the general paging rules.
@@ -238,8 +259,8 @@ func appReference(app *commandNode) string {
 Resources
 Each line is a resource path, its summary and its verbs. A command is the
 resource path followed by a verb, for example `+"`gatherdeal %s %s`"+`.
-Before running a command, read its exact arguments, flags, record_fields and
-read_only with `+"`gatherdeal commands <resource>`"+`, for example
+Before running a command, read its arguments, flags, record_fields,
+filter_fields (allowed root filter operators) and read_only with `+"`gatherdeal commands <resource>`"+`, for example
 `+"`gatherdeal commands %s`"+`.
 `, group, first.choices()[0], group)
 	writeResourceIndex(&b, app)

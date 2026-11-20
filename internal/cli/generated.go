@@ -21,34 +21,41 @@ import (
 // Generated bindings own request encoding and dispatch. Existing presentations
 // win by public ID so the same operation never acquires a second command.
 func generatedCommands(existing []*Command) []*Command {
-	bound := make(map[string]bool)
+	bound := make(map[string]*Command)
 	for _, c := range existing {
-		bound[c.Operation] = true
+		bound[c.Operation] = c
 	}
 	var commands []*Command
 	for _, b := range crmv1.CLIBindings() {
-		if bound[b.PublicID] {
+		if c := bound[b.PublicID]; c != nil {
+			c.FilterFields = b.FilterFields
 			continue
 		}
 		op := contracts.MustOperation(b.PublicID)
-		commands = append(commands, generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*crmv1.Client)(nil),
+		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*crmv1.Client)(nil),
 			func(inv *Invocation) (invokeInput, error) {
 				client, err := inv.contactsClient()
 				if err != nil {
 					return nil, err
 				}
 				outlet := selectedOutlet(inv)
+				var opts []crmv1.RequestOption
+				if requiresIfMatch(op.PublicID) {
+					opts = append(opts, crmv1.WithIfMatch(inv.str("if-match")))
+				}
 				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
 					key, err := inv.generatedWriteKey(op)
 					if err != nil {
 						return nil, "", err
 					}
-					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
+					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly(), opts...)
 				}, nil
-			}))
+			})
+		c.FilterFields = b.FilterFields
+		commands = append(commands, c)
 	}
 	for _, b := range wa.CLIBindings() {
-		if bound[b.PublicID] {
+		if bound[b.PublicID] != nil {
 			continue
 		}
 		op := contracts.MustOperation(b.PublicID)
@@ -171,7 +178,8 @@ func generatedCommand[A ~struct {
 				Arguments map[string]jsontext.Value `json:"arguments,omitempty"`
 				Body      jsontext.Value            `json:"body,omitempty"`
 				Outlet    string                    `json:"outlet,omitempty"`
-			}{values, body, selectedOutlet(inv)}, nil
+				IfMatch   string                    `json:"if_match,omitempty"`
+			}{values, body, selectedOutlet(inv), inv.writeOptions(*c.Write).IfMatch}, nil
 		}
 		var invoke invokeInput
 		call := func() (jsontext.Value, error) {
@@ -254,6 +262,8 @@ func (inv *Invocation) bindingArguments(params []commandParameter) (map[string]j
 				return nil, usageError("--%s must be a UUID", p.flag.Name)
 			}
 			switch {
+			case p.flag.Kind == kindBool:
+				raw = jsontext.Value(strconv.FormatBool(inv.boolean(p.flag.Name)))
 			case p.flag.Kind == kindInt:
 				raw = jsontext.Value(strconv.Itoa(inv.integer(p.flag.Name)))
 			case p.jsonValue:

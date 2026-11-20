@@ -1,0 +1,15 @@
+gatherdeal crm deals create
+
+Create Sales Pipeline Deal.
+
+Flags:
+  --profile <string>           Local profile name (default: "default", the built-in production profile; with --server: the server host).
+  --server <string>            Non-default GatherDeal server origin. Only pass it if you chose that server yourself.
+  --lang <string>              Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change.
+  --accept-server-risk <string> Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself.
+  --outlet <string>            Outlet id (UUID) within this access's approved write scope.
+  --dry-run                    Preview the typed request without submitting the write.
+  --yes                        Explicitly confirm execution of this write.
+  --idempotency-key <string>   Stable replay key; preserve it when reconciling an uncertain result.
+  --input <string>             (required) JSON body: inline JSON, a file path, or - for standard input.
+  --jq <string>                jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request.

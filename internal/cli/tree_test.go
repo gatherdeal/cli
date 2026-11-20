@@ -11,7 +11,7 @@ func TestGroupHelp(t *testing.T) {
 		args []string
 		want string
 	}{
-		{nil, "Manage CRM contacts, tags and contact logs."},
+		{nil, "Manage CRM contacts, tags, contact logs and deals, and read sales pipelines."},
 		{nil, "Install or print the GatherDeal agent skill."},
 		{[]string{"skills", "--help"}, "install"},
 		{[]string{"skills", "install", "--help"}, "--scope"},
@@ -43,8 +43,8 @@ func TestUnknownGroupChoices(t *testing.T) {
 		{[]string{"pos"}, "unknown app or command"},
 		{[]string{"contacts", "list"}, "crm"}, // Resources live under their app only.
 		{[]string{"crm", "orders"}, "unknown resource"},
-		{[]string{"crm", "orders"}, "valid choices: contact-logs, contact-tags, contacts"},
-		{[]string{"crm", "contact_tags", "list"}, `unknown resource "contact_tags"; valid choices: contact-logs, contact-tags, contacts`},
+		{[]string{"crm", "orders"}, "valid choices: contact-logs, contact-tags, contacts, deals, sales-pipelines"},
+		{[]string{"crm", "contact_tags", "list"}, `unknown resource "contact_tags"; valid choices: contact-logs, contact-tags, contacts, deals, sales-pipelines`},
 		{[]string{"whatsapp", "chat_messages", "list"}, `unknown resource "chat_messages"`},
 		{[]string{"whatsapp", "broadcast_suppressions", "list"}, `unknown resource "broadcast_suppressions"`},
 		{[]string{"whatsapp", "message_templates", "list"}, `unknown resource "message_templates"`},
@@ -130,6 +130,25 @@ func TestHelpRespectsFlagOrderAndStringValues(t *testing.T) {
 		r := te.run(append(append([]string{}, c.Path...), "--help")...)
 		if r.exit != 0 || !strings.HasPrefix(r.stdout, "gatherdeal "+c.Name()) {
 			t.Fatal(c.Name(), r.stdout)
+		}
+	}
+}
+
+func TestCommandHelpDescriptionWhitespace(t *testing.T) {
+	var help strings.Builder
+	writeCommandHelp(&help, &Command{
+		Path:    []string{"example"},
+		Summary: "First paragraph.\n\nSecond paragraph.",
+		Args:    []ArgSpec{{Name: "id", Usage: "  Record\r\n\t identifier.  "}},
+		Flags:   []FlagSpec{{Name: "before", Kind: kindString, Usage: "  Previous\n\n  cursor.  "}},
+	})
+	for _, want := range []string{
+		"First paragraph.\n\nSecond paragraph.\n",
+		"Record identifier.\n",
+		"Previous cursor.\n",
+	} {
+		if !strings.Contains(help.String(), want) {
+			t.Errorf("help is missing %q:\n%s", want, help.String())
 		}
 	}
 }

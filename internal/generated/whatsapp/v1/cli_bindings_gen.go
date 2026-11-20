@@ -261,7 +261,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.broadcast_suppressions.add",
-			Command:  "whatsapp broadcast_suppressions add",
+			Command:  "whatsapp broadcast-suppressions add",
 			Summary:  "Add Broadcast Suppressions",
 			HasBody:  true,
 			Keyed:    true,
@@ -292,7 +292,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.broadcast_suppressions.delete",
-			Command:  "whatsapp broadcast_suppressions delete",
+			Command:  "whatsapp broadcast-suppressions delete",
 			Summary:  "Delete Broadcast Suppression",
 			HasBody:  false,
 			Keyed:    false,
@@ -326,7 +326,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.broadcast_suppressions.list",
-			Command:  "whatsapp broadcast_suppressions list",
+			Command:  "whatsapp broadcast-suppressions list",
 			Summary:  "Fetch Broadcast Suppressions",
 			HasBody:  false,
 			Keyed:    false,
@@ -792,7 +792,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.chat_messages.get",
-			Command:  "whatsapp chat_messages get",
+			Command:  "whatsapp chat-messages get",
 			Summary:  "Fetch Chat Message",
 			HasBody:  false,
 			Keyed:    false,
@@ -827,7 +827,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.chat_messages.list",
-			Command:  "whatsapp chat_messages list",
+			Command:  "whatsapp chat-messages list",
 			Summary:  "Poll Chat Messages",
 			HasBody:  false,
 			Keyed:    false,
@@ -995,7 +995,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.message_templates.create",
-			Command:  "whatsapp message_templates create",
+			Command:  "whatsapp message-templates create",
 			Summary:  "Create Message Template",
 			HasBody:  true,
 			Keyed:    false,
@@ -1025,7 +1025,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.message_templates.delete",
-			Command:  "whatsapp message_templates delete",
+			Command:  "whatsapp message-templates delete",
 			Summary:  "Delete Message Template",
 			HasBody:  false,
 			Keyed:    false,
@@ -1059,7 +1059,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.message_templates.get",
-			Command:  "whatsapp message_templates get",
+			Command:  "whatsapp message-templates get",
 			Summary:  "Fetch Message Template",
 			HasBody:  false,
 			Keyed:    false,
@@ -1094,7 +1094,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.message_templates.list",
-			Command:  "whatsapp message_templates list",
+			Command:  "whatsapp message-templates list",
 			Summary:  "Fetch Message Templates",
 			HasBody:  false,
 			Keyed:    false,
@@ -1143,7 +1143,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.message_templates.preview",
-			Command:  "whatsapp message_templates preview",
+			Command:  "whatsapp message-templates preview",
 			Summary:  "Preview Message Template",
 			HasBody:  true,
 			Keyed:    false,
@@ -1178,7 +1178,7 @@ func CLIBindings() []CLIBinding {
 		},
 		{
 			PublicID: "whatsapp.message_templates.update",
-			Command:  "whatsapp message_templates update",
+			Command:  "whatsapp message-templates update",
 			Summary:  "Update Message Template",
 			HasBody:  true,
 			Keyed:    false,

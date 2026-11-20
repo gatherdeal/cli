@@ -1587,6 +1587,20 @@
       {
         "app": "crm",
         "args": [],
+        "filter_fields": {
+          "contact_id": [
+            "EQ",
+            "IN"
+          ],
+          "create_at": [
+            "GTE",
+            "LTE"
+          ],
+          "id": [
+            "EQ",
+            "IN"
+          ]
+        },
         "flags": [
           {
             "name": "profile",
@@ -2073,6 +2087,545 @@
         "output": "json",
         "read_only": false,
         "summary": "Partial Update Contact By ID."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "required": true,
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm deals create",
+        "network": true,
+        "operation": "crm.deals.create",
+        "output": "json",
+        "read_only": false,
+        "summary": "Create Sales Pipeline Deal."
+      },
+      {
+        "app": "crm",
+        "args": [
+          {
+            "name": "id",
+            "usage": "Deal identifier."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm deals get",
+        "network": true,
+        "operation": "crm.deals.get",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "name",
+          "pipeline_id",
+          "stage_id",
+          "pipeline",
+          "stage",
+          "type",
+          "priority",
+          "create_at",
+          "update_at",
+          "remark",
+          "revision"
+        ],
+        "summary": "Get Deal."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "filter_fields": {
+          "id": [
+            "EQ",
+            "IN"
+          ],
+          "pipeline_id": [
+            "EQ",
+            "IN"
+          ],
+          "stage_id": [
+            "EQ",
+            "IN"
+          ]
+        },
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) to read from; it must be one of the outlets this access may read."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Deals per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching deals (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all deals in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: deals created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many deals (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "sort",
+            "type": "string",
+            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "values": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "filter",
+            "type": "string",
+            "usage": "JSON value for filter."
+          },
+          {
+            "name": "pipeline-id",
+            "type": "string",
+            "usage": "List deals in this pipeline. Supply at most once."
+          },
+          {
+            "name": "stage-id",
+            "type": "string",
+            "usage": "List deals in this stage. Supply at most once."
+          },
+          {
+            "name": "search",
+            "type": "string",
+            "usage": "Server-side free-text search."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm deals list",
+        "network": true,
+        "operation": "crm.deals.list",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "name",
+          "pipeline_id",
+          "stage_id",
+          "pipeline",
+          "stage",
+          "type",
+          "priority",
+          "create_at",
+          "update_at"
+        ],
+        "summary": "List Deals."
+      },
+      {
+        "app": "crm",
+        "args": [
+          {
+            "name": "id",
+            "usage": "Deal identifier."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "if-match",
+            "required": true,
+            "type": "string",
+            "usage": "Revision from the latest read, quotes included, sent unchanged as If-Match. A stale revision fails with PRECONDITION_FAILED; read again before retrying."
+          },
+          {
+            "name": "input",
+            "required": true,
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm deals move-stage",
+        "network": true,
+        "operation": "crm.deals.move_stage",
+        "output": "json",
+        "read_only": false,
+        "summary": "Move Deal Stage."
+      },
+      {
+        "app": "crm",
+        "args": [
+          {
+            "name": "id",
+            "usage": "Deal identifier."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "if-match",
+            "required": true,
+            "type": "string",
+            "usage": "Revision from the latest read, quotes included, sent unchanged as If-Match. A stale revision fails with PRECONDITION_FAILED; read again before retrying."
+          },
+          {
+            "name": "input",
+            "required": true,
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm deals update",
+        "network": true,
+        "operation": "crm.deals.update",
+        "output": "json",
+        "read_only": false,
+        "summary": "Update Deal."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "filter_fields": {
+          "id": [
+            "EQ",
+            "IN"
+          ],
+          "name": [
+            "EQ_FOLD",
+            "CONTAINS_FOLD"
+          ]
+        },
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "page",
+            "type": "int",
+            "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
+          },
+          {
+            "name": "page-size",
+            "type": "int",
+            "usage": "Sales pipelines per page (1-100; default 20, or 100 with --all or --limit)."
+          },
+          {
+            "name": "after",
+            "type": "string",
+            "usage": "Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same."
+          },
+          {
+            "name": "total",
+            "type": "string",
+            "usage": "Whether the server counts matching sales pipelines (default: exact with --page, none with --after).",
+            "values": [
+              "exact",
+              "none"
+            ]
+          },
+          {
+            "name": "all",
+            "type": "bool",
+            "usage": "Walk forward through every page with cursors (starting after --after when given) and return all sales pipelines in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: sales pipelines created, changed or deleted during the walk may be missed or seen out of order."
+          },
+          {
+            "name": "limit",
+            "type": "int",
+            "usage": "Return at most this many sales pipelines (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after \u003cnext_cursor\u003e when present."
+          },
+          {
+            "name": "before",
+            "type": "string",
+            "usage": "Opaque cursor: the page before this position. Pass a previous response's\nprev_cursor."
+          },
+          {
+            "name": "sort",
+            "type": "string",
+            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
+          },
+          {
+            "name": "order",
+            "type": "string",
+            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
+            "values": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "filter",
+            "type": "string",
+            "usage": "JSON value for filter."
+          },
+          {
+            "name": "search",
+            "type": "string",
+            "usage": "Server-side free-text search."
+          },
+          {
+            "name": "with-stages",
+            "type": "bool",
+            "usage": "Include up to 50 stages per pipeline."
+          },
+          {
+            "name": "fields",
+            "type": "string",
+            "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm sales-pipelines list",
+        "network": true,
+        "operation": "crm.sales_pipelines.list",
+        "output": "json",
+        "read_only": true,
+        "record_fields": [
+          "id",
+          "name",
+          "create_at",
+          "stages"
+        ],
+        "summary": "List Pipelines."
       },
       {
         "app": "whatsapp",

@@ -8,8 +8,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -172,6 +174,8 @@ type Command struct {
 	// array of them) of a list or get command. It enables --fields, whose
 	// names are its JSON members.
 	Record any
+	// FilterFields holds explicit root field operator restrictions from the binding.
+	FilterFields map[string][]string
 	// Presentation optionally overrides the generated command path, never service ownership.
 	Presentation *CommandPresentation
 	Write        *WritePolicy
@@ -394,6 +398,11 @@ func parse(env *Env, cmd *Command, args []string, helpMode bool) (*Invocation, e
 			return nil, usageError("--%s must be one of %s", f.Name, strings.Join(f.Values, ", "))
 		}
 	}
+	if cmd.FilterFields != nil && inv.isSet("filter") {
+		if err := validateFilter(inv.str("filter"), cmd.FilterFields); err != nil {
+			return nil, err
+		}
+	}
 	var err error
 	if inv.shaping, err = parseShaping(inv); err != nil {
 		return nil, err
@@ -412,7 +421,7 @@ func writeCommandHelp(w io.Writer, c *Command) {
 	if len(c.Args) > 0 {
 		b.WriteString("\nArguments:\n")
 		for _, a := range c.Args {
-			fmt.Fprintf(&b, "  %-24s %s\n", a.Name, a.Usage)
+			fmt.Fprintf(&b, "  %-24s %s\n", a.Name, strings.Join(strings.Fields(a.Usage), " "))
 		}
 	}
 	if len(c.Flags) > 0 {
@@ -422,7 +431,7 @@ func writeCommandHelp(w io.Writer, c *Command) {
 			if f.Kind != kindBool {
 				name += " <" + string(f.Kind) + ">"
 			}
-			usage := f.Usage
+			usage := strings.Join(strings.Fields(f.Usage), " ")
 			if f.Required {
 				usage = "(required) " + usage
 			}
@@ -433,6 +442,12 @@ func writeCommandHelp(w io.Writer, c *Command) {
 				usage += " Default: " + f.Default + "."
 			}
 			fmt.Fprintf(&b, "  %-28s %s\n", name, usage)
+		}
+	}
+	if len(c.FilterFields) > 0 {
+		b.WriteString("\nAllowed --filter operators by root field\n")
+		for _, field := range slices.Sorted(maps.Keys(c.FilterFields)) {
+			fmt.Fprintf(&b, "  %-24s %s\n", field, strings.Join(c.FilterFields[field], ", "))
 		}
 	}
 	fmt.Fprint(w, b.String())

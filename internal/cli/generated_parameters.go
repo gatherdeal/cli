@@ -25,6 +25,7 @@ type parameterSchema struct {
 
 type wireParameter struct {
 	Name, In, Description string
+	Required              bool
 	Schema                parameterSchema
 }
 
@@ -56,7 +57,7 @@ var parameterIndex = sync.OnceValue(func() map[string]map[string]wireParameter {
 			for _, op := range path {
 				params := map[string]wireParameter{}
 				for _, p := range op.Parameters {
-					if p.In != "query" && p.In != "path" {
+					if p.In != "query" && p.In != "path" && p.In != "header" {
 						continue
 					}
 					s := p.Schema
@@ -91,6 +92,8 @@ func parameterFor(op contracts.Operation, a bindingArgument) commandParameter {
 	switch string(wire.Schema.Type) {
 	case `"integer"`:
 		p.flag.Kind = kindInt
+	case `"boolean"`:
+		p.flag.Kind = kindBool
 	case `"object"`, `"array"`:
 		p.jsonValue = true
 		p.flag.Usage = "JSON value for " + a.WireName + "."
@@ -121,4 +124,11 @@ func parameterFor(op contracts.Operation, a bindingArgument) commandParameter {
 	}
 	p.flag.Required = a.Required
 	return p
+}
+
+// requiresIfMatch reports whether the operation's contract requires an
+// If-Match header. Such a write takes a required --if-match flag (see
+// WritePolicy.flags), and the binding sends its value unchanged.
+func requiresIfMatch(publicID string) bool {
+	return parameterIndex()[publicID]["header/If-Match"].Required
 }

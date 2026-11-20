@@ -308,6 +308,44 @@ idempotency key and report it in `meta.write.idempotency_key`. When retrying
 the same request, pass its original key with `--idempotency-key`. A later
 assignment after removal is a new operation and needs a fresh key.
 
+## Read sales pipelines and deals
+
+These commands require `crm.deal.read`. Use `--search` to match names, and
+`--outlet` on deal reads to select one approved outlet.
+
+```sh
+gatherdeal crm sales-pipelines list --with-stages
+gatherdeal crm deals list --pipeline-id <pipeline-id> --stage-id <stage-id>
+gatherdeal crm deals get <deal-id>
+```
+
+If a pipeline has more than 50 stages, `--with-stages` returns HTTP 422
+(`CRM_SALES_PIPELINE_STAGE_LIMIT`). Omit the flag to read the pipeline list.
+
+## Create, update and move deals
+
+These commands require `crm.deal.write`. Creation needs a pipeline and one of
+its stages; CRM names the deal and returns its `id`. The deal belongs to the
+outlet given with `--outlet`, or to the access's only deal-write outlet when
+the flag is omitted (otherwise `CRM_DEAL_OUTLET_REQUIRED`). Creation uses an
+idempotency key like the other CRM creates.
+
+```sh
+gatherdeal crm deals create --outlet <outlet-id> --input '{"pipeline_id":"<pipeline-id>","stage_id":"<stage-id>","priority":"high"}' --yes
+gatherdeal crm deals get <deal-id> --jq .revision
+gatherdeal crm deals move-stage <deal-id> --input '{"stage_id":"<stage-id>"}' --if-match '<revision>' --yes
+gatherdeal crm deals update <deal-id> --input '{"remark":null,"type":"existing"}' --if-match '<revision>' --yes
+```
+
+Moving and updating require `--if-match` with the deal's `revision` from the
+latest `deals get`, passed unchanged. The value includes its own double
+quotes, so wrap it in single quotes for the shell as shown. Each successful
+change returns the next `revision`. If the deal changed in between, the
+command fails with `PRECONDITION_FAILED` (HTTP 412, exit 6); read the deal
+again before deciding whether to repeat the change. Updates accept
+`priority`, `type` and `remark`; an omitted member stays unchanged and `null`
+clears it.
+
 ## Read outlets
 
 ```sh

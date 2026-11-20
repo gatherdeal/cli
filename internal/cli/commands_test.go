@@ -25,7 +25,7 @@ func TestCommandsPrefix(t *testing.T) {
 		args []string
 		want []string
 	}{
-		{[]string{"crm"}, []string{"crm contacts list", "crm contacts get", "crm contact-logs create", "crm contact-logs list", "crm contact-tags assign", "crm contact-tags list", "crm contact-tags remove", "crm contacts create", "crm contacts update"}},
+		{[]string{"crm"}, []string{"crm contacts list", "crm contacts get", "crm contact-logs create", "crm contact-logs list", "crm contact-tags assign", "crm contact-tags list", "crm contact-tags remove", "crm contacts create", "crm contacts update", "crm deals create", "crm deals get", "crm deals list", "crm deals move-stage", "crm deals update", "crm sales-pipelines list"}},
 		{[]string{"crm", "contacts"}, []string{"crm contacts list", "crm contacts get", "crm contacts create", "crm contacts update"}},
 		{[]string{"crm", "contact-tags"}, []string{"crm contact-tags assign", "crm contact-tags list", "crm contact-tags remove"}},
 		{[]string{"whatsapp", "messages"}, []string{"whatsapp messages list", "whatsapp messages get", "whatsapp messages create"}},
@@ -58,7 +58,7 @@ func TestCommandsUnknownPrefix(t *testing.T) {
 		want string
 	}{
 		{[]string{"pos"}, `unknown command path "pos"; valid next segments: agent-context, auth, commands, crm, outlets, skills, uninstall, update, version, whatsapp`},
-		{[]string{"crm", "orders"}, `unknown command path "crm orders"; valid next segments: contact-logs, contact-tags, contacts`},
+		{[]string{"crm", "orders"}, `unknown command path "crm orders"; valid next segments: contact-logs, contact-tags, contacts, deals, sales-pipelines`},
 		{[]string{"whatsapp", "agents", "send"}, `unknown command path "whatsapp agents send"; valid next segments: create, delete, get, list, pairing, update`},
 		{[]string{"version", "extra"}, `"version" is a command and has no subcommands`},
 	} {
