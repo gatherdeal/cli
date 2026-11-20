@@ -10,6 +10,7 @@ import (
 
 	"github.com/gatherdeal/cli/internal/buildinfo"
 	"github.com/gatherdeal/cli/internal/crm"
+	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
 	"github.com/gatherdeal/cli/internal/output"
 	"github.com/gatherdeal/cli/internal/update"
 )
@@ -117,12 +118,12 @@ func Commands() []*Command {
 		if len(c.Path) == 0 || (c.Presentation == nil && (len(c.Path) < 3 || c.Path[0] != c.App)) {
 			panic("contract command path must start with its app: " + c.Operation)
 		}
-	}
-	// Keep the published spelling in the contract and use kebab-case in the CLI.
-	for _, c := range cmds {
-		for i, segment := range c.Path {
-			c.Path[i] = strings.ReplaceAll(segment, "_", "-")
+		// Only CRM bindings pass --if-match to their generated client.
+		if c.App != crmv1.Service && requiresIfMatch(c.Operation) {
+			panic("bind the If-Match option of the generated client for " + c.Operation)
 		}
+	}
+	for _, c := range cmds {
 		addShapingFlags(c)
 	}
 	return cmds
@@ -137,10 +138,11 @@ type commandInfo struct {
 	Args      []ArgSpec  `json:"args"`
 	Flags     []FlagSpec `json:"flags"`
 	// RecordFields are the names --fields accepts.
-	RecordFields []string `json:"record_fields,omitempty"`
-	Output       string   `json:"output"`
-	Network      bool     `json:"network"`
-	ReadOnly     bool     `json:"read_only"`
+	RecordFields []string            `json:"record_fields,omitempty"`
+	FilterFields map[string][]string `json:"filter_fields,omitzero"`
+	Output       string              `json:"output"`
+	Network      bool                `json:"network"`
+	ReadOnly     bool                `json:"read_only"`
 }
 
 type envVarInfo struct {
@@ -181,7 +183,7 @@ func runCommands(_ context.Context, inv *Invocation) (any, error) {
 		if flags == nil {
 			flags = []FlagSpec{}
 		}
-		out = append(out, commandInfo{App: c.App, Name: c.Name(), Summary: c.Summary, Operation: c.Operation, Args: args, Flags: flags, RecordFields: recordFields(c.Record), Output: c.Output, Network: c.Network, ReadOnly: c.ReadOnly})
+		out = append(out, commandInfo{App: c.App, Name: c.Name(), Summary: c.Summary, Operation: c.Operation, Args: args, Flags: flags, RecordFields: recordFields(c.Record), FilterFields: c.FilterFields, Output: c.Output, Network: c.Network, ReadOnly: c.ReadOnly})
 	}
 	return commandsData{
 		EnvelopeSchemaVersion: output.SchemaVersion,

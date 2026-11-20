@@ -1,0 +1,27 @@
+gatherdeal crm sales-pipelines list
+
+List Pipelines.
+
+Flags:
+  --profile <string>           Local profile name (default: "default", the built-in production profile; with --server: the server host).
+  --server <string>            Non-default GatherDeal server origin. Only pass it if you chose that server yourself.
+  --lang <string>              Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change.
+  --accept-server-risk <string> Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself.
+  --page <int>                 Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that.
+  --page-size <int>            Sales pipelines per page (1-100; default 20, or 100 with --all or --limit).
+  --after <string>             Opaque cursor: the page after it (meta.page_info.next_cursor of the previous page). Not with --page; the other flags must stay the same.
+  --total <string>             Whether the server counts matching sales pipelines (default: exact with --page, none with --after). One of: exact, none.
+  --all                        Walk forward through every page with cursors (starting after --after when given) and return all sales pipelines in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: sales pipelines created, changed or deleted during the walk may be missed or seen out of order.
+  --limit <int>                Return at most this many sales pipelines (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after <next_cursor> when present.
+  --before <string>            Opaque cursor: the page before this position. Pass a previous response's prev_cursor.
+  --sort <string>              Field name to sort by (e.g., "created_at", "name").
+  --order <string>             Sort direction: "asc" or "desc". Defaults to "desc". One of: asc, desc.
+  --filter <string>            JSON value for filter.
+  --search <string>            Server-side free-text search.
+  --with-stages                Include up to 50 stages per pipeline.
+  --fields <string>            Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq.
+  --jq <string>                jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request.
+
+Allowed --filter operators by root field
+  id                       EQ, IN
+  name                     EQ_FOLD, CONTAINS_FOLD
