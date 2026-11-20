@@ -305,11 +305,12 @@ func TestSkillIndexes(t *testing.T) {
 	}
 	skill := content["SKILL.md"]
 	for _, want := range []string{
-		"- crm: Manage CRM contacts, tags and contact logs. Notes and resources: references/crm.md or `gatherdeal agent-context crm`.\n",
+		"- crm: Manage CRM contacts, tags, contact logs and deals, and read sales pipelines. Notes and resources: references/crm.md or `gatherdeal agent-context crm`.\n",
 		"- whatsapp: Manage WhatsApp agents and send WhatsApp messages. Notes and resources: references/whatsapp.md or `gatherdeal agent-context whatsapp`.\n",
 		"- auth: Log in, check or end the access, and list local profiles. Verbs: login, logout, status.\n",
 		"- version: Show the CLI version (no network).\n",
 		"gatherdeal commands --search TEXT",
+		"When filter_fields is present, use its allowed --filter operators",
 		"crm contact-tags list",
 	} {
 		if !strings.Contains(skill, want) {
@@ -318,8 +319,10 @@ func TestSkillIndexes(t *testing.T) {
 	}
 	for _, want := range []string{
 		"crm contact-logs list --contact-id <id>",
-		"explicit CRM contact-write approval",
+		"filter_fields (allowed root filter operators)",
+		"matching CRM write approval",
 		"Use a fresh key to reassign a tag after removal.",
+		"pass it unchanged, quotes included, as --if-match",
 	} {
 		if !strings.Contains(content["references/crm.md"], want) {
 			t.Errorf("CRM skill lacks %q", want)

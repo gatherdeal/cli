@@ -74,9 +74,11 @@ func (c *Client) call(outletID string) call {
 	return call{api: api, d: d}
 }
 
-func (c *Client) Invoke(ctx context.Context, binding crmv1.CLIBinding, input any, outlet, key string, write bool) (jsontext.Value, string, error) {
+// Invoke dispatches a generated binding. opts carry request preconditions
+// such as If-Match, which the caller passes unchanged.
+func (c *Client) Invoke(ctx context.Context, binding crmv1.CLIBinding, input any, outlet, key string, write bool, opts ...crmv1.RequestOption) (jsontext.Value, string, error) {
 	call := c.call(outlet)
-	raw, err := binding.Invoke(ctx, call.api, input, key)
+	raw, err := binding.Invoke(ctx, call.api, input, key, opts...)
 	if err != nil {
 		err = call.apiError(ctx, err, write)
 	}

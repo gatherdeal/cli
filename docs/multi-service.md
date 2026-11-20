@@ -10,16 +10,22 @@ runtime. The CRM, Identity and WhatsApp bundles are installed.
 
 ### Manifest v2 release pins
 
-The bundles were regenerated from the released producer commits with
-`GOWORK=off` and compared against their previous CLI bundles. CRM uses utilities
-`v0.0.0-20261119094056-2b8670aebe18`. Identity and WhatsApp use
+The bundles were regenerated from the pinned producer commits with
+`GOWORK=off`. The CRM candidate uses utilities
+`v0.0.0-20261120025032-9afde6f86130`. Identity and WhatsApp use
 `v0.0.0-20261119035543-33746fdc2708`.
 
-| Producer | Released commit | Public operations |
+| Producer | Pinned commit | Public operations |
 | --- | --- | ---: |
-| CRM | `5dbb31a1d6f264b21cca879394e0adeb0b663628` | 9 |
+| CRM | `e352008cba8720d776f572e37eb3006513a633fe` | 15 |
 | Identity | `b7e955aa5161c83957b4b23b8639604b3bad0818` | 1 |
 | WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
+
+The CRM producer pin points to the local `feat/crm-wave4a` branch until the
+CRM revision is released. The CRM bundle uses the kebab-case emitter from the
+utilities version above. Identity and WhatsApp were re-exported with the
+`apigen.CommandPath` fix applied to temporary copies of their pinned utilities
+version. The re-exports reproduced all three OpenAPI digests.
 
 All OpenAPI documents are embedded automatically. Contract checks enumerate
 all bundles, verify the OpenAPI and generated Go digests, service/version
@@ -52,7 +58,8 @@ effects, permissions, outlet policy and idempotency for metadata and skills;
 API `ReadOnly` is derived from the effect. Catalog and skills derive from the
 installed commands. A top-level presentation is a `CommandPresentation{Path: ...}` on
 that binding: `outlets list` belongs to `identity.outlets.list`.
-The CLI renders underscores as hyphens in command path segments.
+The generator publishes kebab-case CLI paths. The full published path
+`identity outlets list` also resolves to the top-level command.
 There is no second inventory and presentation never changes service ownership.
 `outlets get` is a convenience lookup through the published list's ID/code
 filters, not an additional public operation. WhatsApp agent creation resolves
@@ -71,6 +78,22 @@ goes into that app's entry in `appNotes` (`internal/cli/agent_context.go`),
 which heads `references/<app>.md` and `gatherdeal agent-context <app>`;
 `AgentContext` holds only guidance that applies to every app.
 
+## CRM v0.4.0 release gate
+
+The producer's public compatibility check against the CLI `v0.3.0` contract
+exits 1 for these 11 removed field/operator pairs on `crm.contact_logs.list`.
+
+| Field | Removed operators | Retained operators |
+| --- | --- | --- |
+| `contact_id` | `NEQ`, `NOT_IN` | `EQ`, `IN` |
+| `create_at` | `BETWEEN`, `EQ`, `GT`, `IN`, `LT`, `NEQ`, `NOT_IN` | `GTE`, `LTE` |
+| `id` | `NEQ`, `NOT_IN` | `EQ`, `IN` |
+
+A v0.4.0 release with this surface requires the CLI owner's explicit acceptance
+of all 11 removals as a breaking release, a discovery `min_cli_version` of
+`0.4.0`, and gated regeneration against the preserved `v0.3.0` contract with
+the producer's `--public-major` flag. The branch carries the development candidate.
+
 ## Service discovery
 
 Compiled production discovery derives paths from installed bundles and
@@ -81,6 +104,13 @@ discovery document, on its own public origin, before that service's commands
 can be used against it. Credentials are never sent cross-origin.
 
 ## Thin typed adapters
+
+Commands with explicit operator restrictions take their `filter_fields`
+metadata from the generated `CLIBinding.FilterFields` map. Command help and
+`gatherdeal commands <app> <resource>` expose it. The CLI checks these operators
+on root fields, including nested boolean groups, before any request. Edge
+groups have their own field scope. The server validates those groups, filter
+values, and the full filter policy.
 
 Use the origin-bound authenticated HTTP client with `httpx.ResponseDoer` to
 add the outlet selector and retain correlation IDs/raw problems. Generated
@@ -127,7 +157,19 @@ Idempotency support is taken from the manifest. Keyed writes generate a random
 key if omitted; `meta.write` reports the key and whether it was generated on
 success, preview and failure. The binding must pass that exact key to the API.
 Confirmation is mistake prevention, not authorization; previews do not reserve
-resources. The binding is responsible for server scope/revision preconditions.
+resources. The binding is responsible for server scope preconditions.
+
+Revision preconditions come from the contract. When an operation's OpenAPI
+document declares a required `If-Match` header, the write policy adds a
+required `--if-match` flag, so help, `gatherdeal commands` and the skill show
+it. The CLI checks that the value is a strong entity tag (quotes included,
+no `W/` or `*`) before dispatch, the preview reports it as `if_match`, and
+the generated binding sends it unchanged through the client's `WithIfMatch`
+option. The CLI never reads or caches revisions itself. A stale or missing
+tag is a definite server rejection (HTTP 412, `PRECONDITION_FAILED`, exit 6)
+mapped through ordinary problem handling; the caller reads the resource
+again. Only CRM bindings pass the option today; `Commands()` panics if
+another service's contract requires `If-Match` before its binding passes it.
 
 After dispatch may have begun, ambiguous transport/response failures must use
 `output.UnknownWriteOutcome`: `CLI_WRITE_OUTCOME_UNKNOWN`, exit 8,
