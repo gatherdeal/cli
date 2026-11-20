@@ -8,9 +8,10 @@
       "service_path": "/crm",
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
-      "digest": "sha256:972edfe8bc73c93e40d8c9004f14b9dc99823b73321c393fba84744df43b9da1",
-      "source_commit": "4128f9aa2cf1fe73681784a90b5f45781c9dd141",
-      "utilities_version": "v0.0.0-20261119192914-fb05de4996af",
+      "digest": "sha256:72dea226521b900fb0b0af3c95350423dd6addebcbd4ca447861ab435674ea41",
+      "generated_go_digest": "sha256:4bdaaf5cd1a233311238f35ba895b1e54420db6811ffb174d6dab7a0f34272f3",
+      "source_commit": "756644d5dd1f422f58846bcab9554a39822d5d49",
+      "utilities_version": "v0.0.0-20261120015501-6888178c5586",
       "operations": [
         {
           "public_id": "crm.contact_logs.create",
@@ -1767,6 +1768,181 @@
           "input_type": "PartialUpdateContactByIDInput"
         },
         {
+          "public_id": "crm.deals.create",
+          "command": "crm deals create",
+          "tool": "crm_deals_create",
+          "method": "POST",
+          "path": "/v1/deals",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.deal.read",
+              "crm.deal.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CRM_DEAL_OUTLET_REQUIRED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_DEAL_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_STAGE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "CreateSalesPipelineDeal",
+          "input_type": "CreateSalesPipelineDealInput",
+          "output_type": "KeyedAcknowledgment"
+        },
+        {
           "public_id": "crm.deals.get",
           "command": "crm deals get",
           "tool": "crm_deals_get",
@@ -2125,6 +2301,326 @@
           "output_type": "ListDealsOutput"
         },
         {
+          "public_id": "crm.deals.move_stage",
+          "command": "crm deals move_stage",
+          "tool": "crm_deals_move_stage",
+          "method": "PUT",
+          "path": "/v1/deals/:id/stage",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.deal.read",
+              "crm.deal.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_DEAL_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_STAGE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PRECONDITION_FAILED",
+              "status": 412,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "MoveDealStage",
+          "input_type": "MoveDealStageInput",
+          "output_type": "DealRevisionOutput"
+        },
+        {
+          "public_id": "crm.deals.update",
+          "command": "crm deals update",
+          "tool": "crm_deals_update",
+          "method": "PATCH",
+          "path": "/v1/deals/:id/fields",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.deal.read",
+              "crm.deal.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_CLOSED_REQUEST",
+              "status": 499,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_DEAL_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PRECONDITION_FAILED",
+              "status": 412,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "UpdateDeal",
+          "input_type": "UpdateDealInput",
+          "output_type": "DealRevisionOutput"
+        },
+        {
           "public_id": "crm.sales_pipelines.list",
           "command": "crm sales_pipelines list",
           "tool": "crm_sales_pipelines_list",
@@ -2457,6 +2953,14 @@
           "schema": "#/components/schemas/CRMContactVerifiedImmutableProblem"
         },
         {
+          "code": "CRM_DEAL_OUTLET_REQUIRED",
+          "type": "https://docs.gatherdeal.ai/errors/CRM_DEAL_OUTLET_REQUIRED",
+          "status": 422,
+          "retryable": false,
+          "title": "Select an outlet for the new deal.",
+          "schema": "#/components/schemas/CRMDealOutletRequiredProblem"
+        },
+        {
           "code": "CRM_FILE_NOT_FOUND",
           "type": "https://docs.gatherdeal.ai/errors/CRM_FILE_NOT_FOUND",
           "status": 404,
@@ -2481,12 +2985,28 @@
           "schema": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem"
         },
         {
+          "code": "CRM_SALES_PIPELINE_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/CRM_SALES_PIPELINE_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Sales pipeline not found.",
+          "schema": "#/components/schemas/CRMSalesPipelineNotFoundProblem"
+        },
+        {
           "code": "CRM_SALES_PIPELINE_STAGE_LIMIT",
           "type": "https://docs.gatherdeal.ai/errors/CRM_SALES_PIPELINE_STAGE_LIMIT",
           "status": 422,
           "retryable": false,
           "title": "Pipeline stage expansion exceeds its limit.",
           "schema": "#/components/schemas/CRMSalesPipelineStageLimitProblem"
+        },
+        {
+          "code": "CRM_SALES_PIPELINE_STAGE_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/CRM_SALES_PIPELINE_STAGE_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Sales pipeline stage not found.",
+          "schema": "#/components/schemas/CRMSalesPipelineStageNotFoundProblem"
         },
         {
           "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
@@ -2671,6 +3191,14 @@
           "retryable": false,
           "title": "The pagination parameters are invalid.",
           "schema": "#/components/schemas/PaginationParamsInvalidProblem"
+        },
+        {
+          "code": "PRECONDITION_FAILED",
+          "type": "https://docs.gatherdeal.ai/errors/PRECONDITION_FAILED",
+          "status": 412,
+          "retryable": false,
+          "title": "A precondition of the request was not met.",
+          "schema": "#/components/schemas/PreconditionFailedProblem"
         },
         {
           "code": "UNAUTHORIZED",

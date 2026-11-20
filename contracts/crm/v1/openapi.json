@@ -5013,6 +5013,460 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createSalesPipelineDeal",
+        "summary": "Create Sales Pipeline Deal",
+        "description": "Creates a deal in a pipeline stage and returns its ID. CRM names the deal. Reuse the idempotency key to retry the same creation.",
+        "tags": [
+          "deals"
+        ],
+        "x-gd-public-id": "crm.deals.create",
+        "x-gd-effect": {
+          "mutation": "additive",
+          "interaction": "closed",
+          "risks": []
+        },
+        "x-required-permissions": {
+          "allOf": [
+            "crm.deal.read",
+            "crm.deal.write"
+          ]
+        },
+        "x-gd-idempotency": "keyed",
+        "x-gd-outlet-scope": "filtered",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Reuse the key when retrying the same logical operation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[!-~]+$",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSalesPipelineDealInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success envelope (`status: \"success\"`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyedAcknowledgmentEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: problem document (BAD_REQUEST, IDEMPOTENCY_KEY_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdempotencyKeyRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem",
+                      "IDEMPOTENCY_KEY_REQUIRED": "#/components/schemas/IdempotencyKeyRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: problem document (DELEGATED_ACCESS_CREDENTIAL_LOCATION, DELEGATED_ACCESS_INACTIVE, DELEGATED_ACCESS_UNSUPPORTED, UNAUTHORIZED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_CREDENTIAL_LOCATION": "#/components/schemas/DelegatedAccessCredentialLocationProblem",
+                      "DELEGATED_ACCESS_INACTIVE": "#/components/schemas/DelegatedAccessInactiveProblem",
+                      "DELEGATED_ACCESS_UNSUPPORTED": "#/components/schemas/DelegatedAccessUnsupportedProblem",
+                      "UNAUTHORIZED": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_AUDIENCE_MISMATCH": "#/components/schemas/DelegatedAccessAudienceMismatchProblem",
+                      "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem",
+                      "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem",
+                      "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem",
+                      "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
+                      "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
+                      "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
+                      "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
+                      "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
+                      "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
+                      "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
+                      "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found: problem document (CRM_SALES_PIPELINE_DEAL_NOT_FOUND, CRM_SALES_PIPELINE_NOT_FOUND, CRM_SALES_PIPELINE_STAGE_NOT_FOUND)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineStageNotFoundProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CRM_SALES_PIPELINE_DEAL_NOT_FOUND": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem",
+                      "CRM_SALES_PIPELINE_NOT_FOUND": "#/components/schemas/CRMSalesPipelineNotFoundProblem",
+                      "CRM_SALES_PIPELINE_STAGE_NOT_FOUND": "#/components/schemas/CRMSalesPipelineStageNotFoundProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity: problem document (CRM_DEAL_OUTLET_REQUIRED, VALIDATION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CRMDealOutletRequiredProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CRM_DEAL_OUTLET_REQUIRED": "#/components/schemas/CRMDealOutletRequiredProblem",
+                      "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Upgrade Required: problem document (CLIENT_UPGRADE_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Upgrade": {
+                "$ref": "#/components/headers/Upgrade"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "499": {
+            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/InternalErrorProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "INTERNAL_ERROR": "#/components/schemas/InternalErrorProblem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/deals/{id}": {
@@ -5260,6 +5714,908 @@
                     "propertyName": "code",
                     "mapping": {
                       "CRM_SALES_PIPELINE_DEAL_NOT_FOUND": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Upgrade Required: problem document (CLIENT_UPGRADE_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Upgrade": {
+                "$ref": "#/components/headers/Upgrade"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "499": {
+            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/InternalErrorProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "INTERNAL_ERROR": "#/components/schemas/InternalErrorProblem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/deals/{id}/fields": {
+      "patch": {
+        "operationId": "updateDeal",
+        "summary": "Update Deal",
+        "description": "updateDeal changes a deal's priority, type and remark. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Values equal to the stored ones change nothing.",
+        "tags": [
+          "deals"
+        ],
+        "x-gd-public-id": "crm.deals.update",
+        "x-gd-effect": {
+          "mutation": "non_additive",
+          "interaction": "closed",
+          "risks": []
+        },
+        "x-required-permissions": {
+          "allOf": [
+            "crm.deal.read",
+            "crm.deal.write"
+          ]
+        },
+        "x-gd-idempotency": "safe",
+        "x-gd-outlet-scope": "filtered",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "Entity tag precondition for the current resource.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Deal identifier.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDealInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success envelope (`status: \"success\"`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealRevisionOutputEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: problem document (BAD_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: problem document (DELEGATED_ACCESS_CREDENTIAL_LOCATION, DELEGATED_ACCESS_INACTIVE, DELEGATED_ACCESS_UNSUPPORTED, UNAUTHORIZED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_CREDENTIAL_LOCATION": "#/components/schemas/DelegatedAccessCredentialLocationProblem",
+                      "DELEGATED_ACCESS_INACTIVE": "#/components/schemas/DelegatedAccessInactiveProblem",
+                      "DELEGATED_ACCESS_UNSUPPORTED": "#/components/schemas/DelegatedAccessUnsupportedProblem",
+                      "UNAUTHORIZED": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_AUDIENCE_MISMATCH": "#/components/schemas/DelegatedAccessAudienceMismatchProblem",
+                      "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem",
+                      "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem",
+                      "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem",
+                      "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
+                      "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
+                      "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
+                      "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
+                      "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
+                      "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
+                      "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
+                      "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found: problem document (CRM_SALES_PIPELINE_DEAL_NOT_FOUND)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CRM_SALES_PIPELINE_DEAL_NOT_FOUND": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition Failed: problem document (PRECONDITION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PreconditionFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "PRECONDITION_FAILED": "#/components/schemas/PreconditionFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Upgrade Required: problem document (CLIENT_UPGRADE_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Upgrade": {
+                "$ref": "#/components/headers/Upgrade"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "499": {
+            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/InternalErrorProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "INTERNAL_ERROR": "#/components/schemas/InternalErrorProblem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/deals/{id}/stage": {
+      "put": {
+        "operationId": "moveDealStage",
+        "summary": "Move Deal Stage",
+        "description": "moveDealStage moves a deal to another stage of its current pipeline. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Moving to the current stage changes nothing.",
+        "tags": [
+          "deals"
+        ],
+        "x-gd-public-id": "crm.deals.move_stage",
+        "x-gd-effect": {
+          "mutation": "non_additive",
+          "interaction": "closed",
+          "risks": []
+        },
+        "x-required-permissions": {
+          "allOf": [
+            "crm.deal.read",
+            "crm.deal.write"
+          ]
+        },
+        "x-gd-idempotency": "safe",
+        "x-gd-outlet-scope": "filtered",
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "Entity tag precondition for the current resource.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Deal identifier.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveDealStageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success envelope (`status: \"success\"`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealRevisionOutputEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: problem document (BAD_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: problem document (DELEGATED_ACCESS_CREDENTIAL_LOCATION, DELEGATED_ACCESS_INACTIVE, DELEGATED_ACCESS_UNSUPPORTED, UNAUTHORIZED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_CREDENTIAL_LOCATION": "#/components/schemas/DelegatedAccessCredentialLocationProblem",
+                      "DELEGATED_ACCESS_INACTIVE": "#/components/schemas/DelegatedAccessInactiveProblem",
+                      "DELEGATED_ACCESS_UNSUPPORTED": "#/components/schemas/DelegatedAccessUnsupportedProblem",
+                      "UNAUTHORIZED": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_AUDIENCE_MISMATCH": "#/components/schemas/DelegatedAccessAudienceMismatchProblem",
+                      "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem",
+                      "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem",
+                      "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem",
+                      "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
+                      "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
+                      "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
+                      "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
+                      "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
+                      "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
+                      "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
+                      "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found: problem document (CRM_SALES_PIPELINE_DEAL_NOT_FOUND, CRM_SALES_PIPELINE_NOT_FOUND, CRM_SALES_PIPELINE_STAGE_NOT_FOUND)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineStageNotFoundProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CRM_SALES_PIPELINE_DEAL_NOT_FOUND": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem",
+                      "CRM_SALES_PIPELINE_NOT_FOUND": "#/components/schemas/CRMSalesPipelineNotFoundProblem",
+                      "CRM_SALES_PIPELINE_STAGE_NOT_FOUND": "#/components/schemas/CRMSalesPipelineStageNotFoundProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition Failed: problem document (PRECONDITION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PreconditionFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "PRECONDITION_FAILED": "#/components/schemas/PreconditionFailedProblem"
                     }
                   }
                 }
@@ -6564,6 +7920,55 @@
           "retryable"
         ]
       },
+      "CRMDealOutletRequiredProblem": {
+        "type": "object",
+        "description": "CRM_DEAL_OUTLET_REQUIRED (422): Select an outlet for the new deal.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CRM_DEAL_OUTLET_REQUIRED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Select an outlet for the new deal.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 422
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CRM_DEAL_OUTLET_REQUIRED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "CRMFileNotFoundProblem": {
         "type": "object",
         "description": "CRM_FILE_NOT_FOUND (404): File not found.",
@@ -6711,6 +8116,55 @@
           "retryable"
         ]
       },
+      "CRMSalesPipelineNotFoundProblem": {
+        "type": "object",
+        "description": "CRM_SALES_PIPELINE_NOT_FOUND (404): Sales pipeline not found.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CRM_SALES_PIPELINE_NOT_FOUND",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Sales pipeline not found.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 404
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CRM_SALES_PIPELINE_NOT_FOUND"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "CRMSalesPipelineStageLimitProblem": {
         "type": "object",
         "description": "CRM_SALES_PIPELINE_STAGE_LIMIT (422): Pipeline stage expansion exceeds its limit.",
@@ -6762,6 +8216,55 @@
           "code",
           "retryable",
           "details"
+        ]
+      },
+      "CRMSalesPipelineStageNotFoundProblem": {
+        "type": "object",
+        "description": "CRM_SALES_PIPELINE_STAGE_NOT_FOUND (404): Sales pipeline stage not found.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CRM_SALES_PIPELINE_STAGE_NOT_FOUND",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Sales pipeline stage not found.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 404
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CRM_SALES_PIPELINE_STAGE_NOT_FOUND"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
         ]
       },
       "ClientClosedRequestProblem": {
@@ -7560,6 +9063,38 @@
         ],
         "additionalProperties": false
       },
+      "CreateSalesPipelineDealInput": {
+        "type": "object",
+        "description": "Delegated callers create at the selected outlet, or at their only write\noutlet when none is selected; staff choose the home with outlet_id.",
+        "properties": {
+          "pipeline_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Pipeline that holds the deal."
+          },
+          "stage_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Initial stage; it must belong to the pipeline."
+          },
+          "type": {
+            "$ref": "#/components/schemas/SalesPipelineDealType"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/SalesPipelineDealPriority"
+          },
+          "remark": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Deal remark of at most 500 characters."
+          }
+        },
+        "required": [
+          "pipeline_id",
+          "stage_id"
+        ],
+        "additionalProperties": false
+      },
       "Deal": {
         "type": "object",
         "properties": {
@@ -7611,6 +9146,12 @@
             "minLength": 1,
             "maxLength": 500,
             "description": "Deal remark, when present."
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "description": "Revision is the deal's opaque strong entity tag, quotes included. Send it\nunchanged as If-Match to move or update the deal; any write to the deal\nchanges it."
           }
         },
         "required": [
@@ -7621,7 +9162,8 @@
           "pipeline",
           "stage",
           "create_at",
-          "update_at"
+          "update_at",
+          "revision"
         ]
       },
       "DealBrief": {
@@ -7700,6 +9242,39 @@
         "required": [
           "id",
           "name"
+        ]
+      },
+      "DealRevisionOutput": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "description": "The deal's revision after the request, for the next If-Match."
+          }
+        },
+        "required": [
+          "revision"
+        ]
+      },
+      "DealRevisionOutputEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DealRevisionOutput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "success"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
         ]
       },
       "DealStage": {
@@ -9432,6 +11007,20 @@
           }
         ]
       },
+      "MoveDealStageInput": {
+        "type": "object",
+        "properties": {
+          "stage_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Target stage; it must belong to the deal's current pipeline."
+          }
+        },
+        "required": [
+          "stage_id"
+        ],
+        "additionalProperties": false
+      },
       "Operator": {
         "type": "string",
         "enum": [
@@ -9738,6 +11327,55 @@
           "probability"
         ]
       },
+      "PreconditionFailedProblem": {
+        "type": "object",
+        "description": "PRECONDITION_FAILED (412): A precondition of the request was not met.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/PRECONDITION_FAILED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"A precondition of the request was not met.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 412
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "PRECONDITION_FAILED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "ProblemParameter": {
         "type": "object",
         "properties": {
@@ -10013,6 +11651,41 @@
           "retryable"
         ]
       },
+      "UpdateDealInput": {
+        "type": "object",
+        "description": "An omitted field keeps its value and null clears it. A remark keeps 1 to 500\ncharacters after trimming each line.",
+        "properties": {
+          "priority": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SalesPipelineDealPriority"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SalesPipelineDealType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "remark": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500,
+            "description": "Deal remark; null clears it."
+          }
+        },
+        "additionalProperties": false
+      },
       "ValidationFailedProblem": {
         "type": "object",
         "description": "VALIDATION_FAILED (422): Some fields are invalid.",
@@ -10256,6 +11929,17 @@
       }
     },
     {
+      "code": "CRM_SALES_PIPELINE_NOT_FOUND",
+      "type": "https://docs.gatherdeal.ai/errors/CRM_SALES_PIPELINE_NOT_FOUND",
+      "status": 404,
+      "retryable": false,
+      "title": "Sales pipeline not found.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/CRMSalesPipelineNotFoundProblem"
+      }
+    },
+    {
       "code": "CRM_SALES_PIPELINE_STAGE_LIMIT",
       "type": "https://docs.gatherdeal.ai/errors/CRM_SALES_PIPELINE_STAGE_LIMIT",
       "status": 422,
@@ -10266,6 +11950,28 @@
       },
       "problem": {
         "$ref": "#/components/schemas/CRMSalesPipelineStageLimitProblem"
+      }
+    },
+    {
+      "code": "CRM_SALES_PIPELINE_STAGE_NOT_FOUND",
+      "type": "https://docs.gatherdeal.ai/errors/CRM_SALES_PIPELINE_STAGE_NOT_FOUND",
+      "status": 404,
+      "retryable": false,
+      "title": "Sales pipeline stage not found.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/CRMSalesPipelineStageNotFoundProblem"
+      }
+    },
+    {
+      "code": "CRM_DEAL_OUTLET_REQUIRED",
+      "type": "https://docs.gatherdeal.ai/errors/CRM_DEAL_OUTLET_REQUIRED",
+      "status": 422,
+      "retryable": false,
+      "title": "Select an outlet for the new deal.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/CRMDealOutletRequiredProblem"
       }
     },
     {
@@ -10356,6 +12062,17 @@
       "details": null,
       "problem": {
         "$ref": "#/components/schemas/ForbiddenProblem"
+      }
+    },
+    {
+      "code": "PRECONDITION_FAILED",
+      "type": "https://docs.gatherdeal.ai/errors/PRECONDITION_FAILED",
+      "status": 412,
+      "retryable": false,
+      "title": "A precondition of the request was not met.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/PreconditionFailedProblem"
       }
     },
     {
