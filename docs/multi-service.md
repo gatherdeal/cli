@@ -17,7 +17,7 @@ The bundles were regenerated from the pinned producer commits with
 
 | Producer | Pinned commit | Public operations |
 | --- | --- | ---: |
-| CRM | `756644d5dd1f422f58846bcab9554a39822d5d49` | 15 |
+| CRM | `e352008cba8720d776f572e37eb3006513a633fe` | 15 |
 | Identity | `b7e955aa5161c83957b4b23b8639604b3bad0818` | 1 |
 | WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
 

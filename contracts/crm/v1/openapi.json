@@ -9065,7 +9065,7 @@
       },
       "CreateSalesPipelineDealInput": {
         "type": "object",
-        "description": "Delegated callers create at the selected outlet, or at their only write\noutlet when none is selected; staff choose the home with outlet_id.",
+        "description": "The deal is homed at the selected outlet, or at the caller's only deal-write\noutlet when none is selected.",
         "properties": {
           "pipeline_id": {
             "type": "string",

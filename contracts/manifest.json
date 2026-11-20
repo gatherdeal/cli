@@ -8,9 +8,9 @@
       "service_path": "/crm",
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
-      "digest": "sha256:72dea226521b900fb0b0af3c95350423dd6addebcbd4ca447861ab435674ea41",
-      "generated_go_digest": "sha256:4bdaaf5cd1a233311238f35ba895b1e54420db6811ffb174d6dab7a0f34272f3",
-      "source_commit": "756644d5dd1f422f58846bcab9554a39822d5d49",
+      "digest": "sha256:d72481953ce8e9702eb14b0bc81b027a0c811c9abdc7a643716eaa4b0846d586",
+      "generated_go_digest": "sha256:29fd418834f8d62048e2bc412576c8de7b4215dc265aaa6e33a2abee105acc48",
+      "source_commit": "e352008cba8720d776f572e37eb3006513a633fe",
       "utilities_version": "v0.0.0-20261120015501-6888178c5586",
       "operations": [
         {
