@@ -21,6 +21,10 @@ The bundles were regenerated from the released producer commits with
 | Identity | `b7e955aa5161c83957b4b23b8639604b3bad0818` | 1 |
 | WhatsApp | `201d745162307b09762dba466f585cbaefc83fa2` | 34 |
 
+The kebab-case command paths were re-exported from these producer commits
+with the `apigen.CommandPath` fix applied to temporary copies of their
+pinned utilities versions. The export reproduced all three OpenAPI digests.
+
 All OpenAPI documents are embedded automatically. Contract checks enumerate
 all bundles, verify disk/embedded/generated digests, service/version constants
 and generated Client methods, and require one command per published operation.
@@ -29,7 +33,8 @@ effects, permissions, outlet policy and idempotency for metadata and skills;
 API `ReadOnly` is derived from the effect. Catalog and skills derive from the
 installed commands. A top-level presentation is a `CommandPresentation{Path: ...}` on
 that binding: `outlets list` belongs to `identity.outlets.list`.
-The CLI renders underscores as hyphens in command path segments.
+The generator publishes kebab-case CLI paths. The full published path
+`identity outlets list` also resolves to the top-level command.
 There is no second inventory and presentation never changes service ownership.
 `outlets get` is a convenience lookup through the published list's ID/code
 filters, not an additional public operation. WhatsApp agent creation resolves

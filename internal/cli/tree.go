@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -14,6 +15,12 @@ type commandNode struct {
 	app      string
 	command  *Command
 	children map[string]*commandNode
+	aliases  []commandAlias
+}
+
+type commandAlias struct {
+	path []string
+	node *commandNode
 }
 
 func commandTree(commands []*Command) *commandNode {
@@ -27,6 +34,12 @@ func commandTree(commands []*Command) *commandNode {
 			node = node.children[part]
 		}
 		node.command = c
+		if c.Presentation != nil {
+			published := strings.Fields(c.Contract().Command)
+			if !slices.Equal(c.Path, published) {
+				root.aliases = append(root.aliases, commandAlias{path: published, node: node})
+			}
+		}
 	}
 	return root
 }
@@ -73,6 +86,12 @@ func (n *commandNode) summary() string {
 }
 
 func (n *commandNode) resolve(args []string) (*commandNode, []string, error) {
+	// Accept the full published path for commands presented at a different path.
+	for _, alias := range n.aliases {
+		if len(args) >= len(alias.path) && slices.Equal(args[:len(alias.path)], alias.path) {
+			return alias.node, args[len(alias.path):], nil
+		}
+	}
 	for len(args) > 0 && n.command == nil {
 		part := args[0]
 		if len(args) == 1 && (part == "--help" || part == "-h" || part == "-help") {
