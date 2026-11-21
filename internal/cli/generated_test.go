@@ -9,8 +9,20 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gatherdeal/cli/contracts"
 	"github.com/gatherdeal/cli/internal/crm"
 )
+
+func TestGeneratedCommandSkipsNewExternalWrite(t *testing.T) {
+	op := contracts.Operation{
+		PublicID: "whatsapp.messages.forward",
+		Method:   http.MethodPost,
+		Effect:   contracts.Effect{Mutation: "additive", Interaction: "external"},
+	}
+	if got := generatedCommand(op, "Forward a message.", true, []bindingArgument(nil), nil, nil, nil); got != nil {
+		t.Errorf("generated a command for new external write %s", op.PublicID)
+	}
+}
 
 func TestGeneratedTagList(t *testing.T) {
 	f, te := loggedIn(t)

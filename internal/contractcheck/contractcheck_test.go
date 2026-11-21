@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	jsonv2 "encoding/json/v2"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -166,15 +167,21 @@ func operationExclusions(t *testing.T) map[string]string {
 }
 
 func TestPublishedOperationCoverage(t *testing.T) {
-	exclusions := operationExclusions(t)
+	for _, problem := range publishedOperationCoverage(manifest(t), cli.Commands(), operationExclusions(t)) {
+		t.Error(problem)
+	}
+}
+
+func publishedOperationCoverage(m *contracts.Manifest, registered []*cli.Command, exclusions map[string]string) []string {
+	var problems []string
 	byOperation := map[string][]*cli.Command{}
-	for _, c := range cli.Commands() {
+	for _, c := range registered {
 		if c.Operation != "" {
 			byOperation[c.Operation] = append(byOperation[c.Operation], c)
 		}
 	}
 	known := map[string]bool{}
-	for _, b := range manifest(t).Bundles {
+	for _, b := range m.Bundles {
 		for _, op := range b.Operations {
 			id := op.PublicID
 			known[id] = true
@@ -182,12 +189,15 @@ func TestPublishedOperationCoverage(t *testing.T) {
 			_, excluded := exclusions[id]
 			switch {
 			case len(commands) == 0 && !excluded:
-				t.Errorf("%s has no CLI command or exclusion in %s", id, exclusionsFile)
+				problems = append(problems, fmt.Sprintf("%s has no CLI command or exclusion in %s", id, exclusionsFile))
 			case len(commands) > 0 && excluded:
-				t.Errorf("stale exclusion for %s: a CLI command already covers it", id)
+				problems = append(problems, fmt.Sprintf("stale exclusion for %s: a CLI command already covers it", id))
+			}
+			if len(commands) > 0 && cli.RequiresPublishedOperationExclusion(op) {
+				problems = append(problems, fmt.Sprintf("%s is a new external write. Remove its CLI command and add an exclusion in %s", id, exclusionsFile))
 			}
 			if len(commands) > 1 {
-				t.Errorf("%s has %d CLI commands, want at most 1", id, len(commands))
+				problems = append(problems, fmt.Sprintf("%s has %d CLI commands, want at most 1", id, len(commands)))
 			}
 			for _, c := range commands {
 				wantPath := op.Command
@@ -195,20 +205,112 @@ func TestPublishedOperationCoverage(t *testing.T) {
 					wantPath = strings.Join(c.Presentation.Path, " ")
 				}
 				if c.App != b.Service || c.Name() != wantPath {
-					t.Errorf("operation %s: app/path = %q/%q, want %q/%q", id, c.App, c.Name(), b.Service, wantPath)
+					problems = append(problems, fmt.Sprintf("operation %s: app/path = %q/%q, want %q/%q", id, c.App, c.Name(), b.Service, wantPath))
 				}
 			}
 		}
 	}
 	for id := range byOperation {
 		if !known[id] {
-			t.Errorf("a command names operation %s, which the manifest lacks", id)
+			problems = append(problems, fmt.Sprintf("a command names operation %s, which the manifest lacks", id))
 		}
 	}
 	for id := range exclusions {
 		if !known[id] {
-			t.Errorf("stale exclusion for %s: the manifest lacks this operation", id)
+			problems = append(problems, fmt.Sprintf("stale exclusion for %s: the manifest lacks this operation", id))
 		}
+	}
+	return problems
+}
+
+func TestPublishedOperationCoverageDispositions(t *testing.T) {
+	const service = "whatsapp"
+	const newID = "whatsapp.messages.forward"
+	const removedID = "whatsapp.messages.removed"
+	const grandfatheredID = "whatsapp.messages.create"
+
+	read := contracts.Effect{Mutation: "none", Interaction: "closed"}
+	externalWrite := contracts.Effect{Mutation: "additive", Interaction: "external"}
+	closedWrite := contracts.Effect{Mutation: "additive", Interaction: "closed"}
+
+	for _, tt := range []struct {
+		name       string
+		id         string
+		effect     contracts.Effect
+		registered bool
+		excludedID string
+		want       []string
+	}{
+		{
+			name:       "valid exclusion",
+			id:         newID,
+			effect:     externalWrite,
+			excludedID: newID,
+		},
+		{
+			name:   "uncovered operation",
+			id:     newID,
+			effect: externalWrite,
+			want:   []string{newID + " has no CLI command or exclusion in " + exclusionsFile},
+		},
+		{
+			name:       "exclusion for covered operation",
+			id:         newID,
+			effect:     read,
+			registered: true,
+			excludedID: newID,
+			want:       []string{"stale exclusion for " + newID + ": a CLI command already covers it"},
+		},
+		{
+			name:       "exclusion for removed operation",
+			id:         newID,
+			effect:     read,
+			registered: true,
+			excludedID: removedID,
+			want:       []string{"stale exclusion for " + removedID + ": the manifest lacks this operation"},
+		},
+		{
+			name:       "new external write with a command",
+			id:         newID,
+			effect:     externalWrite,
+			registered: true,
+			want:       []string{newID + " is a new external write. Remove its CLI command and add an exclusion in " + exclusionsFile},
+		},
+		{
+			name:       "grandfathered external write",
+			id:         grandfatheredID,
+			effect:     externalWrite,
+			registered: true,
+		},
+		{
+			name:       "new closed write with a command",
+			id:         newID,
+			effect:     closedWrite,
+			registered: true,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &cli.Command{App: service, Operation: tt.id, Path: strings.Split(tt.id, ".")}
+			m := &contracts.Manifest{Bundles: []contracts.Bundle{{
+				Service: service,
+				Operations: []contracts.Operation{{
+					PublicID: tt.id,
+					Command:  c.Name(),
+					Effect:   tt.effect,
+				}},
+			}}}
+			var registered []*cli.Command
+			if tt.registered {
+				registered = append(registered, c)
+			}
+			exclusions := map[string]string{}
+			if tt.excludedID != "" {
+				exclusions[tt.excludedID] = "Deferred from this CLI release."
+			}
+			if got := publishedOperationCoverage(m, registered, exclusions); !slices.Equal(got, tt.want) {
+				t.Errorf("coverage problems = %q, want %q", got, tt.want)
+			}
+		})
 	}
 }
 

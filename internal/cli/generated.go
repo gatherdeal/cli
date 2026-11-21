@@ -18,6 +18,26 @@ import (
 	"github.com/gatherdeal/cli/internal/paging"
 )
 
+// RequiresPublishedOperationExclusion applies the CLI release policy to external
+// writes. The exceptions are the commands already present when the policy was
+// adopted on 2026-11-21.
+func RequiresPublishedOperationExclusion(op contracts.Operation) bool {
+	if op.ReadOnly() || op.Effect.Interaction != "external" {
+		return false
+	}
+	switch op.PublicID {
+	case "whatsapp.broadcasts.resume",
+		"whatsapp.broadcasts.start",
+		"whatsapp.message_templates.create",
+		"whatsapp.message_templates.delete",
+		"whatsapp.message_templates.update",
+		"whatsapp.messages.create":
+		return false
+	default:
+		return true
+	}
+}
+
 // Generated bindings own request encoding and dispatch. Existing presentations
 // win by public ID so the same operation never acquires a second command.
 func generatedCommands(existing []*Command) []*Command {
@@ -51,15 +71,17 @@ func generatedCommands(existing []*Command) []*Command {
 					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly(), opts...)
 				}, nil
 			})
-		c.FilterFields = b.FilterFields
-		commands = append(commands, c)
+		if c != nil {
+			c.FilterFields = b.FilterFields
+			commands = append(commands, c)
+		}
 	}
 	for _, b := range wa.CLIBindings() {
 		if bound[b.PublicID] != nil {
 			continue
 		}
 		op := contracts.MustOperation(b.PublicID)
-		commands = append(commands, generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*wa.Client)(nil),
+		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*wa.Client)(nil),
 			func(inv *Invocation) (invokeInput, error) {
 				client, err := inv.whatsappClient()
 				if err != nil {
@@ -73,7 +95,10 @@ func generatedCommands(existing []*Command) []*Command {
 					}
 					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
 				}, nil
-			}))
+			})
+		if c != nil {
+			commands = append(commands, c)
+		}
 	}
 	return commands
 }
@@ -99,6 +124,9 @@ func generatedCommand[A ~struct {
 	Name, WireName, In string
 	Required           bool
 }](op contracts.Operation, summary string, hasBody bool, args []A, bind bindInput, client any, connect func(*Invocation) (invokeInput, error)) *Command {
+	if RequiresPublishedOperationExclusion(op) {
+		return nil
+	}
 	c := &Command{Operation: op.PublicID, Summary: strings.TrimSuffix(summary, ".") + ".", Network: true, Output: "json", Flags: append([]FlagSpec{}, targetFlags...)}
 	if op.OutletScope == "filtered" {
 		outlet := flagOutlet

@@ -36,10 +36,13 @@ command or a reviewed entry in
 Each exclusion is a JSON object with the full public `id` and a nonempty,
 one-line `reason`. Review exclusions with the bundle or command change. Remove
 an entry when the command ships or the ID leaves the manifest. CI rejects
-uncovered IDs, duplicate commands, and stale or duplicate exclusions. Keep
-new writes that contact third parties out of the CLI and record their
-disposition in the file. Excluded generated bindings must also be omitted from
-command registration. The exclusion file is currently empty.
+uncovered IDs, duplicate commands, and stale or duplicate exclusions. The CLI
+skips automatic registration of writes whose manifest effect declares an
+`external` interaction, except for the six commands already present when the
+owner adopted this policy on 2026-11-21. The contract check requires a
+reviewed exclusion for each new external write and rejects any command for it.
+For other exclusions, omit the binding from command registration as part of
+the same change. The exclusion file is currently empty.
 
 The CRM producer stages `crm.contact_assets.list` for a future route cutover.
 The installed CRM bundle predates that cutover, so coverage starts when a
