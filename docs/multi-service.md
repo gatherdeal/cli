@@ -29,8 +29,24 @@ version. The re-exports reproduced all three OpenAPI digests.
 
 All OpenAPI documents are embedded automatically. Contract checks enumerate
 all bundles, verify the OpenAPI and generated Go digests, service/version
-constants and generated Client methods, and require one command per published
-operation.
+constants and generated Client methods, and enforce coverage of the public IDs
+in every installed bundle. Each published operation must have exactly one CLI
+command or a reviewed entry in
+[`published-operation-exclusions.json`](../internal/contractcheck/published-operation-exclusions.json).
+Each exclusion is a JSON object with the full public `id` and a nonempty,
+one-line `reason`. Review exclusions with the bundle or command change. Remove
+an entry when the command ships or the ID leaves the manifest. CI rejects
+uncovered IDs, duplicate commands, and stale or duplicate exclusions. The CLI
+skips automatic registration of writes whose manifest effect declares an
+`external` interaction, except for the six commands already present when the
+owner adopted this policy on 2026-11-21. The contract check requires a
+reviewed exclusion for each new external write and rejects any command for it.
+For other exclusions, omit the binding from command registration as part of
+the same change. The exclusion file is currently empty.
+
+The CRM producer stages `crm.contact_assets.list` for a future route cutover.
+The installed CRM bundle predates that cutover, so coverage starts when a
+pinned public manifest includes the ID.
 
 `utilities apigen --public-dist` must populate each bundle's
 `generated_go_digest` after emitting its final formatted Go sources. Compute
