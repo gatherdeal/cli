@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	jsonv2 "encoding/json/v2"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -128,10 +129,44 @@ func TestBundleDigest(t *testing.T) {
 	}
 }
 
-// Every manifest operation has exactly one CLI command, every command that
-// names an operation names a manifest one, and the generated client has the
-// operation's method.
-func TestEveryOperationHasACommand(t *testing.T) {
+const exclusionsFile = "published-operation-exclusions.json"
+
+type operationExclusion struct {
+	ID     string `json:"id"`
+	Reason string `json:"reason"`
+}
+
+func operationExclusions(t *testing.T) map[string]string {
+	t.Helper()
+	data, err := os.ReadFile(exclusionsFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var entries []operationExclusion
+	if err := jsonv2.Unmarshal(data, &entries, jsonv2.RejectUnknownMembers(true)); err != nil {
+		t.Fatalf("%s: %v", exclusionsFile, err)
+	}
+	if entries == nil {
+		t.Fatalf("%s must contain a JSON array", exclusionsFile)
+	}
+	exclusions := make(map[string]string, len(entries))
+	for _, entry := range entries {
+		if entry.ID == "" || strings.TrimSpace(entry.ID) != entry.ID {
+			t.Fatalf("%s: invalid public ID %q", exclusionsFile, entry.ID)
+		}
+		if strings.TrimSpace(entry.Reason) == "" || strings.ContainsAny(entry.Reason, "\r\n\v\f\u0085\u2028\u2029") {
+			t.Fatalf("%s: %s requires a nonempty, one-line reason", exclusionsFile, entry.ID)
+		}
+		if _, exists := exclusions[entry.ID]; exists {
+			t.Fatalf("%s: duplicate exclusion for %s", exclusionsFile, entry.ID)
+		}
+		exclusions[entry.ID] = entry.Reason
+	}
+	return exclusions
+}
+
+func TestPublishedOperationCoverage(t *testing.T) {
+	exclusions := operationExclusions(t)
 	byOperation := map[string][]*cli.Command{}
 	for _, c := range cli.Commands() {
 		if c.Operation != "" {
@@ -141,20 +176,28 @@ func TestEveryOperationHasACommand(t *testing.T) {
 	known := map[string]bool{}
 	for _, b := range manifest(t).Bundles {
 		for _, op := range b.Operations {
-			known[op.PublicID] = true
-			for _, c := range byOperation[op.PublicID] {
+			id := op.PublicID
+			known[id] = true
+			commands := byOperation[id]
+			_, excluded := exclusions[id]
+			switch {
+			case len(commands) == 0 && !excluded:
+				t.Errorf("%s has no CLI command or exclusion in %s", id, exclusionsFile)
+			case len(commands) > 0 && excluded:
+				t.Errorf("stale exclusion for %s: a CLI command already covers it", id)
+			}
+			if len(commands) > 1 {
+				t.Errorf("%s has %d CLI commands, want at most 1", id, len(commands))
+			}
+			for _, c := range commands {
 				wantPath := op.Command
 				if c.Presentation != nil {
 					wantPath = strings.Join(c.Presentation.Path, " ")
 				}
 				if c.App != b.Service || c.Name() != wantPath {
-					t.Errorf("operation %s: app/path = %q/%q, want %q/%q", op.PublicID, c.App, c.Name(), b.Service, wantPath)
+					t.Errorf("operation %s: app/path = %q/%q, want %q/%q", id, c.App, c.Name(), b.Service, wantPath)
 				}
 			}
-			if n := len(byOperation[op.PublicID]); n != 1 {
-				t.Errorf("operation %s has %d CLI commands, want 1", op.PublicID, n)
-			}
-
 		}
 	}
 	for id := range byOperation {
@@ -162,11 +205,17 @@ func TestEveryOperationHasACommand(t *testing.T) {
 			t.Errorf("a command names operation %s, which the manifest lacks", id)
 		}
 	}
+	for id := range exclusions {
+		if !known[id] {
+			t.Errorf("stale exclusion for %s: the manifest lacks this operation", id)
+		}
+	}
 }
 
 // Every generated binding and manifest entry must agree on a published path
 // that parses as the runtime command for that operation.
 func TestBindingCommandPaths(t *testing.T) {
+	exclusions := operationExclusions(t)
 	commandPattern := regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*( [a-z0-9]+(-[a-z0-9]+)*)*$`)
 	runtimePaths := map[string]string{}
 	for _, c := range cli.Commands() {
@@ -198,6 +247,9 @@ func TestBindingCommandPaths(t *testing.T) {
 					t.Errorf("generated path = %q, want %q", got, op.Command)
 				}
 				delete(bindings, op.PublicID)
+				if _, excluded := exclusions[op.PublicID]; excluded {
+					return
+				}
 				var stdout bytes.Buffer
 				args := append(strings.Fields(op.Command), "--help")
 				exit := cli.Run(t.Context(), &cli.Env{Stdout: &stdout, Stderr: io.Discard}, args)
@@ -233,7 +285,7 @@ func TestFlagsWithinManifest(t *testing.T) {
 		}
 		op, ok := m.Operation(c.Operation)
 		if !ok {
-			continue // reported by TestEveryOperationHasACommand
+			continue // reported by TestPublishedOperationCoverage
 		}
 		for _, p := range with {
 			if !slices.Contains(op.DelegatedExpansions, p) {
@@ -289,6 +341,7 @@ func TestGeneratedImportsStdlibOnly(t *testing.T) {
 }
 
 func TestRequestFlagsMatchContracts(t *testing.T) {
+	exclusions := operationExclusions(t)
 	commands := map[string]*cli.Command{}
 	for _, c := range cli.Commands() {
 		commands[c.Operation] = c
@@ -315,7 +368,9 @@ func TestRequestFlagsMatchContracts(t *testing.T) {
 			for _, route := range path {
 				c := commands[route.ID]
 				if c == nil {
-					t.Errorf("missing command for %s", route.ID)
+					if _, excluded := exclusions[route.ID]; !excluded {
+						t.Errorf("missing command for %s", route.ID)
+					}
 					continue
 				}
 				flags := map[string]cli.FlagSpec{}
@@ -365,7 +420,7 @@ func TestPagingFlagsMatchManifest(t *testing.T) {
 		}
 		op, ok := m.Operation(c.Operation)
 		if !ok {
-			continue // reported by TestEveryOperationHasACommand
+			continue // reported by TestPublishedOperationCoverage
 		}
 		names := map[string]bool{}
 		for _, f := range c.Flags {
