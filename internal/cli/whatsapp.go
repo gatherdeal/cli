@@ -455,13 +455,13 @@ func (inv *Invocation) resolveCreateOutlet(ctx context.Context, in *wa.CreateAge
 		if err := json.Unmarshal(raw, &outlet); err != nil {
 			return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "invalid outlet record").WithCause(err)
 		}
-		if outlet.ID == nil || *outlet.ID == "" {
+		if outlet.ID == "" {
 			return output.Errorf(output.ExitUnclassified, output.CodeProtocol, "the outlet lookup returned no outlet id")
 		}
-		if in.OutletID != "" && in.OutletID != *outlet.ID {
+		if in.OutletID != "" && in.OutletID != outlet.ID {
 			return usageError("--outlet differs from input outlet_id")
 		}
-		in.OutletID = *outlet.ID
+		in.OutletID = outlet.ID
 	}
 	*inv.strs["outlet"] = in.OutletID
 	inv.Meta.Context.Request = output.ContextRequest{OutletIDs: []string{in.OutletID}}

@@ -1,4 +1,4 @@
-// Only invoked by release.yml. Never replace an artifact or release asset.
+// Reconcile GitHub release assets without replacing them.
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync, readdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
@@ -30,8 +30,6 @@ async function main(mode) {
       gh('run', 'download', run, '--repo', repo, '--name', 'release-assets', '--dir', 'assets');
       appendFileSync(output, 'restored=true\nupload=false\n');
     } else if (release) {
-      // A complete release is a second copy of the original bytes. Verification
-      // below must succeed; incomplete drafts are never repaired by rebuilding.
       gh('release', 'download', tag, '--repo', repo, '--dir', 'assets');
       appendFileSync(output, 'restored=true\nupload=true\n');
     } else if (artifacts.length) {

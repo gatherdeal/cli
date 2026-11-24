@@ -1,7 +1,5 @@
 name: ci
 
-# Pull requests only. Never use pull_request_target: it runs untrusted
-# code with repository secrets.
 on:
   pull_request:
 

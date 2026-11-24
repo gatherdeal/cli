@@ -5,7 +5,7 @@
 *.test
 *.out
 
-# npm packaging output (assembled from dist/ at release time)
+# npm packaging output
 /npm/**/node_modules/
 /npm/platforms/*/bin/
 /npm/cli/LICENSE
@@ -13,7 +13,7 @@
 /npm/platforms/*/LICENSE
 /npm/platforms/*/NOTICE
 
-# Local credentials must never live in a work tree.
+# Local credentials
 credentials/
 profiles.json
 

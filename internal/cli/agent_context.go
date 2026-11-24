@@ -193,7 +193,7 @@ var appNotes = map[string]string{
 	"whatsapp": `- These agents serve the WhatsApp API. They do not appear as messaging inbox
   channels; messaging channels are a separate system.
 - gatherdeal whatsapp chat-messages list --agent-id UUID --after-rev 0 --count 100
-  polls the message ledger. Read data.messages and save data.after_rev for the
+  polls the chat messages. Read data.messages and save data.after_rev for the
   next poll with the same agent and outlet. While data.has_more is true, poll
   again immediately. Use --jq to select members of this revision poll.
 - Create only when asked: gatherdeal whatsapp agents create --outlet <id-or-code>

@@ -1,5 +1,4 @@
-// Copies GoReleaser binaries from dist/ into the npm platform packages and
-// stamps one version into every package.json. It does not publish.
+// Assemble versioned npm packages from dist/.
 //
 //   node npm/scripts/assemble.mjs <version>
 import { copyFileSync, chmodSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";

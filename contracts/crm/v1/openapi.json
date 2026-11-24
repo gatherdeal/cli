@@ -15,7 +15,7 @@
       "get": {
         "operationId": "fetchContactLogs",
         "summary": "Fetch Contact Logs",
-        "description": "fetchContactLogs lists contact notes for one contact.",
+        "description": "Lists contact notes for one contact.",
         "tags": [
           "contact-logs"
         ],
@@ -64,6 +64,7 @@
             "crm.contact.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-pagination": {
@@ -87,6 +88,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "p",
@@ -543,8 +549,14 @@
             "crm.contact.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "Idempotency-Key",
@@ -800,7 +812,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -820,12 +832,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   }
@@ -979,7 +995,7 @@
       "get": {
         "operationId": "fetchContactTags",
         "summary": "Fetch Contact Tags",
-        "description": "fetchContactTags lists the organization’s contact tag definitions.",
+        "description": "Lists the organization’s contact tag definitions.",
         "tags": [
           "contact-tags"
         ],
@@ -1049,6 +1065,7 @@
             "crm.contact.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
@@ -1072,6 +1089,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "p",
@@ -1503,7 +1525,7 @@
       "get": {
         "operationId": "fetchContacts",
         "summary": "Fetch Contacts",
-        "description": "fetchContacts lists contacts visible to the caller.",
+        "description": "Lists contacts visible to the caller.",
         "tags": [
           "contacts"
         ],
@@ -1626,6 +1648,7 @@
             "crm.contact.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-delegated-edge-filters": [
@@ -1658,6 +1681,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -2297,8 +2325,14 @@
             "crm.contact.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "Idempotency-Key",
@@ -2546,7 +2580,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (CRM_CONTACT_EMAIL_OCCUPIED, CRM_CONTACT_PHONE_OCCUPIED, IDEMPOTENCY_KEY_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, CRM_CONTACT_EMAIL_OCCUPIED, CRM_CONTACT_PHONE_OCCUPIED, IDEMPOTENCY_KEY_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -2566,6 +2600,9 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/CRMContactEmailOccupiedProblem"
                     },
                     {
@@ -2578,6 +2615,7 @@
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "CRM_CONTACT_EMAIL_OCCUPIED": "#/components/schemas/CRMContactEmailOccupiedProblem",
                       "CRM_CONTACT_PHONE_OCCUPIED": "#/components/schemas/CRMContactPhoneOccupiedProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
@@ -2757,8 +2795,14 @@
             "crm.contact.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "Idempotency-Key",
@@ -3020,7 +3064,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -3040,12 +3084,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   }
@@ -3197,7 +3245,7 @@
       "delete": {
         "operationId": "removeContactTag",
         "summary": "Remove Contact Tag",
-        "description": "removeContactTag removes one tag from a contact.",
+        "description": "Removes one tag from a contact.",
         "tags": [
           "contact-tags"
         ],
@@ -3215,8 +3263,14 @@
             "crm.contact.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "contact_id",
@@ -3454,6 +3508,40 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict: problem document (CONFLICT)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "422": {
             "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
             "headers": {
@@ -3600,7 +3688,7 @@
       "get": {
         "operationId": "fetchContactByID",
         "summary": "Fetch Contact By ID",
-        "description": "fetchContactByID retrieves a visible contact by its identifier.",
+        "description": "Retrieves a visible contact by its identifier.",
         "tags": [
           "contacts"
         ],
@@ -3615,6 +3703,7 @@
             "crm.contact.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-delegated-expansions": [
@@ -3622,6 +3711,11 @@
           "with_emails",
           "with_phones",
           "with_tags"
+        ],
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
         ],
         "parameters": [
           {
@@ -4033,7 +4127,7 @@
       "patch": {
         "operationId": "partialUpdateContactByID",
         "summary": "Partial Update Contact By ID",
-        "description": "partialUpdateContactByID sets the supplied contact fields. HTTP 200 returns a success envelope.",
+        "description": "Sets the supplied contact fields. HTTP 200 returns a success envelope.",
         "tags": [
           "contacts"
         ],
@@ -4048,8 +4142,14 @@
             "crm.contact.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -4292,7 +4392,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (CRM_CONTACT_EMAIL_OCCUPIED, CRM_CONTACT_PHONE_OCCUPIED)",
+            "description": "Conflict: problem document (CONFLICT, CRM_CONTACT_EMAIL_OCCUPIED, CRM_CONTACT_PHONE_OCCUPIED)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -4312,6 +4412,9 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/CRMContactEmailOccupiedProblem"
                     },
                     {
@@ -4321,6 +4424,7 @@
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "CRM_CONTACT_EMAIL_OCCUPIED": "#/components/schemas/CRMContactEmailOccupiedProblem",
                       "CRM_CONTACT_PHONE_OCCUPIED": "#/components/schemas/CRMContactPhoneOccupiedProblem"
                     }
@@ -4491,7 +4595,7 @@
       "get": {
         "operationId": "listDeals",
         "summary": "List Deals",
-        "description": "listDeals lists visible deals with their current pipeline and stage.",
+        "description": "Lists visible deals with their current pipeline and stage.",
         "tags": [
           "deals"
         ],
@@ -4540,6 +4644,7 @@
             "crm.deal.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-pagination": {
@@ -4563,6 +4668,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "p",
@@ -5033,8 +5143,14 @@
             "crm.deal.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "Idempotency-Key",
@@ -5290,7 +5406,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -5310,12 +5426,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   }
@@ -5473,7 +5593,7 @@
       "get": {
         "operationId": "getDeal",
         "summary": "Get Deal",
-        "description": "getDeal reads a deal and its pipeline placement.",
+        "description": "Reads a deal and its pipeline placement.",
         "tags": [
           "deals"
         ],
@@ -5488,8 +5608,14 @@
             "crm.deal.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -5866,7 +5992,7 @@
       "patch": {
         "operationId": "updateDeal",
         "summary": "Update Deal",
-        "description": "updateDeal changes a deal's priority, type and remark. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Values equal to the stored ones change nothing.",
+        "description": "Changes a deal's priority, type and remark. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Values equal to the stored ones change nothing.",
         "tags": [
           "deals"
         ],
@@ -5882,14 +6008,20 @@
             "crm.deal.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "If-Match",
             "in": "header",
             "required": true,
-            "description": "Entity tag precondition for the current resource.",
+            "description": "Send the `revision` field returned by `crm_deals_get` unchanged as the strong ETag. A stale value returns 412 Precondition Failed, so re-fetch, re-apply the change, and retry.",
             "schema": {
               "type": "string"
             }
@@ -6133,6 +6265,40 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict: problem document (CONFLICT)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "412": {
             "description": "Precondition Failed: problem document (PRECONDITION_FAILED)",
             "headers": {
@@ -6313,7 +6479,7 @@
       "put": {
         "operationId": "moveDealStage",
         "summary": "Move Deal Stage",
-        "description": "moveDealStage moves a deal to another stage of its current pipeline. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Moving to the current stage changes nothing.",
+        "description": "Moves a deal to another stage of its current pipeline. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Moving to the current stage changes nothing.",
         "tags": [
           "deals"
         ],
@@ -6329,14 +6495,20 @@
             "crm.deal.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "If-Match",
             "in": "header",
             "required": true,
-            "description": "Entity tag precondition for the current resource.",
+            "description": "Send the `revision` field returned by `crm_deals_get` unchanged as the strong ETag. A stale value returns 412 Precondition Failed, so re-fetch, re-apply the change, and retry.",
             "schema": {
               "type": "string"
             }
@@ -6588,6 +6760,40 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict: problem document (CONFLICT)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "412": {
             "description": "Precondition Failed: problem document (PRECONDITION_FAILED)",
             "headers": {
@@ -6768,7 +6974,7 @@
       "get": {
         "operationId": "listPipelines",
         "summary": "List Pipelines",
-        "description": "listPipelines lists organization-shared pipelines and optionally their stages.",
+        "description": "Lists organization-shared pipelines and optionally their stages.",
         "tags": [
           "sales-pipelines"
         ],
@@ -6810,6 +7016,7 @@
             "crm.deal.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
         "x-gd-delegated-expansions": [
@@ -6836,6 +7043,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "p",
@@ -8392,6 +8604,55 @@
           "details"
         ]
       },
+      "ConflictProblem": {
+        "type": "object",
+        "description": "CONFLICT (409): The request conflicts with the current state of the resource.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CONFLICT",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The request conflicts with the current state of the resource.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 409
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CONFLICT"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "Conjunction": {
         "type": "string",
         "enum": [
@@ -8507,7 +8768,7 @@
           "number",
           "select"
         ],
-        "description": "ContactAttributeKind is the storage shape of an attribute value."
+        "description": "The kind of value an attribute accepts: text, number, or a selection."
       },
       "ContactAttributeNamespace": {
         "type": "string",
@@ -8521,10 +8782,7 @@
         "type": "object",
         "properties": {
           "incorporation_country": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "Incorporation country code, when specified."
           }
         }
@@ -8649,17 +8907,11 @@
             "$ref": "#/components/schemas/PersonGender"
           },
           "nationality": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "Nationality country code, when specified."
           },
           "citizenship_country": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "Citizenship country code, when specified."
           },
           "ethnicity": {
@@ -8788,7 +9040,7 @@
       },
       "ContactView": {
         "type": "object",
-        "description": "ContactView is the wire resource for the contact list and detail reads.",
+        "description": "Contact details returned by the contact list and detail endpoints.",
         "properties": {
           "id": {
             "type": "string",
@@ -8830,13 +9082,18 @@
           },
           "name": {
             "type": "string",
-            "description": "Contact display name."
+            "description": "Contact display name: the organization's label for the contact."
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Linked account's name, synced from identity; read-only."
+          },
+          "addressing_name": {
+            "type": "string",
+            "description": "Name to address the customer by: the account name of a verified\ncontact; absent otherwise, never the organization's label."
           },
           "profile_image": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "Reference to the contact's profile image, when set."
           },
@@ -8899,24 +9156,10 @@
             "maxItems": 100
           },
           "person": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContactPersonProfile"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContactPersonProfile"
           },
           "company": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContactCompanyProfile"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContactCompanyProfile"
           },
           "capabilities": {
             "$ref": "#/components/schemas/ContactViewCapabilities"
@@ -8953,7 +9196,7 @@
           },
           "can_customer_read": {
             "type": "boolean",
-            "description": "Whether the caller may read the customer projection."
+            "description": "Whether the caller may read the customer information for this contact."
           },
           "can_delete": {
             "type": "boolean",
@@ -9000,7 +9243,7 @@
       },
       "CreateContactInput": {
         "type": "object",
-        "description": "The nested person and company objects are optional and must match kind. A\ncontact always owns a child of its kind, so omitting them creates an empty\nchild rather than a contact without one. A non-zero address becomes the first\naddress-book entry, holding the primary, billing and shipping roles.",
+        "description": "Supply `person` or `company` to set profile details for the matching\n`kind`. Omitting profile details creates an empty profile.",
         "properties": {
           "kind": {
             "$ref": "#/components/schemas/ContactKind"
@@ -10478,7 +10721,7 @@
       },
       "Group": {
         "type": "object",
-        "description": "Group represents a recursive filter expression composed of Rule values\nand nested Group values combined by a Conjunction.\nWhen Group.Negated is true the entire group predicate is logically inverted.\n\nWhen Group.Edge is set, the group's rules and subgroups are evaluated\nagainst the named edge relation rather than the current entity. In that case\nGroup.Quantifier selects the quantifier (some/every/none) that governs\nhow the inner predicate applies across the related rows, and the rules'\nfield names are resolved against the target entity's registry rather than\nthe current one.",
+        "description": "Group combines `rules` and nested `groups` using `conjunction` (`AND` or\n`OR`). Set `negated` to true to reverse the result of the whole group.\n\nTo filter by related resources, set `edge` to the relationship name and\nchoose a supported `quantifier` (`SOME`, `EVERY`, or `NONE`). Use field\nnames from the related resource in that group's rules.",
         "properties": {
           "groups": {
             "type": [
@@ -10766,16 +11009,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -10814,16 +11051,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -10862,16 +11093,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -10910,16 +11135,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -10958,16 +11177,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -11129,10 +11342,7 @@
             "$ref": "#/components/schemas/PaginationParamsReason"
           },
           "max_offset": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "MaxOffset is the offset cap, set with reason offset_too_large."
           }
         },
@@ -11544,11 +11754,11 @@
           "EVERY",
           "NONE"
         ],
-        "description": "Quantifier specifies how a set of conditions applies across the rows of a\nto-many relation (edge). It is used on a Group together with Group.Edge\nto express predicates of the form \"some/every/none related row matches\".\n\nOnly related rows the caller may read count: rows outside the caller's\ntenant scope or soft-deleted rows are treated as nonexistent by every\nquantifier."
+        "description": "Quantifier controls how a filter group matches related resources when\n`edge` is set. Use `SOME` for at least one match, `EVERY` for all, or `NONE`\nfor no matches. Only resources you can read count."
       },
       "Rule": {
         "type": "object",
-        "description": "Rule represents a single filter condition with a field name, an Operator,\nand a JSON-encoded comparison value.",
+        "description": "Rule is a single filter condition. Set `field` to the field name and `op`\nto the comparison operator. Supply a JSON `value` if the operator takes one.",
         "properties": {
           "field": {
             "type": "string"
@@ -11749,7 +11959,7 @@
       "AcceptLanguage": {
         "name": "Accept-Language",
         "in": "header",
-        "description": "Language of problem title/detail texts (RFC 9110 §12.5.4, RFC 4647 lookup). Supported: en, ms, zh-Hans, zh-Hant; zh-CN/zh-SG/zh → zh-Hans, zh-TW/zh-HK/zh-MO → zh-Hant; anything else falls back to en. Success responses never vary by language.",
+        "description": "Language of problem title/detail texts (RFC 9110 section 12.5.4, RFC 4647 lookup). Supported: en, ms, zh-Hans, zh-Hant; zh-CN/zh-SG/zh → zh-Hans, zh-TW/zh-HK/zh-MO → zh-Hant; anything else falls back to en. Success responses never vary by language.",
         "schema": {
           "anyOf": [
             {
@@ -11803,6 +12013,13 @@
         "schema": {
           "type": "string"
         }
+      }
+    },
+    "securitySchemes": {
+      "gatherdealBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "A GatherDeal access token in the Authorization header."
       }
     }
   },
@@ -12062,6 +12279,17 @@
       "details": null,
       "problem": {
         "$ref": "#/components/schemas/ForbiddenProblem"
+      }
+    },
+    {
+      "code": "CONFLICT",
+      "type": "https://docs.gatherdeal.ai/errors/CONFLICT",
+      "status": 409,
+      "retryable": false,
+      "title": "The request conflicts with the current state of the resource.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/ConflictProblem"
       }
     },
     {

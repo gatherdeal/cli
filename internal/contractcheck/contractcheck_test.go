@@ -8,6 +8,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	jsonv2 "encoding/json/v2"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -128,45 +130,194 @@ func TestBundleDigest(t *testing.T) {
 	}
 }
 
-// Every manifest operation has exactly one CLI command, every command that
-// names an operation names a manifest one, and the generated client has the
-// operation's method.
-func TestEveryOperationHasACommand(t *testing.T) {
+const exclusionsFile = "published-operation-exclusions.json"
+
+type operationExclusion struct {
+	ID     string `json:"id"`
+	Reason string `json:"reason"`
+}
+
+func operationExclusions(t *testing.T) map[string]string {
+	t.Helper()
+	data, err := os.ReadFile(exclusionsFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var entries []operationExclusion
+	if err := jsonv2.Unmarshal(data, &entries, jsonv2.RejectUnknownMembers(true)); err != nil {
+		t.Fatalf("%s: %v", exclusionsFile, err)
+	}
+	if entries == nil {
+		t.Fatalf("%s must contain a JSON array", exclusionsFile)
+	}
+	exclusions := make(map[string]string, len(entries))
+	for _, entry := range entries {
+		if entry.ID == "" || strings.TrimSpace(entry.ID) != entry.ID {
+			t.Fatalf("%s: invalid public ID %q", exclusionsFile, entry.ID)
+		}
+		if strings.TrimSpace(entry.Reason) == "" || strings.ContainsAny(entry.Reason, "\r\n\v\f\u0085\u2028\u2029") {
+			t.Fatalf("%s: %s requires a nonempty, one-line reason", exclusionsFile, entry.ID)
+		}
+		if _, exists := exclusions[entry.ID]; exists {
+			t.Fatalf("%s: duplicate exclusion for %s", exclusionsFile, entry.ID)
+		}
+		exclusions[entry.ID] = entry.Reason
+	}
+	return exclusions
+}
+
+func TestPublishedOperationCoverage(t *testing.T) {
+	for _, problem := range publishedOperationCoverage(manifest(t), cli.Commands(), operationExclusions(t)) {
+		t.Error(problem)
+	}
+}
+
+func publishedOperationCoverage(m *contracts.Manifest, registered []*cli.Command, exclusions map[string]string) []string {
+	var problems []string
 	byOperation := map[string][]*cli.Command{}
-	for _, c := range cli.Commands() {
+	for _, c := range registered {
 		if c.Operation != "" {
 			byOperation[c.Operation] = append(byOperation[c.Operation], c)
 		}
 	}
 	known := map[string]bool{}
-	for _, b := range manifest(t).Bundles {
+	for _, b := range m.Bundles {
 		for _, op := range b.Operations {
-			known[op.PublicID] = true
-			for _, c := range byOperation[op.PublicID] {
+			id := op.PublicID
+			known[id] = true
+			commands := byOperation[id]
+			_, excluded := exclusions[id]
+			switch {
+			case len(commands) == 0 && !excluded:
+				problems = append(problems, fmt.Sprintf("%s has no CLI command or exclusion in %s", id, exclusionsFile))
+			case len(commands) > 0 && excluded:
+				problems = append(problems, fmt.Sprintf("stale exclusion for %s: a CLI command already covers it", id))
+			}
+			if len(commands) > 0 && cli.RequiresPublishedOperationExclusion(op) {
+				problems = append(problems, fmt.Sprintf("%s is a new external write. Remove its CLI command and add an exclusion in %s", id, exclusionsFile))
+			}
+			if len(commands) > 1 {
+				problems = append(problems, fmt.Sprintf("%s has %d CLI commands, want at most 1", id, len(commands)))
+			}
+			for _, c := range commands {
 				wantPath := op.Command
 				if c.Presentation != nil {
 					wantPath = strings.Join(c.Presentation.Path, " ")
 				}
 				if c.App != b.Service || c.Name() != wantPath {
-					t.Errorf("operation %s: app/path = %q/%q, want %q/%q", op.PublicID, c.App, c.Name(), b.Service, wantPath)
+					problems = append(problems, fmt.Sprintf("operation %s: app/path = %q/%q, want %q/%q", id, c.App, c.Name(), b.Service, wantPath))
 				}
 			}
-			if n := len(byOperation[op.PublicID]); n != 1 {
-				t.Errorf("operation %s has %d CLI commands, want 1", op.PublicID, n)
-			}
-
 		}
 	}
 	for id := range byOperation {
 		if !known[id] {
-			t.Errorf("a command names operation %s, which the manifest lacks", id)
+			problems = append(problems, fmt.Sprintf("a command names operation %s, which the manifest lacks", id))
 		}
+	}
+	for id := range exclusions {
+		if !known[id] {
+			problems = append(problems, fmt.Sprintf("stale exclusion for %s: the manifest lacks this operation", id))
+		}
+	}
+	return problems
+}
+
+func TestPublishedOperationCoverageDispositions(t *testing.T) {
+	const service = "whatsapp"
+	const newID = "whatsapp.messages.forward"
+	const removedID = "whatsapp.messages.removed"
+	const grandfatheredID = "whatsapp.messages.create"
+
+	read := contracts.Effect{Mutation: "none", Interaction: "closed"}
+	externalWrite := contracts.Effect{Mutation: "additive", Interaction: "external"}
+	closedWrite := contracts.Effect{Mutation: "additive", Interaction: "closed"}
+
+	for _, tt := range []struct {
+		name       string
+		id         string
+		effect     contracts.Effect
+		registered bool
+		excludedID string
+		want       []string
+	}{
+		{
+			name:       "valid exclusion",
+			id:         newID,
+			effect:     externalWrite,
+			excludedID: newID,
+		},
+		{
+			name:   "uncovered operation",
+			id:     newID,
+			effect: externalWrite,
+			want:   []string{newID + " has no CLI command or exclusion in " + exclusionsFile},
+		},
+		{
+			name:       "exclusion for covered operation",
+			id:         newID,
+			effect:     read,
+			registered: true,
+			excludedID: newID,
+			want:       []string{"stale exclusion for " + newID + ": a CLI command already covers it"},
+		},
+		{
+			name:       "exclusion for removed operation",
+			id:         newID,
+			effect:     read,
+			registered: true,
+			excludedID: removedID,
+			want:       []string{"stale exclusion for " + removedID + ": the manifest lacks this operation"},
+		},
+		{
+			name:       "new external write with a command",
+			id:         newID,
+			effect:     externalWrite,
+			registered: true,
+			want:       []string{newID + " is a new external write. Remove its CLI command and add an exclusion in " + exclusionsFile},
+		},
+		{
+			name:       "grandfathered external write",
+			id:         grandfatheredID,
+			effect:     externalWrite,
+			registered: true,
+		},
+		{
+			name:       "new closed write with a command",
+			id:         newID,
+			effect:     closedWrite,
+			registered: true,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &cli.Command{App: service, Operation: tt.id, Path: strings.Split(tt.id, ".")}
+			m := &contracts.Manifest{Bundles: []contracts.Bundle{{
+				Service: service,
+				Operations: []contracts.Operation{{
+					PublicID: tt.id,
+					Command:  c.Name(),
+					Effect:   tt.effect,
+				}},
+			}}}
+			var registered []*cli.Command
+			if tt.registered {
+				registered = append(registered, c)
+			}
+			exclusions := map[string]string{}
+			if tt.excludedID != "" {
+				exclusions[tt.excludedID] = "Deferred from this CLI release."
+			}
+			if got := publishedOperationCoverage(m, registered, exclusions); !slices.Equal(got, tt.want) {
+				t.Errorf("coverage problems = %q, want %q", got, tt.want)
+			}
+		})
 	}
 }
 
 // Every generated binding and manifest entry must agree on a published path
 // that parses as the runtime command for that operation.
 func TestBindingCommandPaths(t *testing.T) {
+	exclusions := operationExclusions(t)
 	commandPattern := regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*( [a-z0-9]+(-[a-z0-9]+)*)*$`)
 	runtimePaths := map[string]string{}
 	for _, c := range cli.Commands() {
@@ -198,6 +349,9 @@ func TestBindingCommandPaths(t *testing.T) {
 					t.Errorf("generated path = %q, want %q", got, op.Command)
 				}
 				delete(bindings, op.PublicID)
+				if _, excluded := exclusions[op.PublicID]; excluded {
+					return
+				}
 				var stdout bytes.Buffer
 				args := append(strings.Fields(op.Command), "--help")
 				exit := cli.Run(t.Context(), &cli.Env{Stdout: &stdout, Stderr: io.Discard}, args)
@@ -233,7 +387,7 @@ func TestFlagsWithinManifest(t *testing.T) {
 		}
 		op, ok := m.Operation(c.Operation)
 		if !ok {
-			continue // reported by TestEveryOperationHasACommand
+			continue // reported by TestPublishedOperationCoverage
 		}
 		for _, p := range with {
 			if !slices.Contains(op.DelegatedExpansions, p) {
@@ -289,6 +443,7 @@ func TestGeneratedImportsStdlibOnly(t *testing.T) {
 }
 
 func TestRequestFlagsMatchContracts(t *testing.T) {
+	exclusions := operationExclusions(t)
 	commands := map[string]*cli.Command{}
 	for _, c := range cli.Commands() {
 		commands[c.Operation] = c
@@ -315,7 +470,9 @@ func TestRequestFlagsMatchContracts(t *testing.T) {
 			for _, route := range path {
 				c := commands[route.ID]
 				if c == nil {
-					t.Errorf("missing command for %s", route.ID)
+					if _, excluded := exclusions[route.ID]; !excluded {
+						t.Errorf("missing command for %s", route.ID)
+					}
 					continue
 				}
 				flags := map[string]cli.FlagSpec{}
@@ -365,7 +522,7 @@ func TestPagingFlagsMatchManifest(t *testing.T) {
 		}
 		op, ok := m.Operation(c.Operation)
 		if !ok {
-			continue // reported by TestEveryOperationHasACommand
+			continue // reported by TestPublishedOperationCoverage
 		}
 		names := map[string]bool{}
 		for _, f := range c.Flags {

@@ -86,7 +86,7 @@ test('GitHub reconciliation rejects altered and unexpected assets', () => {
   assert.throws(() => compareAssets(local, new Map([['unexpected', bytes]])));
 });
 
-// A fake executable records calls; no real gh or npm command is executed.
+// Record calls made to a fake executable.
 function github(mode, scenario) {
   const dir = mkdtempSync(join(tmpdir(), 'release-flow-test-'));
   try {

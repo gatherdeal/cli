@@ -301,6 +301,8 @@
           "create_by_user_id",
           "kind",
           "name",
+          "user_name",
+          "addressing_name",
           "profile_image",
           "remark",
           "preferred_language",
@@ -398,6 +400,8 @@
           "create_by_user_id",
           "kind",
           "name",
+          "user_name",
+          "addressing_name",
           "profile_image",
           "remark",
           "preferred_language",
@@ -3748,7 +3752,7 @@
           {
             "name": "agent-id",
             "type": "string",
-            "usage": "The agent whose ledger to read."
+            "usage": "The WhatsApp connection whose chat messages to list."
           },
           {
             "name": "after-rev",

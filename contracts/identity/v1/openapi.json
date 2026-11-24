@@ -15,6 +15,7 @@
       "get": {
         "operationId": "fetchOutlets",
         "summary": "Fetch Outlets",
+        "description": "Lists the outlets visible to the caller.",
         "tags": [
           "outlets"
         ],
@@ -209,6 +210,12 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {},
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "organization_id",
@@ -798,7 +805,7 @@
       },
       "BusinessHours": {
         "type": "object",
-        "description": "BusinessHours is a complete weekly schedule. A nil *BusinessHours means\nunconfigured on an organization and live inheritance on an outlet.",
+        "description": "Weekly opening hours. A null organization schedule means hours are unset.\nA null outlet schedule inherits the organization's current hours.",
         "properties": {
           "monday": {
             "$ref": "#/components/schemas/BusinessHoursDay"
@@ -834,12 +841,12 @@
       },
       "BusinessHoursDay": {
         "type": "object",
-        "description": "BusinessHoursDay uses an empty interval array for a closed day. Revision is\nassigned by the server and changes only when this day is edited or reset.",
+        "description": "Opening hours for one day. An empty `intervals` array means the outlet\nor organization is closed. The server changes `revision` only when this\nday is edited or reset.",
         "properties": {
           "intervals": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BusinessHoursInterval"
+              "$ref": "#/components/schemas/BusinessHoursIntervalOutput"
             }
           },
           "revision": {
@@ -852,7 +859,7 @@
           "revision"
         ]
       },
-      "BusinessHoursInterval": {
+      "BusinessHoursIntervalOutput": {
         "type": "object",
         "description": "BusinessHoursInterval is a half-open local-time interval within one day.\nMidnight-crossing openings are split into intervals on consecutive days.",
         "properties": {
@@ -2166,16 +2173,12 @@
         "type": "object",
         "properties": {
           "outlets": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageOutlet"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageOutlet"
           }
-        }
+        },
+        "required": [
+          "outlets"
+        ]
       },
       "FetchOutletsOutputEnvelope": {
         "allOf": [
@@ -2247,7 +2250,7 @@
       },
       "Group": {
         "type": "object",
-        "description": "Group represents a recursive filter expression composed of Rule values\nand nested Group values combined by a Conjunction.\nWhen Group.Negated is true the entire group predicate is logically inverted.\n\nWhen Group.Edge is set, the group's rules and subgroups are evaluated\nagainst the named edge relation rather than the current entity. In that case\nGroup.Quantifier selects the quantifier (some/every/none) that governs\nhow the inner predicate applies across the related rows, and the rules'\nfield names are resolved against the target entity's registry rather than\nthe current one.",
+        "description": "Group combines `rules` and nested `groups` using `conjunction` (`AND` or\n`OR`). Set `negated` to true to reverse the result of the whole group.\n\nTo filter by related resources, set `edge` to the relationship name and\nchoose a supported `quantifier` (`SOME`, `EVERY`, or `NONE`). Use field\nnames from the related resource in that group's rules.",
         "properties": {
           "groups": {
             "type": "array",
@@ -2521,16 +2524,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -2567,13 +2564,10 @@
       },
       "Outlet": {
         "type": "object",
-        "description": "Outlet is the API response shape for an outlet entity.",
+        "description": "An outlet and its organization, owner, and operating settings.",
         "properties": {
           "id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid"
           },
           "create_at": {
@@ -2589,16 +2583,10 @@
             "format": "date-time"
           },
           "code": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "description": {
             "type": "string"
@@ -2661,21 +2649,11 @@
             }
           },
           "timezone": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "Timezone override for this outlet; empty inherits the organization's value (see embedded organization)."
           },
           "currency": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Currency"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Currency"
           },
           "business_hours": {
             "oneOf": [
@@ -2692,56 +2670,36 @@
             "format": "int64"
           },
           "is_master": {
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "type": "boolean"
           },
           "organization_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid"
           },
           "organization": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/OutletOrganization"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/OutletOrganization"
           },
           "owner_id": {
             "type": "string",
             "format": "uuid"
           },
           "owner": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/UserBrief"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/UserBrief"
           }
         },
         "required": [
+          "id",
+          "name",
+          "business_hours",
           "business_hours_revision"
         ]
       },
       "OutletOrganization": {
         "type": "object",
-        "description": "OutletOrganization is a lightweight representation of an outlet's organization.",
+        "description": "Organization details included in an outlet response.",
         "properties": {
           "phone": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "phone",
             "pattern": "^(?:\\+[1-9][0-9]+|(?:\\([1-9][0-9]*\\)|\\+[1-9][0-9]*[ -])(?:[ .-]*(?:[0-9]+|\\([ .-]*[0-9][0-9 .-]*\\)))+[ .-]*)$",
             "examples": [
@@ -2809,56 +2767,31 @@
             }
           },
           "email": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "website": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "distribution_id": {
             "type": "string",
             "format": "uuid"
           },
           "id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid"
           },
           "code": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "timezone": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "description": "Organization timezone used as the fallback when the outlet's timezone is empty."
           },
           "currency": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Currency"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Currency"
           },
           "business_hours": {
             "oneOf": [
@@ -2875,14 +2808,12 @@
             "format": "int64"
           },
           "logo": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid"
           }
         },
         "required": [
+          "business_hours",
           "business_hours_revision"
         ]
       },
@@ -2969,10 +2900,7 @@
             "$ref": "#/components/schemas/PaginationParamsReason"
           },
           "max_offset": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "MaxOffset is the offset cap, set with reason offset_too_large."
           }
         },
@@ -3212,11 +3140,11 @@
           "EVERY",
           "NONE"
         ],
-        "description": "Quantifier specifies how a set of conditions applies across the rows of a\nto-many relation (edge). It is used on a Group together with Group.Edge\nto express predicates of the form \"some/every/none related row matches\".\n\nOnly related rows the caller may read count: rows outside the caller's\ntenant scope or soft-deleted rows are treated as nonexistent by every\nquantifier."
+        "description": "Quantifier controls how a filter group matches related resources when\n`edge` is set. Use `SOME` for at least one match, `EVERY` for all, or `NONE`\nfor no matches. Only resources you can read count."
       },
       "Rule": {
         "type": "object",
-        "description": "Rule represents a single filter condition with a field name, an Operator,\nand a JSON-encoded comparison value.",
+        "description": "Rule is a single filter condition. Set `field` to the field name and `op`\nto the comparison operator. Supply a JSON `value` if the operator takes one.",
         "properties": {
           "field": {
             "type": "string"
@@ -3286,7 +3214,7 @@
       },
       "UserBrief": {
         "type": "object",
-        "description": "UserBrief is the brief user projection embedded wherever a caller needs\njust enough to reference a user — an owner, a role/staff association\nmember, an audit-ledger actor, or a public profile lookup: the id plus what\na UI needs to show a person instead of an id (name, avatar). It carries no\ncontact fields; OrganizationStaffAssociationUser embeds it and adds the one\ncontact field (Phone) that surface needs. OrganizationBrief is the\norganization counterpart.",
+        "description": "A user reference with an `id` and, when available, a `name` and\n`profile_image`.",
         "properties": {
           "id": {
             "type": "string",
@@ -3296,10 +3224,7 @@
             "type": "string"
           },
           "profile_image": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid"
           }
         }
@@ -3367,7 +3292,7 @@
       "AcceptLanguage": {
         "name": "Accept-Language",
         "in": "header",
-        "description": "Language of problem title/detail texts (RFC 9110 §12.5.4, RFC 4647 lookup). Supported: en, ms, zh-Hans, zh-Hant; zh-CN/zh-SG/zh → zh-Hans, zh-TW/zh-HK/zh-MO → zh-Hant; anything else falls back to en. Success responses never vary by language.",
+        "description": "Language of problem title/detail texts (RFC 9110 section 12.5.4, RFC 4647 lookup). Supported: en, ms, zh-Hans, zh-Hant; zh-CN/zh-SG/zh → zh-Hans, zh-TW/zh-HK/zh-MO → zh-Hant; anything else falls back to en. Success responses never vary by language.",
         "schema": {
           "anyOf": [
             {
@@ -3421,6 +3346,13 @@
         "schema": {
           "type": "string"
         }
+      }
+    },
+    "securitySchemes": {
+      "gatherdealBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "A GatherDeal access token in the Authorization header."
       }
     }
   },

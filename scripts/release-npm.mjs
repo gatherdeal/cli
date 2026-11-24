@@ -1,5 +1,4 @@
-// Pack once, compare immutable registry versions, publish only absent versions,
-// and wait for every version to become visible and verified.
+// Publish missing npm versions and verify every package.
 import { execFile } from 'node:child_process';
 import { createHash, X509Certificate } from 'node:crypto';
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -58,8 +57,7 @@ export async function lookup(name, version, fetcher = fetch) {
   return response.json();
 }
 
-// A condition that resolves by itself once the registry catches up with a
-// publish: the version is not yet visible, installable or attested.
+// NotReady indicates a version is pending registry visibility or verification.
 export class NotReady extends Error {}
 
 export function notYetInstallable(stderr = '') {
@@ -84,8 +82,7 @@ export async function untilReady(attempt, label, { sleep, now, log,
   }
 }
 
-// Publishes a version only when the registry answers 404, then waits until
-// the new or existing version is visible and verified.
+// Publish on HTTP 404 and verify the resulting registry version.
 async function release(dir, { pack, find, publish, verify }, timing) {
   let label = dir;
   try {
@@ -102,9 +99,7 @@ async function release(dir, { pack, find, publish, verify }, timing) {
   }
 }
 
-// Platform packages run in parallel and all settle before the outcome is
-// decided; the launcher depends on them and is published only after every
-// platform package verifies.
+// Verify all platform packages before publishing the launcher.
 export async function publishAll(platformDirs, launcherDir, operations, timing) {
   const results = await Promise.allSettled(platformDirs.map(dir => release(dir, operations, timing)));
   const errors = results.filter(r => r.status === 'rejected').map(r => r.reason);
@@ -149,8 +144,7 @@ async function main() {
           if (notYetInstallable(err.stderr)) throw new NotReady('published version is not yet installable');
           throw err;
         }
-        // The audit exits non-zero when signatures are missing or invalid;
-        // its JSON report says which.
+        // Read the JSON audit report even on a nonzero exit.
         let report;
         try {
           report = await npm(['audit', 'signatures', '--json', '--include-attestations', '--registry', registry], audit);

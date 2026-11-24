@@ -57,6 +57,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "outlet_id",
@@ -490,7 +495,24 @@
         },
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Reuse the key when retrying the same logical operation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[!-~]+$",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
           {
             "$ref": "#/components/parameters/AcceptLanguage"
           }
@@ -691,7 +713,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -711,12 +733,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   }
@@ -939,6 +965,11 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "agent_id",
@@ -1328,6 +1359,11 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "agent_id",
@@ -1568,7 +1604,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_SYSTEM_AGENT_UNASSIGNABLE)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_SYSTEM_AGENT_UNASSIGNABLE)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -1588,12 +1624,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppSystemAgentUnassignableProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_SYSTEM_AGENT_UNASSIGNABLE": "#/components/schemas/WhatsAppSystemAgentUnassignableProblem"
                     }
                   }
@@ -1838,6 +1878,11 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "agent_id",
@@ -2067,6 +2112,40 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict: problem document (CONFLICT)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "422": {
             "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
             "headers": {
@@ -2266,6 +2345,11 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "agent_id",
@@ -2658,6 +2742,7 @@
             "whatsapp.broadcast.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
@@ -2681,6 +2766,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "p",
@@ -3119,9 +3209,27 @@
             "whatsapp.broadcast.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Reuse the key when retrying the same logical operation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[!-~]+$",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
           {
             "$ref": "#/components/parameters/AcceptLanguage"
           }
@@ -3322,7 +3430,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -3342,12 +3450,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   }
@@ -3517,8 +3629,14 @@
             "whatsapp.broadcast.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "suppression_id",
@@ -3741,6 +3859,40 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict: problem document (CONFLICT)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "422": {
             "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
             "headers": {
@@ -3904,6 +4056,7 @@
             "whatsapp.broadcast.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
@@ -3927,6 +4080,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "p",
@@ -4355,9 +4513,27 @@
             "whatsapp.message.create"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Reuse the key when retrying the same logical operation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[!-~]+$",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
           {
             "$ref": "#/components/parameters/AcceptLanguage"
           }
@@ -4592,7 +4768,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -4612,12 +4788,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   }
@@ -4789,8 +4969,14 @@
             "whatsapp.broadcast.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "broadcast_id",
@@ -5179,8 +5365,14 @@
             "whatsapp.message.create"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "broadcast_id",
@@ -5425,7 +5617,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_BROADCAST_STATE_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_BROADCAST_STATE_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -5445,12 +5637,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_BROADCAST_STATE_CONFLICT": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   }
@@ -5624,8 +5820,14 @@
             "whatsapp.broadcast.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "broadcast_id",
@@ -5856,7 +6058,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_BROADCAST_STATE_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_BROADCAST_STATE_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -5876,12 +6078,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_BROADCAST_STATE_CONFLICT": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   }
@@ -6049,8 +6255,14 @@
             "whatsapp.broadcast.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "broadcast_id",
@@ -6281,7 +6493,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_BROADCAST_STATE_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_BROADCAST_STATE_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -6301,12 +6513,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_BROADCAST_STATE_CONFLICT": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   }
@@ -6478,6 +6694,7 @@
             "whatsapp.broadcast.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
@@ -6501,6 +6718,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "broadcast_id",
@@ -6997,9 +7219,27 @@
             "whatsapp.broadcast.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Reuse the key when retrying the same logical operation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[!-~]+$",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
           {
             "name": "broadcast_id",
             "in": "path",
@@ -7247,7 +7487,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT, WHATSAPP_BROADCAST_STATE_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT, WHATSAPP_BROADCAST_STATE_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -7267,6 +7507,9 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     },
                     {
@@ -7276,6 +7519,7 @@
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem",
                       "WHATSAPP_BROADCAST_STATE_CONFLICT": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
@@ -7454,8 +7698,14 @@
             "whatsapp.broadcast.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "broadcast_id",
@@ -7692,7 +7942,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_BROADCAST_STATE_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_BROADCAST_STATE_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -7712,12 +7962,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_BROADCAST_STATE_CONFLICT": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   }
@@ -7888,8 +8142,14 @@
             "whatsapp.message.create"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "broadcast_id",
@@ -8120,7 +8380,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_BROADCAST_STATE_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_BROADCAST_STATE_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -8140,12 +8400,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_BROADCAST_STATE_CONFLICT": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
                   }
@@ -8320,8 +8584,14 @@
             "whatsapp.message.create"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "broadcast_id",
@@ -8556,7 +8826,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_BROADCAST_ACTIVE_LIMIT_REACHED, WHATSAPP_BROADCAST_STATE_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_BROADCAST_ACTIVE_LIMIT_REACHED, WHATSAPP_BROADCAST_STATE_CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -8576,6 +8846,9 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppBroadcastActiveLimitReachedProblem"
                     },
                     {
@@ -8585,6 +8858,7 @@
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_BROADCAST_ACTIVE_LIMIT_REACHED": "#/components/schemas/WhatsAppBroadcastActiveLimitReachedProblem",
                       "WHATSAPP_BROADCAST_STATE_CONFLICT": "#/components/schemas/WhatsAppBroadcastStateConflictProblem"
                     }
@@ -8758,13 +9032,19 @@
             "whatsapp.message.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "agent_id",
             "in": "query",
-            "description": "The agent whose ledger to read.",
+            "description": "The WhatsApp connection whose chat messages to list.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -9170,8 +9450,14 @@
             "whatsapp.message.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -9565,6 +9851,7 @@
             "whatsapp.inbound.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-pagination": {
@@ -9588,6 +9875,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "agent_id",
@@ -10053,8 +10345,14 @@
             "whatsapp.inbound.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "chat_id",
@@ -10445,6 +10743,7 @@
             "whatsapp.message.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-pagination": {
@@ -10468,6 +10767,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "chat_id",
@@ -10915,6 +11219,7 @@
             "whatsapp.template.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
@@ -10938,6 +11243,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "p",
@@ -11367,8 +11677,14 @@
             "whatsapp.template.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "none",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/AcceptLanguage"
@@ -11566,7 +11882,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_TEMPLATE_NAME_TAKEN)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_TEMPLATE_NAME_TAKEN)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -11586,12 +11902,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppTemplateNameTakenProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_TEMPLATE_NAME_TAKEN": "#/components/schemas/WhatsAppTemplateNameTakenProblem"
                     }
                   }
@@ -11764,8 +12084,14 @@
             "whatsapp.template.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "template_id",
@@ -12155,8 +12481,14 @@
             "whatsapp.template.write"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "none",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "template_id",
@@ -12397,7 +12729,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (WHATSAPP_TEMPLATE_NAME_TAKEN)",
+            "description": "Conflict: problem document (CONFLICT, WHATSAPP_TEMPLATE_NAME_TAKEN)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -12417,12 +12749,16 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppTemplateNameTakenProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "WHATSAPP_TEMPLATE_NAME_TAKEN": "#/components/schemas/WhatsAppTemplateNameTakenProblem"
                     }
                   }
@@ -12591,8 +12927,14 @@
             "whatsapp.template.delete"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "template_id",
@@ -12815,6 +13157,40 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict: problem document (CONFLICT)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "422": {
             "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
             "headers": {
@@ -12976,8 +13352,14 @@
             "whatsapp.template.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "template_id",
@@ -13384,6 +13766,7 @@
             "whatsapp.message.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
         "x-gd-pagination": {
@@ -13407,6 +13790,11 @@
           "total_items_field": "total_items",
           "total_pages_field": "total_pages"
         },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "outlet_id",
@@ -13913,9 +14301,27 @@
             "whatsapp.message.create"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Reuse the key when retrying the same logical operation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[!-~]+$",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
           {
             "$ref": "#/components/parameters/AcceptLanguage"
           }
@@ -14162,7 +14568,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (IDEMPOTENCY_KEY_CONFLICT, WHATSAPP_AGENT_NOT_READY, WHATSAPP_MESSAGE_OPERATION_NOT_ALLOWED, WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED, WHATSAPP_MESSAGE_TARGET_NOT_SENT)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT, WHATSAPP_AGENT_NOT_READY, WHATSAPP_MESSAGE_OPERATION_NOT_ALLOWED, WHATSAPP_MESSAGE_RUNTIME_UNSUPPORTED, WHATSAPP_MESSAGE_TARGET_NOT_SENT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -14182,6 +14588,9 @@
                 "schema": {
                   "oneOf": [
                     {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     },
                     {
@@ -14200,6 +14609,7 @@
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem",
                       "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem",
                       "WHATSAPP_AGENT_NOT_READY": "#/components/schemas/WhatsAppAgentNotReadyProblem",
                       "WHATSAPP_MESSAGE_OPERATION_NOT_ALLOWED": "#/components/schemas/WhatsAppMessageOperationNotAllowedProblem",
@@ -14449,8 +14859,14 @@
             "whatsapp.message.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "message_id",
@@ -14917,41 +15333,21 @@
             "description": "The connection runtime, when assigned."
           },
           "runtime_generation": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "format": "int64"
           },
           "current_run": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AgentCurrentRun"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/AgentCurrentRun"
           },
           "egress": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AgentEgress"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/AgentEgress"
           },
           "id": {
             "type": "string",
             "format": "uuid"
           },
           "phone": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "phone",
             "pattern": "^(?:\\+[1-9][0-9]+|(?:\\([1-9][0-9]*\\)|\\+[1-9][0-9]*[ -])(?:[ .-]*(?:[0-9]+|\\([ .-]*[0-9][0-9 .-]*\\)))+[ .-]*)$",
             "examples": [
@@ -15005,64 +15401,41 @@
             "description": "Last reported WhatsApp web client version; visible only to platform operators."
           },
           "phone_last_seen_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
-            "description": "Latest primary-phone sighting across runs; absent until first observed."
+            "description": "When the primary phone was last seen. Omitted until first seen."
           },
           "phone_last_pinged_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
-            "description": "Last claimed ping attempt; visible only to platform operators."
+            "description": "Time of the last attempt to check the primary phone. Visible only to\nplatform operators."
           },
           "phone_activity": {
             "$ref": "#/components/schemas/AgentPhoneActivity"
           },
           "last_heartbeat_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "status_changed_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
-            "description": "Last status change; heartbeats never move it."
+            "description": "Time when the connection status last changed."
           },
           "stop_reason": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AgentStopReason"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/AgentStopReason"
           },
           "stop_detail": {
             "type": "string",
             "description": "Error text from the last stop; visible only to platform operators."
           },
           "send_pacing": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/SendPacing"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/SendPacingOutput"
           }
-        }
+        },
+        "required": [
+          "outlet_id"
+        ]
       },
       "AgentCurrentRun": {
         "type": "object",
@@ -15079,24 +15452,15 @@
             "$ref": "#/components/schemas/RunCapacityState"
           },
           "started_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "online_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "node_ref": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           }
         },
         "required": [
@@ -15137,10 +15501,7 @@
             "type": "string"
           },
           "shard_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid"
           }
         },
@@ -15317,17 +15678,10 @@
             "$ref": "#/components/schemas/BroadcastStatus"
           },
           "pause_reason": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/BroadcastPauseReason"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/BroadcastPauseReason"
           },
           "content": {
-            "$ref": "#/components/schemas/BroadcastContent"
+            "$ref": "#/components/schemas/BroadcastContentOutput"
           },
           "distribution": {
             "$ref": "#/components/schemas/BroadcastDistribution"
@@ -15336,7 +15690,7 @@
             "$ref": "#/components/schemas/BroadcastAffinityFallback"
           },
           "interval": {
-            "$ref": "#/components/schemas/BroadcastInterval"
+            "$ref": "#/components/schemas/BroadcastIntervalOutput"
           },
           "sender_daily_limit": {
             "type": "integer",
@@ -15346,43 +15700,24 @@
             "type": "integer"
           },
           "send_window": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/SendWindow"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/SendWindowOutput"
           },
           "not_before": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
             "description": "Sending does not start before this time."
           },
           "not_after": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
             "description": "Recipients not sent by then expire; set at start (default 30 days)."
           },
           "started_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "completed_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "senders": {
@@ -15460,6 +15795,24 @@
           "type"
         ]
       },
+      "BroadcastContentOutput": {
+        "type": "object",
+        "description": "BroadcastContent is a broadcast's content: a text body, or a template\nrendered for each recipient with its params.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/BroadcastContentType"
+          },
+          "text": {
+            "$ref": "#/components/schemas/MessageTextOutput"
+          },
+          "template": {
+            "$ref": "#/components/schemas/BroadcastTemplateReferenceOutput"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
       "BroadcastContentType": {
         "type": "string",
         "enum": [
@@ -15473,9 +15826,29 @@
           "round_robin",
           "affinity"
         ],
-        "description": "BroadcastDistribution decides which sender a recipient is fed to."
+        "description": "How the broadcast chooses a sender for each recipient."
       },
       "BroadcastInterval": {
+        "type": "object",
+        "description": "BroadcastInterval is the range each message's cooldown is drawn from:\nafter a broadcast message settles, its sender sends no other broadcast\nmessage for the drawn time. 10 000 <= min_ms <= max_ms <= 600 000.",
+        "properties": {
+          "min_ms": {
+            "type": "integer",
+            "minimum": 10000,
+            "maximum": 600000
+          },
+          "max_ms": {
+            "type": "integer",
+            "minimum": 10000,
+            "maximum": 600000
+          }
+        },
+        "required": [
+          "min_ms",
+          "max_ms"
+        ]
+      },
+      "BroadcastIntervalOutput": {
         "type": "object",
         "description": "BroadcastInterval is the range each message's cooldown is drawn from:\nafter a broadcast message settles, its sender sends no other broadcast\nmessage for the drawn time. 10 000 <= min_ms <= max_ms <= 600 000.",
         "properties": {
@@ -15528,14 +15901,7 @@
         "type": "object",
         "properties": {
           "broadcast": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Broadcast"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Broadcast"
           }
         }
       },
@@ -15637,25 +16003,25 @@
             "additionalProperties": {
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/TemplateDateValue"
+                  "$ref": "#/components/schemas/TemplateDateValueOutput"
                 },
                 {
-                  "$ref": "#/components/schemas/TemplateDatetimeValue"
+                  "$ref": "#/components/schemas/TemplateDatetimeValueOutput"
                 },
                 {
-                  "$ref": "#/components/schemas/TemplateMoneyValue"
+                  "$ref": "#/components/schemas/TemplateMoneyValueOutput"
                 },
                 {
-                  "$ref": "#/components/schemas/TemplateTextValue"
+                  "$ref": "#/components/schemas/TemplateTextValueOutput"
                 }
               ],
               "discriminator": {
                 "propertyName": "kind",
                 "mapping": {
-                  "date": "#/components/schemas/TemplateDateValue",
-                  "datetime": "#/components/schemas/TemplateDatetimeValue",
-                  "money": "#/components/schemas/TemplateMoneyValue",
-                  "text": "#/components/schemas/TemplateTextValue"
+                  "date": "#/components/schemas/TemplateDateValueOutput",
+                  "datetime": "#/components/schemas/TemplateDatetimeValueOutput",
+                  "money": "#/components/schemas/TemplateMoneyValueOutput",
+                  "text": "#/components/schemas/TemplateTextValueOutput"
                 }
               }
             }
@@ -15664,43 +16030,25 @@
             "$ref": "#/components/schemas/BroadcastRecipientStatus"
           },
           "error": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/BroadcastRecipientError"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/BroadcastRecipientError"
           },
           "preferred_agent_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "The sender the recipient last talked to (affinity), if any."
           },
           "agent_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
-            "description": "The sender and message of a queued or settled recipient."
+            "description": "The WhatsApp connection assigned to send to this recipient."
           },
           "message_id": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
+            "type": "string",
+            "format": "uuid",
+            "description": "The message sent or scheduled for this recipient."
           },
           "settled_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "create_at": {
@@ -15731,7 +16079,7 @@
           "no_sender",
           "sender_lost"
         ],
-        "description": "BroadcastRecipientError is the typed cause of a failed recipient; the raw\nagent code stays on the message."
+        "description": "The reason sending failed for this recipient."
       },
       "BroadcastRecipientInput": {
         "type": "object",
@@ -15922,6 +16270,19 @@
           "id"
         ]
       },
+      "BroadcastTemplateReferenceOutput": {
+        "type": "object",
+        "description": "BroadcastTemplateReference names the template a broadcast renders.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
       "Chat": {
         "type": "object",
         "description": "Chat is one WhatsApp conversation of an agent.",
@@ -15938,14 +16299,7 @@
             "$ref": "#/components/schemas/ChatType"
           },
           "user": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ChatParty"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ChatParty"
           },
           "group_jid": {
             "type": "string",
@@ -15960,17 +16314,11 @@
             "description": "The disappearing-message timer, in seconds; 0 when off."
           },
           "last_message_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "merged_into_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "Set when this chat was found to be the same conversation as another;\nread that chat instead."
           },
@@ -16003,13 +16351,10 @@
           "rev": {
             "type": "integer",
             "format": "int64",
-            "description": "The ledger revision; poll GET /v1/chat-messages with after_rev."
+            "description": "Message revision. Pass it as `after_rev` when polling\n`GET /v1/chat-messages` for later changes."
           },
           "merged_into_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "Set on a tombstone: the message this copy was merged into."
           },
@@ -16022,14 +16367,7 @@
             "format": "uuid"
           },
           "sender": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ChatParty"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ChatParty"
           },
           "origin": {
             "$ref": "#/components/schemas/ChatMessageOrigin"
@@ -16042,57 +16380,32 @@
             "description": "The WhatsApp message ID."
           },
           "content": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Content"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Content"
           },
           "quoted_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "The chat message this one replies to."
           },
           "target_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "The chat message a poll vote refers to."
           },
           "sent_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "edited_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "revoked_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "expires_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
             "description": "When a disappearing message's content goes away."
           },
@@ -16113,14 +16426,7 @@
             }
           },
           "receipt": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageReceipt"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageReceipt"
           }
         },
         "required": [
@@ -16218,14 +16524,7 @@
             "type": "string"
           },
           "user": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Party"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Party"
           },
           "send_jid": {
             "type": "string"
@@ -16364,6 +16663,55 @@
           "details"
         ]
       },
+      "ConflictProblem": {
+        "type": "object",
+        "description": "CONFLICT (409): The request conflicts with the current state of the resource.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/CONFLICT",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"The request conflicts with the current state of the resource.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 409
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "CONFLICT"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "ContactCard": {
         "type": "object",
         "description": "ContactCard is one shared contact.",
@@ -16387,174 +16735,55 @@
             "$ref": "#/components/schemas/ContentType"
           },
           "text": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentText"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentText"
           },
           "image": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentImage"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentImage"
           },
           "video": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentVideo"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentVideo"
           },
           "audio": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentAudio"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentAudio"
           },
           "document": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentDocument"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentDocument"
           },
           "sticker": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentSticker"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentSticker"
           },
           "location": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentLocation"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentLocation"
           },
           "contacts": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContacts"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContacts"
           },
           "poll": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentPoll"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentPoll"
           },
           "poll_vote": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentPollVote"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentPollVote"
           },
           "interactive": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentInteractive"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentInteractive"
           },
           "interactive_reply": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentInteractiveReply"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentInteractiveReply"
           },
           "system": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentSystem"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentSystem"
           },
           "call": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentCall"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentCall"
           },
           "unavailable": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentUnavailable"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentUnavailable"
           },
           "unsupported": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentUnsupported"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentUnsupported"
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -16634,7 +16863,7 @@
       },
       "ContentAudio": {
         "type": "object",
-        "description": "ContentAudio is an audio file or, with VoiceNote, a push-to-talk note.",
+        "description": "ContentAudio is an audio file. `voice_note` marks a push-to-talk note.",
         "properties": {
           "media": {
             "$ref": "#/components/schemas/MediaMeta"
@@ -16649,7 +16878,7 @@
       },
       "ContentButton": {
         "type": "object",
-        "description": "ContentButton is one button or list row; ID is the reply identifier.",
+        "description": "ContentButton is one button or list row. `id` is the reply identifier.",
         "properties": {
           "id": {
             "type": "string"
@@ -16664,7 +16893,7 @@
       },
       "ContentCall": {
         "type": "object",
-        "description": "ContentCall records an unanswered incoming call (CallOffer).",
+        "description": "ContentCall records an unanswered incoming call.",
         "properties": {
           "call_id": {
             "type": "string"
@@ -16679,7 +16908,7 @@
       },
       "ContentContacts": {
         "type": "object",
-        "description": "ContentContacts is one or more shared contact cards (ContactMessage,\nContactsArrayMessage).",
+        "description": "ContentContacts contains one or more shared contact cards in `contacts`.",
         "properties": {
           "contacts": {
             "type": "array",
@@ -16697,14 +16926,7 @@
         "description": "ContentContext is the context shared by every content type: the quoted\nmessage, mentions and whether the message was forwarded.",
         "properties": {
           "quoted": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageKey"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageKey"
           },
           "mentions": {
             "type": "array",
@@ -16719,7 +16941,7 @@
       },
       "ContentDocument": {
         "type": "object",
-        "description": "ContentDocument is a document (DocumentMessage, with or without caption).\nThe file name is Media.FileName.",
+        "description": "ContentDocument is a document with an optional `caption`. Its file name\nis available in `media.file_name` when supplied.",
         "properties": {
           "caption": {
             "type": "string"
@@ -16740,7 +16962,7 @@
       },
       "ContentImage": {
         "type": "object",
-        "description": "ContentImage is an image (ImageMessage, InstantImageMessage).",
+        "description": "ContentImage is an image with an optional `caption`.",
         "properties": {
           "caption": {
             "type": "string"
@@ -16776,7 +16998,7 @@
       },
       "ContentInteractiveReply": {
         "type": "object",
-        "description": "ContentInteractiveReply is a reply to an interactive message (buttons,\nlist, template button or interactive response): the selected ID and the\ntext the user saw. The answered message is Context.Quoted.",
+        "description": "ContentInteractiveReply is a reply to an interactive message, including\nbuttons, lists, and templates. `selected_id` identifies the user's choice\nand `text` gives the text they saw. `context.quoted` identifies the\noriginal message.",
         "properties": {
           "selected_id": {
             "type": "string"
@@ -16788,7 +17010,7 @@
       },
       "ContentLinkPreview": {
         "type": "object",
-        "description": "ContentLinkPreview is the link preview WhatsApp attached to a text, without\nits thumbnail (link-preview thumbnails are not stored).",
+        "description": "ContentLinkPreview contains the link details WhatsApp attached to a text\nmessage. The preview omits the thumbnail.",
         "properties": {
           "url": {
             "type": "string"
@@ -16803,7 +17025,7 @@
       },
       "ContentLocation": {
         "type": "object",
-        "description": "ContentLocation is a location; Live marks a live location, of which only\nthe first point is recorded.",
+        "description": "ContentLocation is a shared location. When `live` is true, the coordinates\nrepresent the initial point of a live location.",
         "properties": {
           "latitude": {
             "type": "number",
@@ -16836,7 +17058,7 @@
       },
       "ContentPoll": {
         "type": "object",
-        "description": "ContentPoll is a poll (PollCreationMessage and its versions).\nSelectableCount is how many options a voter may pick; zero means any.",
+        "description": "ContentPoll is a poll. `selectable_count` limits the number of options a\nvoter may select. Zero allows any number.",
         "properties": {
           "question": {
             "type": "string"
@@ -16876,7 +17098,7 @@
       },
       "ContentSticker": {
         "type": "object",
-        "description": "ContentSticker is a sticker (StickerMessage, lottie included).",
+        "description": "ContentSticker is a sticker, including Lottie stickers.",
         "properties": {
           "media": {
             "$ref": "#/components/schemas/MediaMeta"
@@ -16897,10 +17119,7 @@
             "type": "string"
           },
           "ephemeral_seconds": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "name": {
             "type": "string"
@@ -16915,10 +17134,7 @@
             }
           },
           "enabled": {
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "type": "boolean"
           }
         },
         "required": [
@@ -16927,20 +17143,13 @@
       },
       "ContentText": {
         "type": "object",
-        "description": "ContentText is plain or extended text (Conversation, ExtendedTextMessage).",
+        "description": "ContentText contains a plain or extended text message in `body`.",
         "properties": {
           "body": {
             "type": "string"
           },
           "preview": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentLinkPreview"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentLinkPreview"
           }
         },
         "required": [
@@ -16971,7 +17180,7 @@
       },
       "ContentUnavailable": {
         "type": "object",
-        "description": "ContentUnavailable stands in for a message whose content exists but is not\nrecorded. ExpectedType is the type detected, when known (for example image\nfor a view-once photo). Target is set for a poll vote that could not be\ndecrypted.",
+        "description": "ContentUnavailable indicates that message content is unavailable. When\nknown, `expected_type` names the format, such as `image` for a view-once\nphoto. If a poll vote could not be decrypted, `target` identifies the poll.",
         "properties": {
           "reason": {
             "type": "string"
@@ -16980,14 +17189,7 @@
             "$ref": "#/components/schemas/ContentType"
           },
           "target": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageKey"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageKey"
           }
         },
         "required": [
@@ -17069,14 +17271,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17140,14 +17335,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17211,14 +17399,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17282,14 +17463,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17353,14 +17527,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17424,14 +17591,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17495,14 +17655,7 @@
             "$ref": "#/components/schemas/ContentUnsupported"
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17566,14 +17719,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17637,14 +17783,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17708,14 +17847,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17779,14 +17911,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17850,14 +17975,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17921,14 +18039,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -17992,14 +18103,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -18063,14 +18167,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -18134,14 +18231,7 @@
             "not": {}
           },
           "context": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ContentContext"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ContentContext"
           }
         },
         "required": [
@@ -18151,7 +18241,7 @@
       },
       "ContentVideo": {
         "type": "object",
-        "description": "ContentVideo is a video (VideoMessage); GIFPlayback marks a GIF, VideoNote\na round video note (PtvMessage).",
+        "description": "ContentVideo is a video. `gif_playback` marks a GIF and `video_note` marks\na round video note.",
         "properties": {
           "caption": {
             "type": "string"
@@ -18190,24 +18280,10 @@
         "type": "object",
         "properties": {
           "agent": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Agent"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Agent"
           },
           "pairing": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AgentPairing"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/AgentPairing"
           }
         }
       },
@@ -18912,14 +18988,7 @@
         "type": "object",
         "properties": {
           "message": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Message"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Message"
           }
         }
       },
@@ -19967,14 +20036,7 @@
         "type": "object",
         "properties": {
           "deletion": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AgentDeletion"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/AgentDeletion"
           }
         }
       },
@@ -20001,14 +20063,7 @@
         "type": "object",
         "properties": {
           "agent": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Agent"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Agent"
           }
         }
       },
@@ -20035,14 +20090,7 @@
         "type": "object",
         "properties": {
           "pairing": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AgentPairing"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/AgentPairing"
           }
         }
       },
@@ -20069,14 +20117,7 @@
         "type": "object",
         "properties": {
           "agents": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageAgent"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageAgent"
           }
         }
       },
@@ -20103,14 +20144,7 @@
         "type": "object",
         "properties": {
           "recipients": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageBroadcastRecipient"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageBroadcastRecipient"
           }
         }
       },
@@ -20137,14 +20171,7 @@
         "type": "object",
         "properties": {
           "suppressions": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageBroadcastSuppression"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageBroadcastSuppression"
           }
         }
       },
@@ -20171,14 +20198,7 @@
         "type": "object",
         "properties": {
           "broadcasts": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageBroadcast"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageBroadcast"
           }
         }
       },
@@ -20205,14 +20225,7 @@
         "type": "object",
         "properties": {
           "message": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ChatMessage"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ChatMessage"
           }
         }
       },
@@ -20239,14 +20252,7 @@
         "type": "object",
         "properties": {
           "messages": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageChatMessage"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageChatMessage"
           }
         }
       },
@@ -20273,14 +20279,7 @@
         "type": "object",
         "properties": {
           "chat": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Chat"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Chat"
           }
         }
       },
@@ -20307,14 +20306,7 @@
         "type": "object",
         "properties": {
           "chats": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageChat"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageChat"
           }
         }
       },
@@ -20341,14 +20333,7 @@
         "type": "object",
         "properties": {
           "message": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Message"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Message"
           }
         }
       },
@@ -20375,14 +20360,7 @@
         "type": "object",
         "properties": {
           "templates": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageMessageTemplate"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageMessageTemplate"
           }
         }
       },
@@ -20409,14 +20387,7 @@
         "type": "object",
         "properties": {
           "messages": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ListPageMessage"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/ListPageMessage"
           }
         }
       },
@@ -20671,16 +20642,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -20726,16 +20691,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -20781,16 +20740,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -20836,16 +20789,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -20891,16 +20838,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -20946,16 +20887,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -21001,16 +20936,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -21056,16 +20985,10 @@
             "type": "integer"
           },
           "total_items": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "total_pages": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           }
         },
         "required": [
@@ -21077,18 +21000,18 @@
       },
       "MediaMeta": {
         "type": "object",
-        "description": "MediaMeta describes a media part. It never carries download credentials,\nwhich travel only in a MediaDescriptor.",
+        "description": "MediaMeta describes a media file with metadata such as its size or MIME type.",
         "properties": {
           "mimetype": {
             "type": "string"
           },
           "size": {
             "type": "integer",
-            "description": "Size is the plaintext file length in bytes."
+            "description": "File length in bytes before encryption."
           },
           "sha256": {
             "type": "string",
-            "description": "SHA256 is the plaintext file hash, lowercase hex."
+            "description": "SHA-256 hash of the file before encryption, encoded as lowercase hex."
           },
           "file_name": {
             "type": "string"
@@ -21108,14 +21031,7 @@
         "type": "object",
         "properties": {
           "template": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageTemplateReference"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageTemplateReference"
           },
           "id": {
             "type": "string",
@@ -21130,10 +21046,7 @@
             "format": "uuid"
           },
           "from": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "phone",
             "pattern": "^(?:\\+[1-9][0-9]+|(?:\\([1-9][0-9]*\\)|\\+[1-9][0-9]*[ -])(?:[ .-]*(?:[0-9]+|\\([ .-]*[0-9][0-9 .-]*\\)))+[ .-]*)$",
             "examples": [
@@ -21144,10 +21057,7 @@
             "description": "The agent's current phone number, which may differ from its number when the message was sent."
           },
           "to": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "phone",
             "pattern": "^(?:\\+[1-9][0-9]+|(?:\\([1-9][0-9]*\\)|\\+[1-9][0-9]*[ -])(?:[ .-]*(?:[0-9]+|\\([ .-]*[0-9][0-9 .-]*\\)))+[ .-]*)$",
             "examples": [
@@ -21161,40 +21071,20 @@
             "$ref": "#/components/schemas/MessageKind"
           },
           "text": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageText"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageTextOutput"
           },
           "reply_to_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "The chat message a reply quotes."
           },
           "target_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "The chat message a reaction, edit or revoke changes."
           },
           "reaction": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageReactionEmoji"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageReactionEmoji"
           },
           "redacted": {
             "type": "boolean",
@@ -21204,28 +21094,15 @@
             "$ref": "#/components/schemas/MessageStatus"
           },
           "send_window": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/SendWindow"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/SendWindowOutput"
           },
           "not_before": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
             "description": "The message is not sent before this time."
           },
           "not_after": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time",
             "description": "The service stops trying to send the message after this time."
           },
@@ -21236,14 +21113,7 @@
             "type": "integer"
           },
           "error": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageError"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageError"
           },
           "create_at": {
             "type": "string",
@@ -21259,20 +21129,10 @@
             "description": "When the message was sent to WhatsApp (single tick); it does not\nconfirm receipt by the recipient: see receipt."
           },
           "receipt": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageReceipt"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageReceipt"
           },
           "broadcast_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "uuid",
             "description": "The broadcast the message was sent for."
           }
@@ -21393,7 +21253,7 @@
           "target_id": {
             "type": "string",
             "format": "uuid",
-            "description": "The chat message to react to (a chat message id; an API send's row\nshares its message id). Reacting to a received message also requires\nwhatsapp.inbound.read."
+            "description": "ID of the chat message to react to. A message sent through the API\ncan be identified by its message ID. Reacting to a received message\nrequires `whatsapp.inbound.read`."
           },
           "emoji": {
             "type": "string",
@@ -21425,31 +21285,19 @@
             "$ref": "#/components/schemas/MessageReceiptStatus"
           },
           "sent_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "delivered_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "read_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           },
           "played_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "format": "date-time"
           }
         },
@@ -21499,7 +21347,7 @@
           "target_id": {
             "type": "string",
             "format": "uuid",
-            "description": "The ledger message the operation names (reply_to_id or target_id)."
+            "description": "ID of the chat message specified by `reply_to_id` or `target_id`."
           }
         },
         "required": [
@@ -21532,7 +21380,7 @@
           "params": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/TemplateParam"
+              "$ref": "#/components/schemas/TemplateParamOutput"
             }
           },
           "variants": {
@@ -21567,14 +21415,7 @@
         "type": "object",
         "properties": {
           "template": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MessageTemplate"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/MessageTemplate"
           }
         }
       },
@@ -21615,6 +21456,18 @@
         ]
       },
       "MessageText": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "MessageTextOutput": {
         "type": "object",
         "properties": {
           "body": {
@@ -21709,10 +21562,7 @@
             "$ref": "#/components/schemas/PaginationParamsReason"
           },
           "max_offset": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "MaxOffset is the offset cap, set with reason offset_too_large."
           }
         },
@@ -22148,7 +21998,7 @@
           },
           "too_long": {
             "type": "boolean",
-            "description": "TooLong diagnoses disabled variants without making them send candidates."
+            "description": "Whether the rendered variant exceeds the message length limit, even\nwhen the variant is disabled."
           }
         },
         "required": [
@@ -22220,9 +22070,9 @@
           "params"
         ]
       },
-      "SendPacing": {
+      "SendPacingOutput": {
         "type": "object",
-        "description": "SendPacing spaces an agent's outbound sends: each send starts no earlier\nthan a uniformly random [MinIntervalMs, MaxIntervalMs] after the previous\nsend started. The agent's typing simulation runs inside that interval.\nZero for both disables spacing.",
+        "description": "SendPacing controls the delay between the start of consecutive message\nsends. Set `min_interval_ms` and `max_interval_ms` to bound the randomly\nchosen delay in milliseconds. Set both to zero to disable spacing.",
         "properties": {
           "min_interval_ms": {
             "type": "integer"
@@ -22230,7 +22080,11 @@
           "max_interval_ms": {
             "type": "integer"
           }
-        }
+        },
+        "required": [
+          "min_interval_ms",
+          "max_interval_ms"
+        ]
       },
       "SendPriorityClass": {
         "type": "string",
@@ -22241,9 +22095,41 @@
           "broadcast",
           "background"
         ],
-        "description": "SendPriorityClass names a band of send priorities. A caller requests a\nclass and an offset; the stored priority is the class base plus the offset."
+        "description": "A priority band for sending messages. An offset adjusts priority\nwithin the selected class."
       },
       "SendWindow": {
+        "type": "object",
+        "description": "SendWindow is a recurring local wall-clock window in which a message may be\nsent; outside it the message waits for the next opening.",
+        "properties": {
+          "from": {
+            "type": "string",
+            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+            "description": "Opening time, \"HH:MM\" 24-hour, local to timezone."
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+            "description": "Closing time, \"HH:MM\", exclusive; earlier than from wraps past midnight. Must differ from from."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone name, e.g. Asia/Kuala_Lumpur."
+          },
+          "days": {
+            "type": "array",
+            "description": "Weekdays on which the window opens, unique; empty means every day.\nA window that wraps past midnight belongs to the day it opens.",
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone"
+        ]
+      },
+      "SendWindowOutput": {
         "type": "object",
         "description": "SendWindow is a recurring local wall-clock window in which a message may be\nsent; outside it the message waits for the next opening.",
         "properties": {
@@ -22291,7 +22177,39 @@
           "date"
         ]
       },
+      "TemplateDateValueOutput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "date"
+          },
+          "date": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "date"
+        ]
+      },
       "TemplateDatetimeValue": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "datetime"
+          },
+          "datetime": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "datetime"
+        ]
+      },
+      "TemplateDatetimeValueOutput": {
         "type": "object",
         "properties": {
           "kind": {
@@ -22347,6 +22265,26 @@
           "currency"
         ]
       },
+      "TemplateMoneyValueOutput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "money"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "amount",
+          "currency"
+        ]
+      },
       "TemplateNotFoundDetails": {
         "type": "object",
         "properties": {
@@ -22379,6 +22317,21 @@
           "datetime"
         ]
       },
+      "TemplateParamOutput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TemplateParamKind"
+          }
+        },
+        "required": [
+          "name",
+          "kind"
+        ]
+      },
       "TemplateRenderedTooLongDetails": {
         "type": "object",
         "properties": {
@@ -22400,6 +22353,22 @@
         ]
       },
       "TemplateTextValue": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "text"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "text"
+        ]
+      },
+      "TemplateTextValueOutput": {
         "type": "object",
         "properties": {
           "kind": {
@@ -22589,14 +22558,7 @@
         "type": "object",
         "properties": {
           "agent": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Agent"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/Agent"
           }
         }
       },
@@ -24236,7 +24198,7 @@
       "AcceptLanguage": {
         "name": "Accept-Language",
         "in": "header",
-        "description": "Language of problem title/detail texts (RFC 9110 §12.5.4, RFC 4647 lookup). Supported: en, ms, zh-Hans, zh-Hant; zh-CN/zh-SG/zh → zh-Hans, zh-TW/zh-HK/zh-MO → zh-Hant; anything else falls back to en. Success responses never vary by language.",
+        "description": "Language of problem title/detail texts (RFC 9110 section 12.5.4, RFC 4647 lookup). Supported: en, ms, zh-Hans, zh-Hant; zh-CN/zh-SG/zh → zh-Hans, zh-TW/zh-HK/zh-MO → zh-Hant; anything else falls back to en. Success responses never vary by language.",
         "schema": {
           "anyOf": [
             {
@@ -24297,6 +24259,13 @@
         "schema": {
           "type": "string"
         }
+      }
+    },
+    "securitySchemes": {
+      "gatherdealBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "A GatherDeal access token in the Authorization header."
       }
     }
   },
@@ -24679,6 +24648,17 @@
       "details": null,
       "problem": {
         "$ref": "#/components/schemas/ForbiddenProblem"
+      }
+    },
+    {
+      "code": "CONFLICT",
+      "type": "https://docs.gatherdeal.ai/errors/CONFLICT",
+      "status": 409,
+      "retryable": false,
+      "title": "The request conflicts with the current state of the resource.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/ConflictProblem"
       }
     },
     {

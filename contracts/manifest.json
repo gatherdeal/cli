@@ -8,8 +8,8 @@
       "service_path": "/crm",
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
-      "digest": "sha256:d72481953ce8e9702eb14b0bc81b027a0c811c9abdc7a643716eaa4b0846d586",
-      "generated_go_digest": "sha256:58c2c4c4ebda0ac1e99a279eb9c11f171bbdd60976274a141ce1fa8a7e52e873",
+      "digest": "sha256:f0920c7ecb45376835d61c2845120aff0556dc3c17dc6e109bf6fc5bd29aa0cd",
+      "generated_go_digest": "sha256:84e942e5b2734cc2cc8759417b66727a0471eb14fca5fd947a708abec0791ebf",
       "operations": [
         {
           "public_id": "crm.contact_logs.create",
@@ -44,6 +44,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -423,6 +428,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -823,6 +833,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "CRM_CONTACT_NOT_FOUND",
               "status": 404,
               "retryable": false
@@ -973,6 +988,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -1612,6 +1632,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "CRM_CONTACT_CHILD_KIND_MISMATCH",
               "status": 422,
               "retryable": false
@@ -1798,6 +1823,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -2334,6 +2364,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "CRM_SALES_PIPELINE_DEAL_NOT_FOUND",
               "status": 404,
               "retryable": false
@@ -2496,6 +2531,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -2853,6 +2893,14 @@
           "retryable": false,
           "title": "This client version is no longer supported. Update the client to continue.",
           "schema": "#/components/schemas/ClientUpgradeRequiredProblem"
+        },
+        {
+          "code": "CONFLICT",
+          "type": "https://docs.gatherdeal.ai/errors/CONFLICT",
+          "status": 409,
+          "retryable": false,
+          "title": "The request conflicts with the current state of the resource.",
+          "schema": "#/components/schemas/ConflictProblem"
         },
         {
           "code": "CRM_CONTACT_CHILD_KIND_MISMATCH",
@@ -3223,7 +3271,8 @@
       "service_path": "/identity",
       "contract": "contracts/identity/v1/openapi.json",
       "go_package": "internal/generated/identity/v1",
-      "digest": "sha256:c1f3386aefa73e60370b3cc736dd63ebd8861491b89426eeb0f40a6b879884a5",
+      "digest": "sha256:784112d188758115fbe617166a79d3ae32bf302d2327540c1b014ccc41982a60",
+      "generated_go_digest": "sha256:c2cea1ee10d4aca9a9cd8bc1d1e4bd652a8c6c67229cc50dcdd82129cb21ffe1",
       "operations": [
         {
           "public_id": "identity.outlets.list",
@@ -3815,7 +3864,8 @@
       "service_path": "/whatsapp",
       "contract": "contracts/whatsapp/v1/openapi.json",
       "go_package": "internal/generated/whatsapp/v1",
-      "digest": "sha256:968fee321e1595dea70c6b54b63b6ac46bffcf533da9deda752b4d5af683814a",
+      "digest": "sha256:b5e9aab59eea25933fbf9492804d9d56e3a1c58ed0e404a4367f61017b23bf08",
+      "generated_go_digest": "sha256:dcc9575b655b1f387541e9e0011ddd99ecc34b6e87bd2733da92ef964949492a",
       "operations": [
         {
           "public_id": "whatsapp.agents.create",
@@ -3849,6 +3899,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -4030,6 +4085,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -4665,6 +4725,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
               "status": 403,
               "retryable": false
@@ -4834,6 +4899,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
               "status": 403,
               "retryable": false
@@ -4987,6 +5057,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -5318,6 +5393,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
               "status": 403,
               "retryable": false
@@ -5470,6 +5550,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -5964,6 +6049,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
               "status": 403,
               "retryable": false
@@ -6115,6 +6205,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -6296,6 +6391,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -6644,6 +6744,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
               "status": 403,
               "retryable": false
@@ -6803,6 +6908,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -6973,6 +7083,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -7956,6 +8071,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
               "status": 403,
               "retryable": false
@@ -8110,6 +8230,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -8747,6 +8872,11 @@
               "retryable": false
             },
             {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
               "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
               "status": 403,
               "retryable": false
@@ -8900,6 +9030,11 @@
             {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
               "retryable": false
             },
             {
@@ -9429,6 +9564,14 @@
           "retryable": false,
           "title": "This client version is no longer supported. Update the client to continue.",
           "schema": "#/components/schemas/ClientUpgradeRequiredProblem"
+        },
+        {
+          "code": "CONFLICT",
+          "type": "https://docs.gatherdeal.ai/errors/CONFLICT",
+          "status": 409,
+          "retryable": false,
+          "title": "The request conflicts with the current state of the resource.",
+          "schema": "#/components/schemas/ConflictProblem"
         },
         {
           "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
