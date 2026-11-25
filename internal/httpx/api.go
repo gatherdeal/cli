@@ -62,7 +62,8 @@ var problemExits = map[string]output.ExitCode{
 
 // Result is a decoded successful API response.
 type Result struct {
-	// Body is the full success document (payload fields plus "status").
+	// Body is the full success document (payload fields plus "status"),
+	// empty for a bodyless success such as 204 No Content.
 	Body []byte
 	// CorrelationID is the server's correlation id, if any.
 	CorrelationID string
@@ -90,8 +91,9 @@ func DoAPI(ctx context.Context, client *http.Client, req *http.Request) (*Result
 //
 //  1. Content-Type is parsed structurally (case-insensitive, parameters
 //     ignored).
-//  2. A 2xx must be an application/json success envelope; a 2xx problem
-//     document or any other 2xx is a protocol error.
+//  2. A 2xx without a body (such as 204 No Content) succeeds with an empty
+//     Body. Any other 2xx must be an application/json success envelope; a
+//     2xx problem document or any other 2xx is a protocol error.
 //  3. A non-2xx application/problem+json document is a problem: its status
 //     derives the exit code and its retryable member the retryability.
 //     Malformed JSON, a missing code or a status that differs from the
@@ -104,6 +106,8 @@ func DecodeAPI(status int, header http.Header, body []byte) (*Result, error) {
 		switch {
 		case media == ProblemMediaType:
 			return nil, ProtocolError(status, correlationID, "problem document with a success status")
+		case len(body) == 0:
+			return &Result{CorrelationID: correlationID, HTTPStatus: status}, nil
 		case media != "application/json":
 			return nil, ProtocolError(status, correlationID, "success response is not application/json")
 		}

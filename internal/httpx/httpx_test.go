@@ -241,6 +241,19 @@ func TestDecodeAPIWithoutProblem(t *testing.T) {
 	}
 }
 
+func TestDecodeAPIBodylessSuccess(t *testing.T) {
+	for _, status := range []int{http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusNoContent} {
+		res, err := DecodeAPI(status, http.Header{CorrelationHeader: {"corr-1"}}, nil)
+		if err != nil || res == nil || res.HTTPStatus != status || len(res.Body) != 0 || res.CorrelationID != "corr-1" {
+			t.Fatalf("status %d: res=%+v err=%v", status, res, err)
+		}
+	}
+	// A 2xx body that is present must still be a success envelope.
+	if _, err := DecodeAPI(http.StatusCreated, http.Header{"Content-Type": {"application/json"}}, []byte(`{}`)); err == nil {
+		t.Fatal("a 201 body without a success envelope was accepted")
+	}
+}
+
 // DecodeAPI passes the shared decode-contract fixtures of the bundle.
 func TestDecodeAPIConformance(t *testing.T) {
 	for _, c := range conformance.Load(t) {

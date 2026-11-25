@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"sync"
 
 	"github.com/gatherdeal/cli/contracts"
@@ -10,7 +11,8 @@ import (
 )
 
 // Use the route's request and success schemas, including envelope allOf
-// and nested variant refs. A 204 has no receipt schema.
+// and nested variant refs. The receipt is the schema of the operation's one
+// declared 2xx response (200, 201 or 202); a 204 has no receipt schema.
 type writeSchemas struct{ request, receipt *jsonschema.Schema }
 
 var writeContracts = sync.OnceValue(func() map[string]writeSchemas {
@@ -63,12 +65,26 @@ var writeContracts = sync.OnceValue(func() map[string]writeSchemas {
 				if contracts.MustOperation(route.ID).ReadOnly() {
 					continue
 				}
-				index[route.ID] = writeSchemas{compile(route.RequestBody), compile(route.Responses["200"])}
+				index[route.ID] = writeSchemas{compile(route.RequestBody), compile(successResponse(route.ID, route.Responses))}
 			}
 		}
 	}
 	return index
 })
+
+// successResponse returns the operation's single declared 2xx response.
+func successResponse[P any](id string, responses map[string]P) P {
+	var found []string
+	for status := range responses {
+		if len(status) == 3 && status[0] == '2' {
+			found = append(found, status)
+		}
+	}
+	if len(found) != 1 {
+		panic(fmt.Sprintf("contracts: %s declares %d success responses %v, want 1", id, len(found), found))
+	}
+	return responses[found[0]]
+}
 
 func validateJSON(raw []byte, schema *jsonschema.Schema) error {
 	value, err := jsonschema.UnmarshalJSON(bytes.NewReader(raw))
