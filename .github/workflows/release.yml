@@ -138,7 +138,7 @@ jobs:
     environment: release
     permissions:
       contents: write # publish the draft
-      id-token: write # npm trusted publishing with provenance
+      id-token: write # npm provenance statements
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -166,6 +166,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/release-github.mjs draft
       - name: publish missing npm packages and verify all versions
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: node scripts/release-npm.mjs
       - name: make the complete GitHub release public
         env:
