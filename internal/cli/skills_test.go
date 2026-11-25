@@ -321,7 +321,8 @@ func TestSkillIndexes(t *testing.T) {
 		"crm contact-logs list --contact-id <id>",
 		"filter_fields (allowed root filter operators)",
 		"matching CRM write approval",
-		"contact-tags assign and remove take no key and are safe to",
+		"contact-tags add and remove take no key and are safe to",
+		"contact-tags assign is deprecated. Use contact-tags add.",
 		"deals move-stage and deal-fields update are deprecated; use deals update.",
 		"pass it unchanged, quotes included, as --if-match",
 	} {
@@ -332,7 +333,9 @@ func TestSkillIndexes(t *testing.T) {
 	if want := "- whatsapp agents: List, create, pair, update and delete WhatsApp agents. Verbs: create, delete, get, list, update.\n- whatsapp agents pairing: Check a WhatsApp agent's pairing. Verbs: get.\n"; !strings.Contains(content["references/whatsapp.md"], want) {
 		t.Errorf("whatsapp index lacks %q", want)
 	}
-	for _, want := range []string{"whatsapp chat-messages list", "--count", "--after-rev", "data.messages", "data.after_rev", "data.has_more"} {
+	for _, want := range []string{"whatsapp chat-messages list", "--count", "--after-rev", "data.messages", "data.after_rev", "data.has_more",
+		"broadcasts recipients delete is deprecated. Use broadcasts recipients remove.",
+		"broadcast-suppressions delete is deprecated. Use broadcast-suppressions remove."} {
 		if !strings.Contains(content["references/whatsapp.md"], want) {
 			t.Errorf("WhatsApp skill lacks %q", want)
 		}
@@ -340,8 +343,8 @@ func TestSkillIndexes(t *testing.T) {
 	if !strings.Contains(skill, "Paging (paginated record lists)") {
 		t.Error("general skill does not scope cursor paging")
 	}
-	// Every command appears as exactly one index entry: an app command as a
-	// verb in its app's resource index, a core command in SKILL.md.
+	// Primary commands appear in the resource index or in SKILL.md. Former
+	// names appear in the app's deprecation notes.
 	for _, c := range Commands() {
 		if c.Path[0] == "skills" && (c.Network || c.ReadOnly != (c.Path[1] == "show")) {
 			t.Fatalf("incorrect metadata: %+v", c)
@@ -358,8 +361,9 @@ func TestSkillIndexes(t *testing.T) {
 		}
 		group := strings.Join(c.Path[:len(c.Path)-1], " ")
 		line := regexp.MustCompile(`(?m)^- ` + regexp.QuoteMeta(group) + `: ` + regexp.QuoteMeta(groupSummaries[group]) + ` Verbs: (.*)\.$`).FindStringSubmatch(content[file])
-		if line == nil || !slices.Contains(strings.Split(line[1], ", "), c.Path[len(c.Path)-1]) {
-			t.Errorf("%s: no index entry in %s", c.Name(), file)
+		indexed := line != nil && slices.Contains(strings.Split(line[1], ", "), c.Path[len(c.Path)-1])
+		if want := c.aliasDeprecation == nil; indexed != want {
+			t.Errorf("%s: indexed = %t in %s, want %t", c.Name(), indexed, file, want)
 		}
 	}
 	// Resource indexes name commands only; flags come from the catalog.

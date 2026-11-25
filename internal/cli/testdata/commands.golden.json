@@ -1756,9 +1756,9 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "crm contact-tags assign",
+        "name": "crm contact-tags add",
         "network": true,
-        "operation": "crm.contact_tags.assign",
+        "operation": "crm.contact_tags.add",
         "output": "json",
         "read_only": false,
         "summary": "Assign Contact Tag."
@@ -2713,58 +2713,6 @@
       },
       {
         "app": "whatsapp",
-        "args": [
-          {
-            "name": "suppression-id",
-            "usage": "The suppression to remove."
-          }
-        ],
-        "flags": [
-          {
-            "name": "profile",
-            "type": "string",
-            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
-          },
-          {
-            "name": "server",
-            "type": "string",
-            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
-          },
-          {
-            "name": "lang",
-            "type": "string",
-            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
-          },
-          {
-            "name": "accept-server-risk",
-            "type": "string",
-            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
-          },
-          {
-            "name": "dry-run",
-            "type": "bool",
-            "usage": "Preview the typed request without submitting the write."
-          },
-          {
-            "name": "yes",
-            "type": "bool",
-            "usage": "Explicitly confirm execution of this write."
-          },
-          {
-            "name": "jq",
-            "type": "string",
-            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
-          }
-        ],
-        "name": "whatsapp broadcast-suppressions delete",
-        "network": true,
-        "operation": "whatsapp.broadcast_suppressions.delete",
-        "output": "json",
-        "read_only": false,
-        "summary": "Delete Broadcast Suppression."
-      },
-      {
-        "app": "whatsapp",
         "args": [],
         "flags": [
           {
@@ -2859,6 +2807,58 @@
           "create_at"
         ],
         "summary": "Fetch Broadcast Suppressions."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "suppression-id",
+            "usage": "The suppression to remove."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcast-suppressions remove",
+        "network": true,
+        "operation": "whatsapp.broadcast_suppressions.remove",
+        "output": "json",
+        "read_only": false,
+        "summary": "Delete Broadcast Suppression."
       },
       {
         "app": "whatsapp",
@@ -3285,62 +3285,6 @@
         "args": [
           {
             "name": "broadcast-id",
-            "usage": "The draft broadcast."
-          },
-          {
-            "name": "recipient-id",
-            "usage": "The recipient to remove."
-          }
-        ],
-        "flags": [
-          {
-            "name": "profile",
-            "type": "string",
-            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
-          },
-          {
-            "name": "server",
-            "type": "string",
-            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
-          },
-          {
-            "name": "lang",
-            "type": "string",
-            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
-          },
-          {
-            "name": "accept-server-risk",
-            "type": "string",
-            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
-          },
-          {
-            "name": "dry-run",
-            "type": "bool",
-            "usage": "Preview the typed request without submitting the write."
-          },
-          {
-            "name": "yes",
-            "type": "bool",
-            "usage": "Explicitly confirm execution of this write."
-          },
-          {
-            "name": "jq",
-            "type": "string",
-            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
-          }
-        ],
-        "name": "whatsapp broadcasts recipients delete",
-        "network": true,
-        "operation": "whatsapp.broadcasts.recipients.delete",
-        "output": "json",
-        "read_only": false,
-        "summary": "Delete Broadcast Recipient."
-      },
-      {
-        "app": "whatsapp",
-        "args": [
-          {
-            "name": "broadcast-id",
             "usage": "The broadcast whose recipients to list."
           }
         ],
@@ -3464,6 +3408,62 @@
           "update_at"
         ],
         "summary": "Fetch Broadcast Recipients."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "The draft broadcast."
+          },
+          {
+            "name": "recipient-id",
+            "usage": "The recipient to remove."
+          }
+        ],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts recipients remove",
+        "network": true,
+        "operation": "whatsapp.broadcasts.recipients.remove",
+        "output": "json",
+        "read_only": false,
+        "summary": "Delete Broadcast Recipient."
       },
       {
         "app": "whatsapp",
@@ -4435,6 +4435,187 @@
         "output": "json",
         "read_only": false,
         "summary": "Replace Message Template."
+      },
+      {
+        "app": "crm",
+        "args": [
+          {
+            "name": "contact-id",
+            "usage": "Contact to receive the tag."
+          },
+          {
+            "name": "tag-id",
+            "usage": "Organization tag to assign."
+          }
+        ],
+        "deprecated": {
+          "since": "2026-11-26",
+          "successor": "crm contact-tags add"
+        },
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm contact-tags assign",
+        "network": true,
+        "operation": "crm.contact_tags.add",
+        "output": "json",
+        "read_only": false,
+        "summary": "Assign Contact Tag."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "suppression-id",
+            "usage": "The suppression to remove."
+          }
+        ],
+        "deprecated": {
+          "since": "2026-11-26",
+          "successor": "whatsapp broadcast-suppressions remove"
+        },
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcast-suppressions delete",
+        "network": true,
+        "operation": "whatsapp.broadcast_suppressions.remove",
+        "output": "json",
+        "read_only": false,
+        "summary": "Delete Broadcast Suppression."
+      },
+      {
+        "app": "whatsapp",
+        "args": [
+          {
+            "name": "broadcast-id",
+            "usage": "The draft broadcast."
+          },
+          {
+            "name": "recipient-id",
+            "usage": "The recipient to remove."
+          }
+        ],
+        "deprecated": {
+          "since": "2026-11-26",
+          "successor": "whatsapp broadcasts recipients remove"
+        },
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "whatsapp broadcasts recipients delete",
+        "network": true,
+        "operation": "whatsapp.broadcasts.recipients.remove",
+        "output": "json",
+        "read_only": false,
+        "summary": "Delete Broadcast Recipient."
       }
     ],
     "envelope_schema_version": 1,
