@@ -171,7 +171,7 @@ var appNotes = map[string]string{
 - contacts create, contact-logs create and deals create use a key from
   meta.write.idempotency_key. For a retry of the same operation, pass that key
   with --idempotency-key; IDEMPOTENCY_KEY_CONFLICT means the key was used for
-  other input. contact-tags assign and remove take no key and are safe to
+  other input. contact-tags add and remove take no key and are safe to
   repeat.
 - gatherdeal crm deals create --outlet <id> --input <json> --yes creates a deal
   in that outlet from {"pipeline_id":"…","stage_id":"…"} plus optional type,
@@ -188,6 +188,7 @@ var appNotes = map[string]string{
 - deals update --input takes stage_id, priority, type and remark: omit a member
   to keep it, null clears it. stage_id moves the deal to a stage of its own
   pipeline, for example {"stage_id":"…"}.
+- contact-tags assign is deprecated. Use contact-tags add.
 - deals move-stage and deal-fields update are deprecated; use deals update.
 `,
 	"outlets": `- gatherdeal outlets list [--code CODE] [--id UUID] [--search TEXT] --limit N
@@ -227,6 +228,8 @@ var appNotes = map[string]string{
   add one. Variants left out are removed.
 - messages create sends to one recipient. Message status describes runtime
   acceptance, not recipient delivery.
+- broadcasts recipients delete is deprecated. Use broadcasts recipients remove.
+- broadcast-suppressions delete is deprecated. Use broadcast-suppressions remove.
 `,
 }
 
@@ -284,8 +287,10 @@ filter_fields (allowed root filter operators) and read_only with `+"`gatherdeal 
 func writeResourceIndex(b *strings.Builder, n *commandNode) {
 	var verbs, groups []string
 	for _, name := range n.choices() {
-		if n.children[name].command != nil {
-			verbs = append(verbs, name)
+		if command := n.children[name].command; command != nil {
+			if command.aliasDeprecation == nil {
+				verbs = append(verbs, name)
+			}
 		} else {
 			groups = append(groups, name)
 		}

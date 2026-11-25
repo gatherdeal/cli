@@ -299,7 +299,7 @@ execute or `--dry-run` to preview the request.
 gatherdeal crm contact-logs list --contact-id <contact-id> --limit 20
 gatherdeal crm contacts create --input '{"kind":"personal","name":"Amina"}' --yes
 gatherdeal crm contacts update <contact-id> --input '{"remark":"Met at the launch"}' --yes
-gatherdeal crm contact-tags assign <contact-id> <tag-id> --yes
+gatherdeal crm contact-tags add <contact-id> <tag-id> --yes
 gatherdeal crm contact-tags remove <contact-id> <tag-id> --yes
 gatherdeal crm contact-logs create --input '{"contact_id":"<contact-id>","content":"Called to follow up"}' --yes
 ```

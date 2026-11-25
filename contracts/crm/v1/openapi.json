@@ -54,6 +54,7 @@
           "create_at"
         ],
         "x-gd-public-id": "crm.contact_logs.list",
+        "x-gd-resource": "ContactLog",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -496,6 +497,7 @@
           "contact-logs"
         ],
         "x-gd-public-id": "crm.contact_logs.create",
+        "x-gd-resource": "ContactLog",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "closed",
@@ -983,6 +985,7 @@
           "name"
         ],
         "x-gd-public-id": "crm.contact_tags.list",
+        "x-gd-resource": "ContactTag",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -1520,6 +1523,7 @@
           "name"
         ],
         "x-gd-public-id": "crm.contacts.list",
+        "x-gd-resource": "Contact",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -2155,6 +2159,7 @@
           "contacts"
         ],
         "x-gd-public-id": "crm.contacts.create",
+        "x-gd-resource": "Contact",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "closed",
@@ -2599,11 +2604,18 @@
       "put": {
         "operationId": "assignContactTag",
         "summary": "Assign Contact Tag",
-        "description": "Assigns one tag to a contact. Assigning a tag the contact already has changes nothing, including after the tag is archived.",
+        "description": "Attaches an existing tag to a contact. Repeating the request for an attached tag changes nothing, including after the tag is archived.",
         "tags": [
           "contact-tags"
         ],
-        "x-gd-public-id": "crm.contact_tags.assign",
+        "x-gd-public-id": "crm.contact_tags.add",
+        "x-gd-resource": "ContactTag",
+        "x-gd-former-public-ids": [
+          {
+            "id": "crm.contact_tags.assign",
+            "since": "2026-11-26"
+          }
+        ],
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -3013,6 +3025,7 @@
           "contact-tags"
         ],
         "x-gd-public-id": "crm.contact_tags.remove",
+        "x-gd-resource": "ContactTag",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -3426,6 +3439,7 @@
           "contacts"
         ],
         "x-gd-public-id": "crm.contacts.get",
+        "x-gd-resource": "Contact",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -3835,6 +3849,7 @@
           "contacts"
         ],
         "x-gd-public-id": "crm.contacts.update",
+        "x-gd-resource": "Contact",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -4307,6 +4322,7 @@
           "create_at"
         ],
         "x-gd-public-id": "crm.deals.list",
+        "x-gd-resource": "Deal",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -4763,6 +4779,7 @@
           "deals"
         ],
         "x-gd-public-id": "crm.deals.create",
+        "x-gd-resource": "Deal",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "closed",
@@ -5209,6 +5226,7 @@
           "deals"
         ],
         "x-gd-public-id": "crm.deals.get",
+        "x-gd-resource": "Deal",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -5576,6 +5594,7 @@
           "deals"
         ],
         "x-gd-public-id": "crm.deals.update",
+        "x-gd-resource": "Deal",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -6576,6 +6595,7 @@
         ],
         "deprecated": true,
         "x-gd-public-id": "crm.deals.move_stage",
+        "x-gd-resource": "Deal",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -7106,6 +7126,7 @@
           "name"
         ],
         "x-gd-public-id": "crm.sales_pipelines.list",
+        "x-gd-resource": "SalesPipeline",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -8898,7 +8919,8 @@
           "create_at",
           "update_at",
           "content"
-        ]
+        ],
+        "x-gd-type-name": "ContactLog"
       },
       "ContactPersonProfile": {
         "type": "object",
@@ -9041,7 +9063,8 @@
           "is_archived",
           "create_at",
           "update_at"
-        ]
+        ],
+        "x-gd-type-name": "ContactTag"
       },
       "ContactView": {
         "type": "object",
@@ -9181,7 +9204,8 @@
           "preferred_language",
           "is_verified",
           "capabilities"
-        ]
+        ],
+        "x-gd-type-name": "Contact"
       },
       "ContactViewCapabilities": {
         "type": "object",
@@ -9244,7 +9268,8 @@
           "can_statement_share",
           "can_update",
           "can_update_identity"
-        ]
+        ],
+        "x-gd-type-name": "ContactCapabilities"
       },
       "CreateContactInput": {
         "type": "object",
@@ -9412,7 +9437,8 @@
           "create_at",
           "update_at",
           "revision"
-        ]
+        ],
+        "x-gd-type-name": "Deal"
       },
       "DealBrief": {
         "type": "object",
@@ -9477,7 +9503,8 @@
           "create_at",
           "update_at",
           "revision"
-        ]
+        ],
+        "x-gd-type-name": "DealSummary"
       },
       "DealPipeline": {
         "type": "object",
@@ -11515,7 +11542,8 @@
           "id",
           "name",
           "create_at"
-        ]
+        ],
+        "x-gd-type-name": "SalesPipeline"
       },
       "PipelineStage": {
         "type": "object",
@@ -11547,7 +11575,8 @@
           "name",
           "sequence",
           "probability"
-        ]
+        ],
+        "x-gd-type-name": "SalesPipelineStage"
       },
       "PreconditionFailedProblem": {
         "type": "object",

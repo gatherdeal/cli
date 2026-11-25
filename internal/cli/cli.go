@@ -180,7 +180,12 @@ type Command struct {
 	Presentation *CommandPresentation
 	Write        *WritePolicy
 	Run          func(ctx context.Context, inv *Invocation) (any, error)
+
+	aliasDeprecation *output.Deprecation
 }
+
+// IsAlias reports whether the command serves a former public command path.
+func (c *Command) IsAlias() bool { return c.aliasDeprecation != nil }
 
 // Name is the space-joined path.
 func (c *Command) Name() string { return strings.Join(c.Path, " ") }
@@ -207,6 +212,8 @@ type Invocation struct {
 	set     map[string]bool
 	Meta    output.Meta
 
+	commands []*Command
+
 	// target is the profile and server the command resolved, if any.
 	target *target
 	// credentialSource is where the credential the command sent came from
@@ -229,6 +236,14 @@ func (l *listValue) Set(s string) error { l.values = append(l.values, s); return
 
 // Run executes args (without the program name) and returns the exit code.
 func Run(ctx context.Context, env *Env, args []string) int {
+	cmds, err := commands()
+	if err != nil {
+		return emitError(env, output.Meta{}, err)
+	}
+	return runWithCommands(ctx, env, args, cmds)
+}
+
+func runWithCommands(ctx context.Context, env *Env, args []string, cmds []*Command) int {
 	env.redactor = &output.Redactor{}
 	if env.Getenv != nil {
 		env.addSecret(env.Getenv("GATHERDEAL_TOKEN"))
@@ -237,7 +252,7 @@ func Run(ctx context.Context, env *Env, args []string) int {
 	if helpMode {
 		args = args[1:]
 	}
-	node, rest, err := commandTree(Commands()).resolve(args)
+	node, rest, err := commandTree(cmds).resolve(args)
 	if err != nil {
 		return emitError(env, output.Meta{}, err)
 	}
@@ -254,6 +269,7 @@ func Run(ctx context.Context, env *Env, args []string) int {
 	if err != nil {
 		return emitError(env, output.Meta{}, err)
 	}
+	inv.commands = cmds
 	data, err := inv.run(ctx)
 	if err != nil {
 		err = inv.authRecovery(err)

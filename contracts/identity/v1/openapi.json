@@ -173,6 +173,7 @@
           "code"
         ],
         "x-gd-public-id": "identity.outlets.list",
+        "x-gd-resource": "Outlet",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -725,6 +726,7 @@
           "outlets"
         ],
         "x-gd-public-id": "identity.outlets.get",
+        "x-gd-resource": "Outlet",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",

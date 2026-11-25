@@ -1,0 +1,31 @@
+{
+  "format_version": 2,
+  "bundles": [
+    {
+      "service": "crm",
+      "version": "v1",
+      "operations": [
+        {
+          "public_id": "crm.contacts.get",
+          "command": "crm contacts get",
+          "method": "GET",
+          "path": "/v1/contacts/:id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed"
+          },
+          "permissions": {
+            "allOf": ["crm.contact.read"]
+          },
+          "former_ids": [
+            {
+              "public_id": "crm.contacts.fetch_by_id",
+              "command": "crm contacts fetch-by-id",
+              "since": "2026-11-25"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

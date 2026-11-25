@@ -24,6 +24,7 @@
           "update_at"
         ],
         "x-gd-public-id": "whatsapp.agents.list",
+        "x-gd-resource": "Agent",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -441,6 +442,7 @@
           "agents"
         ],
         "x-gd-public-id": "whatsapp.agents.create",
+        "x-gd-resource": "Agent",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "closed",
@@ -891,6 +893,7 @@
           "agents"
         ],
         "x-gd-public-id": "whatsapp.agents.get",
+        "x-gd-resource": "Agent",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -1256,6 +1259,7 @@
           "agents"
         ],
         "x-gd-public-id": "whatsapp.agents.update",
+        "x-gd-resource": "Agent",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -1791,6 +1795,7 @@
           "agents"
         ],
         "x-gd-public-id": "whatsapp.agents.delete",
+        "x-gd-resource": "Agent",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -2231,6 +2236,7 @@
           "agents"
         ],
         "x-gd-public-id": "whatsapp.agents.pairing.get",
+        "x-gd-resource": "AgentPairing",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -2601,6 +2607,7 @@
           "create_at"
         ],
         "x-gd-public-id": "whatsapp.broadcast_suppressions.list",
+        "x-gd-resource": "BroadcastSuppression",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -3023,6 +3030,7 @@
           "broadcast-suppressions"
         ],
         "x-gd-public-id": "whatsapp.broadcast_suppressions.add",
+        "x-gd-resource": "BroadcastSuppression",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "closed",
@@ -3403,10 +3411,18 @@
       "delete": {
         "operationId": "deleteBroadcastSuppression",
         "summary": "Delete Broadcast Suppression",
+        "description": "Removes a suppression entry. Recipients it already suppressed stay suppressed.",
         "tags": [
           "broadcast-suppressions"
         ],
-        "x-gd-public-id": "whatsapp.broadcast_suppressions.delete",
+        "x-gd-public-id": "whatsapp.broadcast_suppressions.remove",
+        "x-gd-resource": "BroadcastSuppression",
+        "x-gd-former-public-ids": [
+          {
+            "id": "whatsapp.broadcast_suppressions.delete",
+            "since": "2026-11-26"
+          }
+        ],
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -3803,6 +3819,7 @@
           "create_at"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.list",
+        "x-gd-resource": "Broadcast",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -4213,6 +4230,7 @@
           "broadcasts"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.create",
+        "x-gd-resource": "Broadcast",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "closed",
@@ -4650,6 +4668,7 @@
           "broadcasts"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.get",
+        "x-gd-resource": "Broadcast",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -5012,6 +5031,7 @@
           "broadcasts"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.update",
+        "x-gd-resource": "Broadcast",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -5438,6 +5458,7 @@
           "broadcasts"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.cancel",
+        "x-gd-resource": "Broadcast",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -5843,6 +5864,7 @@
           "broadcasts"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.pause",
+        "x-gd-resource": "Broadcast",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -6249,6 +6271,7 @@
           "settled_at"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.recipients.list",
+        "x-gd-resource": "BroadcastRecipient",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -6732,6 +6755,7 @@
           "broadcasts"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.recipients.add",
+        "x-gd-resource": "BroadcastRecipient",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "closed",
@@ -7172,10 +7196,18 @@
       "delete": {
         "operationId": "deleteBroadcastRecipient",
         "summary": "Delete Broadcast Recipient",
+        "description": "Removes a recipient from a draft broadcast.",
         "tags": [
           "broadcasts"
         ],
-        "x-gd-public-id": "whatsapp.broadcasts.recipients.delete",
+        "x-gd-public-id": "whatsapp.broadcasts.recipients.remove",
+        "x-gd-resource": "BroadcastRecipient",
+        "x-gd-former-public-ids": [
+          {
+            "id": "whatsapp.broadcasts.recipients.delete",
+            "since": "2026-11-26"
+          }
+        ],
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -7588,6 +7620,7 @@
           "broadcasts"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.resume",
+        "x-gd-resource": "Broadcast",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "external",
@@ -8002,6 +8035,7 @@
           "broadcasts"
         ],
         "x-gd-public-id": "whatsapp.broadcasts.start",
+        "x-gd-resource": "Broadcast",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "external",
@@ -8423,6 +8457,7 @@
           "chat-messages"
         ],
         "x-gd-public-id": "whatsapp.chat_messages.list",
+        "x-gd-resource": "ChatMessageFeed",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -8811,6 +8846,7 @@
           "chat-messages"
         ],
         "x-gd-public-id": "whatsapp.chat_messages.get",
+        "x-gd-resource": "ChatMessage",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -9184,6 +9220,7 @@
           "create_at"
         ],
         "x-gd-public-id": "whatsapp.chats.list",
+        "x-gd-resource": "Chat",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -9635,6 +9672,7 @@
           "chats"
         ],
         "x-gd-public-id": "whatsapp.chats.get",
+        "x-gd-resource": "Chat",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -10003,6 +10041,7 @@
           "chats"
         ],
         "x-gd-public-id": "whatsapp.chats.messages.list",
+        "x-gd-resource": "ChatMessage",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -10450,6 +10489,7 @@
           "create_at"
         ],
         "x-gd-public-id": "whatsapp.message_templates.list",
+        "x-gd-resource": "MessageTemplate",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -10861,6 +10901,7 @@
           "message-templates"
         ],
         "x-gd-public-id": "whatsapp.message_templates.create",
+        "x-gd-resource": "MessageTemplate",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "external",
@@ -11265,6 +11306,7 @@
           "message-templates"
         ],
         "x-gd-public-id": "whatsapp.message_templates.get",
+        "x-gd-resource": "MessageTemplate",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -11628,6 +11670,7 @@
           "message-templates"
         ],
         "x-gd-public-id": "whatsapp.message_templates.replace",
+        "x-gd-resource": "MessageTemplate",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "external",
@@ -12040,6 +12083,7 @@
           "message-templates"
         ],
         "x-gd-public-id": "whatsapp.message_templates.delete",
+        "x-gd-resource": "MessageTemplate",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "external",
@@ -12434,6 +12478,7 @@
           "message-templates"
         ],
         "x-gd-public-id": "whatsapp.message_templates.preview",
+        "x-gd-resource": "MessageTemplate",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -12816,6 +12861,7 @@
           "create_at"
         ],
         "x-gd-public-id": "whatsapp.messages.list",
+        "x-gd-resource": "Message",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -13313,6 +13359,7 @@
           "messages"
         ],
         "x-gd-public-id": "whatsapp.messages.create",
+        "x-gd-resource": "Message",
         "x-gd-effect": {
           "mutation": "additive",
           "interaction": "external",
@@ -13853,6 +13900,7 @@
           "messages"
         ],
         "x-gd-public-id": "whatsapp.messages.get",
+        "x-gd-resource": "Message",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",

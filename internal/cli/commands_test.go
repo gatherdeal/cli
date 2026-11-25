@@ -25,9 +25,9 @@ func TestCommandsPrefix(t *testing.T) {
 		args []string
 		want []string
 	}{
-		{[]string{"crm"}, []string{"crm contacts list", "crm contacts get", "crm contact-logs create", "crm contact-logs list", "crm contact-tags assign", "crm contact-tags list", "crm contact-tags remove", "crm contacts create", "crm contacts update", "crm deal-fields update", "crm deals create", "crm deals get", "crm deals list", "crm deals move-stage", "crm deals update", "crm sales-pipelines list"}},
+		{[]string{"crm"}, []string{"crm contacts list", "crm contacts get", "crm contact-logs create", "crm contact-logs list", "crm contact-tags add", "crm contact-tags list", "crm contact-tags remove", "crm contacts create", "crm contacts update", "crm deal-fields update", "crm deals create", "crm deals get", "crm deals list", "crm deals move-stage", "crm deals update", "crm sales-pipelines list", "crm contact-tags assign"}},
 		{[]string{"crm", "contacts"}, []string{"crm contacts list", "crm contacts get", "crm contacts create", "crm contacts update"}},
-		{[]string{"crm", "contact-tags"}, []string{"crm contact-tags assign", "crm contact-tags list", "crm contact-tags remove"}},
+		{[]string{"crm", "contact-tags"}, []string{"crm contact-tags add", "crm contact-tags list", "crm contact-tags remove", "crm contact-tags assign"}},
 		{[]string{"whatsapp", "messages"}, []string{"whatsapp messages list", "whatsapp messages get", "whatsapp messages create"}},
 		{[]string{"whatsapp", "agents", "create"}, []string{"whatsapp agents create"}},
 		{[]string{"auth"}, []string{"auth profiles list", "auth login", "auth status", "auth logout"}},
@@ -82,7 +82,7 @@ func TestCommandsSearch(t *testing.T) {
 		// Resource summary: "List, show and send WhatsApp messages."
 		{[]string{"--search", "show and send"}, []string{"whatsapp messages list", "whatsapp messages get", "whatsapp messages create"}},
 		// Combined with a prefix.
-		{[]string{"whatsapp", "--search", "recipient"}, []string{"whatsapp messages create", "whatsapp broadcasts recipients add", "whatsapp broadcasts recipients delete", "whatsapp broadcasts recipients list"}},
+		{[]string{"whatsapp", "--search", "recipient"}, []string{"whatsapp messages create", "whatsapp broadcasts recipients add", "whatsapp broadcasts recipients list", "whatsapp broadcasts recipients remove", "whatsapp broadcasts recipients delete"}},
 		{[]string{"crm", "--search", "outlet"}, []string{"crm contacts list"}},
 		// No match is an empty success.
 		{[]string{"--search", "no such command"}, []string{}},

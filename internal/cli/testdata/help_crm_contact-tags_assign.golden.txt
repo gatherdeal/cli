@@ -2,6 +2,8 @@ gatherdeal crm contact-tags assign <contact-id> <tag-id>
 
 Assign Contact Tag.
 
+Deprecated since 2026-11-26; it will be removed in a later release. Use `gatherdeal crm contact-tags add`.
+
 Arguments:
   contact-id               Contact to receive the tag.
   tag-id                   Organization tag to assign.

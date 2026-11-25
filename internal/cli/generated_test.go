@@ -123,6 +123,52 @@ func TestWhatsAppBodylessWriteFlags(t *testing.T) {
 	}
 }
 
+func TestWhatsAppRemoveCommands(t *testing.T) {
+	const recipientID = "55555555-5555-4555-8555-555555555555"
+	for _, tc := range []struct {
+		resource string
+		path     string
+		ids      []string
+	}{
+		{"broadcasts recipients", "/whatsapp/v1/broadcasts/" + waAgentID + "/recipients/" + recipientID, []string{waAgentID, recipientID}},
+		{"broadcast-suppressions", "/whatsapp/v1/broadcast-suppressions/" + recipientID, []string{recipientID}},
+	} {
+		t.Run(tc.resource, func(t *testing.T) {
+			f, te := loggedIn(t)
+			calls := 0
+			f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
+				calls++
+				if r.Method != http.MethodDelete || r.URL.Path != tc.path || r.ContentLength != 0 {
+					t.Errorf("unexpected request: %s %s (body length %d)", r.Method, r.URL, r.ContentLength)
+				}
+				w.WriteHeader(http.StatusNoContent)
+			}
+
+			canonical := "whatsapp " + tc.resource + " remove"
+			former := "whatsapp " + tc.resource + " delete"
+			for _, name := range []string{canonical, former} {
+				args := append(strings.Fields(name), tc.ids...)
+				r := te.run(append(args, "--yes")...)
+				if r.exit != 0 {
+					t.Fatalf("%s: %s", name, r.stdout)
+				}
+				deprecation := r.env["meta"].(map[string]any)["deprecation"]
+				if name == former {
+					want := map[string]any{"successor": canonical, "since": "2026-11-26"}
+					if !reflect.DeepEqual(deprecation, want) || !strings.Contains(r.stderr, "is deprecated") {
+						t.Fatalf("%s: %s %s", name, r.stderr, r.stdout)
+					}
+				} else if deprecation != nil || r.stderr != "" {
+					t.Fatalf("%s: %s %s", name, r.stderr, r.stdout)
+				}
+			}
+			if calls != 2 {
+				t.Fatalf("got %d route calls, want 2", calls)
+			}
+		})
+	}
+}
+
 func TestGeneratedWriteBodyAndReceipt(t *testing.T) {
 	f, te := loggedIn(t)
 	calls := 0
@@ -212,7 +258,7 @@ func TestChatMessagesRevisionPoll(t *testing.T) {
 
 func TestGeneratedCRMHelp(t *testing.T) {
 	te := newTestEnv(t, nil)
-	for _, name := range []string{"contacts update", "contact-tags assign", "contact-tags remove", "contact-logs list", "sales-pipelines list", "deals list", "deals get", "deals create", "deals move-stage", "deals update"} {
+	for _, name := range []string{"contacts update", "contact-tags add", "contact-tags assign", "contact-tags remove", "contact-logs list", "sales-pipelines list", "deals list", "deals get", "deals create", "deals move-stage", "deals update"} {
 		t.Run(name, func(t *testing.T) {
 			args := append([]string{"crm"}, strings.Fields(name)...)
 			res := te.run(append(args, "--help")...)
@@ -331,7 +377,8 @@ func TestGeneratedCRMWrites(t *testing.T) {
 	}{
 		{"create contact", http.MethodPost, contacts, `{"kind":"personal","name":"Amina"}`, []string{"contacts", "create"}, true},
 		{"update contact", http.MethodPatch, contacts + "/" + id, `{"remark":null}`, []string{"contacts", "update", id}, false},
-		{"assign tag", http.MethodPut, membership, "", []string{"contact-tags", "assign", id, tag}, false},
+		{"add tag", http.MethodPut, membership, "", []string{"contact-tags", "add", id, tag}, false},
+		{"assign tag alias", http.MethodPut, membership, "", []string{"contact-tags", "assign", id, tag}, false},
 		{"remove tag", http.MethodDelete, membership, "", []string{"contact-tags", "remove", id, tag}, false},
 		{"create log", http.MethodPost, logs, `{"contact_id":"` + id + `","content":" Follow-up "}`, []string{"contact-logs", "create"}, true},
 	} {

@@ -186,9 +186,28 @@ func publishedOperationCoverage(m *contracts.Manifest, registered []*cli.Command
 			id := op.PublicID
 			known[id] = true
 			commands := byOperation[id]
+			canonicalCount := 0
+			for _, c := range commands {
+				wantPath := op.Command
+				switch {
+				case c.IsAlias():
+					if c.App != b.Service || !slices.ContainsFunc(op.FormerIDs, func(former contracts.FormerID) bool {
+						return c.Name() == former.Command
+					}) {
+						problems = append(problems, fmt.Sprintf("operation %s: undeclared CLI alias %q in app %q", id, c.Name(), c.App))
+					}
+					continue
+				case c.Presentation != nil:
+					wantPath = strings.Join(c.Presentation.Path, " ")
+				}
+				canonicalCount++
+				if c.App != b.Service || c.Name() != wantPath {
+					problems = append(problems, fmt.Sprintf("operation %s: app/path = %q/%q, want %q/%q", id, c.App, c.Name(), b.Service, wantPath))
+				}
+			}
 			_, excluded := exclusions[id]
 			switch {
-			case len(commands) == 0 && !excluded:
+			case canonicalCount == 0 && !excluded:
 				problems = append(problems, fmt.Sprintf("%s has no CLI command or exclusion in %s", id, exclusionsFile))
 			case len(commands) > 0 && excluded:
 				problems = append(problems, fmt.Sprintf("stale exclusion for %s: a CLI command already covers it", id))
@@ -196,17 +215,8 @@ func publishedOperationCoverage(m *contracts.Manifest, registered []*cli.Command
 			if len(commands) > 0 && cli.RequiresPublishedOperationExclusion(op) {
 				problems = append(problems, fmt.Sprintf("%s is a new external write. Remove its CLI command and add an exclusion in %s", id, exclusionsFile))
 			}
-			if len(commands) > 1 {
-				problems = append(problems, fmt.Sprintf("%s has %d CLI commands, want at most 1", id, len(commands)))
-			}
-			for _, c := range commands {
-				wantPath := op.Command
-				if c.Presentation != nil {
-					wantPath = strings.Join(c.Presentation.Path, " ")
-				}
-				if c.App != b.Service || c.Name() != wantPath {
-					problems = append(problems, fmt.Sprintf("operation %s: app/path = %q/%q, want %q/%q", id, c.App, c.Name(), b.Service, wantPath))
-				}
+			if canonicalCount > 1 {
+				problems = append(problems, fmt.Sprintf("%s has %d CLI commands, want at most 1", id, canonicalCount))
 			}
 		}
 	}
@@ -321,7 +331,9 @@ func TestBindingCommandPaths(t *testing.T) {
 	commandPattern := regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*( [a-z0-9]+(-[a-z0-9]+)*)*$`)
 	runtimePaths := map[string]string{}
 	for _, c := range cli.Commands() {
-		runtimePaths[c.Operation] = c.Name()
+		if !c.IsAlias() {
+			runtimePaths[c.Operation] = c.Name()
+		}
 	}
 	bindings := map[string]string{}
 	recordBinding := func(id, path string) {
