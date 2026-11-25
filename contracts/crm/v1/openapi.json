@@ -11959,7 +11959,7 @@
       },
       "UpdateDealInput": {
         "type": "object",
-        "description": "An omitted field keeps its value and null clears it. A remark keeps 1 to 500\ncharacters after trimming each line. The staff-only fields keep their\nearlier meaning: attachments are linked, never replaced or cleared, and\noutlet_id moves the deal (null makes it organization-wide).",
+        "description": "An omitted field keeps its value and null clears it. A remark keeps 1 to 500\ncharacters after trimming each line.",
         "properties": {
           "stage_id": {
             "type": "string",

@@ -20217,6 +20217,11 @@
             "type": "boolean",
             "description": "Whether the message text is withheld from this response."
           },
+          "redacted": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Whether the message text is withheld from this response; equals is_redacted.\n\nDeprecated: use `is_redacted` instead."
+          },
           "status": {
             "$ref": "#/components/schemas/MessageStatus"
           },

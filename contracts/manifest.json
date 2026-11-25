@@ -8,8 +8,8 @@
       "service_path": "/crm",
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
-      "digest": "sha256:66c5d9b0733f7ac0381d167f1bada1ec8953ce37a2b0ae2dcb003ae2dd1a8a32",
-      "generated_go_digest": "sha256:edb23ac1d355f737d964fe1f0cda999343e18f33f6f0183fe3f00ac386b15ea1",
+      "digest": "sha256:c8b2aede12f5b08fd788271b748b7b9591d460d809188a28469f35aabd00b214",
+      "generated_go_digest": "sha256:24116a748f62c35f6e3f726b6d5ef376b49464cfe84bd1f0cb3d54acfa87de52",
       "operations": [
         {
           "public_id": "crm.contact_logs.create",
@@ -3374,7 +3374,7 @@
       "contract": "contracts/identity/v1/openapi.json",
       "go_package": "internal/generated/identity/v1",
       "digest": "sha256:20a18556aa4626641cd15566b01e76505b18847c405fc819cf874d2fc1811d3d",
-      "generated_go_digest": "sha256:44f40de13327cbe5f9985901058f4fe35e1bb3fdf4503e1f12d34689e2205b5a",
+      "generated_go_digest": "sha256:0202aef7f6a8bd437a888311927bb10e6ccff42a97e050dfd0bc796a710e7845",
       "operations": [
         {
           "public_id": "identity.outlets.get",
@@ -4124,8 +4124,8 @@
       "service_path": "/whatsapp",
       "contract": "contracts/whatsapp/v1/openapi.json",
       "go_package": "internal/generated/whatsapp/v1",
-      "digest": "sha256:4494b6874b8cd51f86674afc6fad8d5fe9ff5b10cf841eb3b014af48da36ec7e",
-      "generated_go_digest": "sha256:0f948c4bbefdccfb5f21f72f423437fc7c9c95cedf486bdb4ca6a4660e4ae98f",
+      "digest": "sha256:4304dea41118530bf47a1b42410604caf386245e862785152c5e7191e7990b06",
+      "generated_go_digest": "sha256:cd479fc0e66ffd59c54e60d76177752832e5c1f1dba083f3959a203ece67d5c6",
       "operations": [
         {
           "public_id": "whatsapp.agents.create",

@@ -500,9 +500,7 @@ type UserBrief struct {
 	ProfileImage string `json:"profile_image,omitzero"` // Profile image of the user. Absent when unset.
 }
 
-// FetchOutletByIDInput keeps code lookup for internal callers: the public
-// contract narrows the path id to a UUID (apigen public=uuid), and public
-// clients resolve a code through the list's exact code selector.
+// FetchOutletByIDInput selects one outlet by its UUID.
 type FetchOutletByIDInput struct {
 	// UUID of the outlet to fetch. To find an outlet by its code, list
 	// outlets with the exact code selector.
