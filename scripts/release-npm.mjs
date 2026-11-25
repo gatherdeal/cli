@@ -130,7 +130,8 @@ async function main() {
       find: lookup,
       async publish({ pkg, tarball }) {
         await npm(['publish', tarball, '--ignore-scripts', '--provenance', '--access', 'public',
-          '--registry', registry, '--tag', pkg.version.includes('-') ? 'next' : 'latest']);
+          '--registry', registry, '--tag', pkg.version.includes('-') ? 'next' : 'latest',
+          '--loglevel', 'verbose']);
       },
       async verify(meta, { pkg, bytes }) {
         checkMetadata(meta, pkg, bytes);
