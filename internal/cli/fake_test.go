@@ -376,6 +376,7 @@ type testEnv struct {
 	sleeps      []time.Duration
 	stdin       string
 	interactive bool
+	commands    []*Command
 }
 
 func newTestEnv(t *testing.T, fake *fakeServer) *testEnv {
@@ -439,9 +440,16 @@ func (te *testEnv) run(args ...string) result {
 	if te.fake != nil {
 		env.HTTPBase = te.fake.transport()
 	}
-	code := Run(context.Background(), env, args)
+	cmds := te.commands
+	var code int
+	if cmds == nil {
+		code = Run(context.Background(), env, args)
+		cmds = Commands()
+	} else {
+		code = runWithCommands(context.Background(), env, args, cmds)
+	}
 	res := result{exit: code, stdout: stdout.String(), stderr: stderr.String()}
-	node, rest, resolveErr := commandTree(Commands()).resolve(args)
+	node, rest, resolveErr := commandTree(cmds).resolve(args)
 	// Text commands print an envelope only on failure.
 	textOutput := (code == 0 && len(args) > 0 && args[0] == "help") || resolveErr == nil && (node.command == nil || (node.command.Output == "text" && code == 0))
 	if code == 0 && resolveErr == nil && node.command != nil {

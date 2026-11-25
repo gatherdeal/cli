@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"fmt"
 	"runtime"
 	"slices"
 	"strings"
@@ -19,6 +20,14 @@ import (
 // Commands returns the command tree. The same declarations drive parsing,
 // help and `gatherdeal commands`.
 func Commands() []*Command {
+	cmds, err := commands()
+	if err != nil {
+		panic(err)
+	}
+	return cmds
+}
+
+func commands() ([]*Command, error) {
 	loginFlags := append([]FlagSpec{}, targetFlags...)
 	loginFlags = append(loginFlags,
 		FlagSpec{Name: "credential-store", Kind: kindString, Default: "keyring", Values: []string{"keyring", "file"}, Usage: "Where to keep the credential: the OS keyring, or an owner-only file under the config directory."},
@@ -96,7 +105,7 @@ func Commands() []*Command {
 	// API paths and app ownership come from the published contracts.
 	m, err := contracts.Load()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	for _, c := range cmds {
 		if c.Operation == "" {
@@ -126,11 +135,47 @@ func Commands() []*Command {
 	for _, c := range cmds {
 		addShapingFlags(c)
 	}
-	return cmds
+	return registerFormerCommands(cmds, m)
 }
 
-// deprecation reports the command's deprecation from its contract, or nil.
+func registerFormerCommands(cmds []*Command, m *contracts.Manifest) ([]*Command, error) {
+	occupied := []string{"help"}
+	for _, c := range cmds {
+		occupied = append(occupied, c.Name())
+		if c.Presentation != nil {
+			occupied = append(occupied, strings.Join(strings.Fields(c.Contract().Command), " "))
+		}
+	}
+	var aliases []*Command
+	for _, c := range cmds {
+		op, _ := m.Operation(c.Operation)
+		for _, former := range op.FormerIDs {
+			path := strings.Fields(former.Command)
+			name := strings.Join(path, " ")
+			if name == "" {
+				return nil, fmt.Errorf("former operation %s has an empty command path", former.PublicID)
+			}
+			for _, other := range occupied {
+				if name == other || strings.HasPrefix(name, other+" ") || strings.HasPrefix(other, name+" ") {
+					return nil, fmt.Errorf("former command %q (%s) conflicts with command %q", name, former.PublicID, other)
+				}
+			}
+			alias := *c
+			alias.Path = path
+			alias.Presentation = nil
+			alias.aliasDeprecation = &output.Deprecation{Since: former.Since, Successor: c.Name()}
+			aliases = append(aliases, &alias)
+			occupied = append(occupied, name)
+		}
+	}
+	return append(cmds, aliases...), nil
+}
+
+// deprecation reports the command's deprecation, or nil.
 func (c *Command) deprecation() *output.Deprecation {
+	if c.aliasDeprecation != nil {
+		return c.aliasDeprecation
+	}
 	if c.Operation == "" {
 		return nil
 	}
@@ -173,7 +218,7 @@ type commandsData struct {
 }
 
 func runCommands(_ context.Context, inv *Invocation) (any, error) {
-	cmds := Commands()
+	cmds := inv.commands
 	prefix := inv.Args
 	n := commandTree(cmds)
 	for i, part := range prefix {

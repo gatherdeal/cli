@@ -64,6 +64,8 @@ type Operation struct {
 	// Deprecation is set on an operation that remains available for now
 	// and has a successor.
 	Deprecation *Deprecation `json:"deprecation"`
+	// FormerIDs are previous public IDs and command paths for this route.
+	FormerIDs []FormerID `json:"former_ids,omitempty"`
 	// Errors are the problem codes the operation declares.
 	Errors     []OperationError `json:"errors"`
 	GoMethod   string           `json:"go_method"`
@@ -89,6 +91,13 @@ func (op *Operation) UnmarshalJSON(data []byte) error {
 	}
 	*op = Operation(wire.fields)
 	return nil
+}
+
+// FormerID describes a previous public ID for an operation.
+type FormerID struct {
+	PublicID string `json:"public_id"`
+	Command  string `json:"command"`
+	Since    string `json:"since"`
 }
 
 // Deprecation describes a deprecated operation.
