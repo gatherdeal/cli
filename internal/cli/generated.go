@@ -6,6 +6,7 @@ import (
 	"encoding/json/jsontext"
 	"net/http"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -30,7 +31,7 @@ func RequiresPublishedOperationExclusion(op contracts.Operation) bool {
 		"whatsapp.broadcasts.start",
 		"whatsapp.message_templates.create",
 		"whatsapp.message_templates.delete",
-		"whatsapp.message_templates.update",
+		"whatsapp.message_templates.replace",
 		"whatsapp.messages.create":
 		return false
 	default:
@@ -52,7 +53,13 @@ func generatedCommands(existing []*Command) []*Command {
 			continue
 		}
 		op := contracts.MustOperation(b.PublicID)
-		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*crmv1.Client)(nil),
+		dispatch := b
+		if op.Deprecation != nil {
+			// A deprecated command keeps its flags and input and sends
+			// them through its successor.
+			dispatch = crmSuccessor(b, op.Deprecation.Successor)
+		}
+		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, dispatch.Bind, (*crmv1.Client)(nil),
 			func(inv *Invocation) (invokeInput, error) {
 				client, err := inv.contactsClient()
 				if err != nil {
@@ -68,7 +75,7 @@ func generatedCommands(existing []*Command) []*Command {
 					if err != nil {
 						return nil, "", err
 					}
-					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly(), opts...)
+					return client.Invoke(ctx, dispatch, input, outlet, key, !op.ReadOnly(), opts...)
 				}, nil
 			})
 		if c != nil {
@@ -88,12 +95,16 @@ func generatedCommands(existing []*Command) []*Command {
 					return nil, err
 				}
 				outlet := selectedOutlet(inv)
+				var opts []wa.RequestOption
+				if requiresIfMatch(op.PublicID) {
+					opts = append(opts, wa.WithIfMatch(inv.str("if-match")))
+				}
 				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
 					key, err := inv.generatedWriteKey(op)
 					if err != nil {
 						return nil, "", err
 					}
-					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly())
+					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly(), opts...)
 				}, nil
 			})
 		if c != nil {
@@ -101,6 +112,23 @@ func generatedCommands(existing []*Command) []*Command {
 		}
 	}
 	return commands
+}
+
+// crmSuccessor returns the binding of a deprecated operation's successor.
+// The successor must take the same arguments, the same preconditions and a
+// body that accepts every body of the deprecated operation.
+func crmSuccessor(deprecated crmv1.CLIBinding, successor string) crmv1.CLIBinding {
+	for _, b := range crmv1.CLIBindings() {
+		if b.PublicID != successor {
+			continue
+		}
+		if !slices.Equal(b.Arguments, deprecated.Arguments) || b.HasBody != deprecated.HasBody || b.Keyed != deprecated.Keyed ||
+			requiresIfMatch(b.PublicID) != requiresIfMatch(deprecated.PublicID) {
+			panic(deprecated.PublicID + ": successor " + successor + " takes different arguments")
+		}
+		return b
+	}
+	panic(deprecated.PublicID + ": missing successor binding " + successor)
 }
 
 func (inv *Invocation) generatedWriteKey(op contracts.Operation) (string, error) {

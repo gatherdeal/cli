@@ -15,7 +15,10 @@ import (
 	"github.com/gatherdeal/cli/internal/paging"
 )
 
-const ListOperation = identityv1.Service + ".outlets.list"
+const (
+	ListOperation = identityv1.Service + ".outlets.list"
+	GetOperation  = identityv1.Service + ".outlets.get"
+)
 
 type Client struct {
 	http *http.Client
@@ -70,7 +73,10 @@ func readBinding(id string) identityv1.CLIBinding {
 	panic("missing generated binding: " + id)
 }
 
-var listOutlets = readBinding("identity.outlets.list")
+var (
+	listOutlets = readBinding(ListOperation)
+	getOutlet   = readBinding(GetOperation)
+)
 
 func (c *Client) FetchOutlets(ctx context.Context, in identityv1.FetchOutletsInput, all bool, maxItems int) ([]json.RawMessage, output.PageInfo, string, error) {
 	call := c.call()
@@ -87,8 +93,20 @@ func (c *Client) FetchOutlets(ctx context.Context, in identityv1.FetchOutletsInp
 	})
 }
 
-// GetOutlet resolves an exact ID/code filter through the sole published list operation.
-func (c *Client) GetOutlet(ctx context.Context, in identityv1.FetchOutletsInput) (json.RawMessage, string, error) {
+// GetOutlet reads one outlet by its UUID.
+func (c *Client) GetOutlet(ctx context.Context, in identityv1.FetchOutletByIDInput) (json.RawMessage, string, error) {
+	call := c.call()
+	raw, err := getOutlet.Invoke(ctx, call.api, &in, "")
+	if err != nil {
+		return nil, call.d.CorrelationID, call.apiError(ctx, err)
+	}
+	record, err := httpx.ResultMember(raw, "outlet", call.d.CorrelationID)
+	return record, call.d.CorrelationID, err
+}
+
+// FindOutlet returns the first outlet the list filter in selects, such as
+// an exact code; none is OUTLET_NOT_FOUND.
+func (c *Client) FindOutlet(ctx context.Context, in identityv1.FetchOutletsInput) (json.RawMessage, string, error) {
 	in.PageSize, in.Total = 1, identityv1.TotalModeNone
 	items, _, correlation, err := c.FetchOutlets(ctx, in, false, 0)
 	if err != nil {

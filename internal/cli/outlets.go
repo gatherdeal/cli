@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"encoding/json"
+	"slices"
 	"strings"
 
 	"github.com/gatherdeal/cli/contracts"
@@ -21,16 +22,19 @@ func outletCommands() []*Command {
 		FlagSpec{Name: "name", Kind: kindString, Usage: "Filter by outlet name (partial match)."},
 		flagSearch,
 		FlagSpec{Name: "is-master", Kind: kindBool, Usage: "Filter by master outlet status; use --is-master=false for other outlets."},
-		FlagSpec{Name: "sort", Kind: kindString, Usage: "Field to sort by."},
-		FlagSpec{Name: "order", Kind: kindString, Values: []string{"asc", "desc"}, Usage: "Sort direction."},
+		sortFlag(identity.ListOperation),
 	)
 	for _, param := range contracts.MustOperation(identity.ListOperation).DelegatedExpansions {
 		flags = append(flags, FlagSpec{Name: expansionFlagName(param), Kind: kindBool, Usage: "Include the outlet's " + strings.TrimPrefix(param, "with_") + "."})
 	}
+	getFlags := append([]FlagSpec{}, targetFlags...)
+	for _, param := range contracts.MustOperation(identity.GetOperation).DelegatedExpansions {
+		getFlags = append(getFlags, FlagSpec{Name: expansionFlagName(param), Kind: kindBool, Usage: "Include the outlet's " + strings.TrimPrefix(param, "with_") + "."})
+	}
 	return []*Command{
 		{Operation: identity.ListOperation, Presentation: &CommandPresentation{Path: []string{"outlets", "list"}}, Summary: "List outlets this access may read.", Flags: flags, Record: identityv1.Outlet{}, Output: "json", Network: true, Run: runOutletsList},
-		// This convenience lookup uses outlets.list; it is not another published operation.
-		{Path: []string{"outlets", "get"}, App: "identity", Summary: "Show one outlet this access may read, by id or code.", Args: []ArgSpec{{Name: "id-or-code", Usage: "Outlet UUID or code."}}, Flags: append([]FlagSpec{}, targetFlags...), Record: identityv1.Outlet{}, Output: "json", Network: true, ReadOnly: true, Run: runOutletsGet},
+		// A code is resolved with the list's exact code selector first.
+		{Operation: identity.GetOperation, Presentation: &CommandPresentation{Path: []string{"outlets", "get"}}, Summary: "Show one outlet this access may read, by id or code.", Args: []ArgSpec{{Name: "id-or-code", Usage: "Outlet UUID, or an outlet code to look up through the outlets list."}}, Flags: getFlags, Record: identityv1.Outlet{}, Output: "json", Network: true, Run: runOutletsGet},
 	}
 }
 func (inv *Invocation) identityClient() (*identity.Client, error) {
@@ -64,7 +68,7 @@ func runOutletsList(ctx context.Context, inv *Invocation) (any, error) {
 			return nil, usageError("--code must not be empty")
 		}
 	}
-	in := identityv1.FetchOutletsInput{IDs: inv.list("id"), Codes: inv.list("code"), Name: inv.str("name"), SearchTerm: inv.str("search"), Page: inv.integer("page"), PageSize: inv.integer("page-size"), After: inv.str("after"), Total: identityv1.TotalMode(inv.str("total")), SortBy: inv.str("sort"), SortOrder: inv.str("order"), WithOwner: inv.boolean("with-owner"), WithOrganization: inv.boolean("with-organization")}
+	in := identityv1.FetchOutletsInput{IDs: inv.list("id"), Codes: inv.list("code"), Name: inv.str("name"), SearchTerm: inv.str("search"), Page: inv.integer("page"), PageSize: inv.integer("page-size"), After: inv.str("after"), Total: identityv1.TotalMode(inv.str("total")), SortBy: inv.str("sort"), WithOwner: inv.boolean("with-owner"), WithOrganization: inv.boolean("with-organization")}
 	if inv.isSet("is-master") {
 		value := inv.boolean("is-master")
 		in.IsMaster = &value
@@ -82,24 +86,28 @@ func runOutletsList(ctx context.Context, inv *Invocation) (any, error) {
 	inv.Meta.PageInfo = &page
 	return items, nil
 }
-func (inv *Invocation) resolveOutlet(ctx context.Context, idOrCode string) (json.RawMessage, error) {
+
+// resolveOutlet reads an outlet by UUID with outlets.get, or finds it by
+// exact code with outlets.list. expand selects the get's expansions.
+func (inv *Invocation) resolveOutlet(ctx context.Context, idOrCode string, expand ...string) (json.RawMessage, error) {
 	if strings.TrimSpace(idOrCode) == "" {
 		return nil, usageError("outlet id or code is required")
-	}
-	in := identityv1.FetchOutletsInput{}
-	if uuidRE.MatchString(idOrCode) {
-		in.IDs = []string{idOrCode}
-	} else {
-		in.Codes = []string{idOrCode}
 	}
 	c, err := inv.identityClient()
 	if err != nil {
 		return nil, err
 	}
-	outlet, correlation, err := c.GetOutlet(ctx, in)
+	withOwner, withOrganization := slices.Contains(expand, "with_owner"), slices.Contains(expand, "with_organization")
+	var outlet json.RawMessage
+	var correlation string
+	if uuidRE.MatchString(idOrCode) {
+		outlet, correlation, err = c.GetOutlet(ctx, identityv1.FetchOutletByIDInput{IDOrCode: idOrCode, WithOwner: withOwner, WithOrganization: withOrganization})
+	} else {
+		outlet, correlation, err = c.FindOutlet(ctx, identityv1.FetchOutletsInput{Codes: []string{idOrCode}, WithOwner: withOwner, WithOrganization: withOrganization})
+	}
 	inv.Meta.CorrelationID = correlation
 	return outlet, auth.Explain(err)
 }
 func runOutletsGet(ctx context.Context, inv *Invocation) (any, error) {
-	return inv.resolveOutlet(ctx, inv.Args[0])
+	return inv.resolveOutlet(ctx, inv.Args[0], inv.expansions()...)
 }

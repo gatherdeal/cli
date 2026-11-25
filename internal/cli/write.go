@@ -188,6 +188,10 @@ func ReadBody[T any](path string, stdin io.Reader) (*T, error) {
 }
 
 func (inv *Invocation) run(ctx context.Context) (any, error) {
+	if d := inv.Command.deprecation(); d != nil {
+		inv.Meta.Deprecation = d
+		inv.Env.stderrf("warning: `gatherdeal %s` is deprecated since %s and will be removed in a later release; use `gatherdeal %s`.\n", inv.Command.Name(), d.Since, d.Successor)
+	}
 	policy := inv.Command.Write
 	if policy == nil {
 		return inv.Command.Run(ctx, inv)

@@ -8,8 +8,8 @@
       "service_path": "/crm",
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
-      "digest": "sha256:f0920c7ecb45376835d61c2845120aff0556dc3c17dc6e109bf6fc5bd29aa0cd",
-      "generated_go_digest": "sha256:84e942e5b2734cc2cc8759417b66727a0471eb14fca5fd947a708abec0791ebf",
+      "digest": "sha256:c8b2aede12f5b08fd788271b748b7b9591d460d809188a28469f35aabd00b214",
+      "generated_go_digest": "sha256:24116a748f62c35f6e3f726b6d5ef376b49464cfe84bd1f0cb3d54acfa87de52",
       "operations": [
         {
           "public_id": "crm.contact_logs.create",
@@ -34,11 +34,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -240,8 +235,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -263,11 +258,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -402,7 +392,7 @@
           "method": "PUT",
           "path": "/v1/contacts/:contact_id/tags/:tag_id",
           "effect": {
-            "mutation": "additive",
+            "mutation": "non_additive",
             "interaction": "closed",
             "risks": []
           },
@@ -413,16 +403,11 @@
             ]
           },
           "outlet_scope": "filtered",
-          "idempotency": "keyed",
+          "idempotency": "safe",
           "errors": [
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -536,16 +521,6 @@
               "retryable": false
             },
             {
-              "code": "IDEMPOTENCY_KEY_CONFLICT",
-              "status": 409,
-              "retryable": false
-            },
-            {
-              "code": "IDEMPOTENCY_KEY_REQUIRED",
-              "status": 400,
-              "retryable": false
-            },
-            {
               "code": "INTERNAL_ERROR",
               "status": 500,
               "retryable": false
@@ -562,8 +537,7 @@
             }
           ],
           "go_method": "AssignContactTag",
-          "input_type": "AssignContactTagInput",
-          "output_type": "KeyedAcknowledgment"
+          "input_type": "AssignContactTagInput"
         },
         {
           "public_id": "crm.contact_tags.list",
@@ -610,7 +584,7 @@
               ]
             },
             {
-              "name": "is_archive",
+              "name": "is_archived",
               "kind": "bool",
               "ops": [
                 "EQ"
@@ -640,8 +614,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -663,11 +637,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -823,11 +792,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -978,11 +942,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -1168,11 +1127,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -1437,8 +1391,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -1460,11 +1414,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -1619,11 +1568,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -1791,6 +1735,170 @@
           "input_type": "PartialUpdateContactByIDInput"
         },
         {
+          "public_id": "crm.deal_fields.update",
+          "command": "crm deal-fields update",
+          "tool": "crm_deal_fields_update",
+          "method": "PATCH",
+          "path": "/v1/deals/:id/fields",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.deal.read",
+              "crm.deal.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_DEAL_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PRECONDITION_FAILED",
+              "status": 412,
+              "retryable": false
+            },
+            {
+              "code": "PRECONDITION_REQUIRED",
+              "status": 428,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "UpdateDealFields",
+          "input_type": "UpdateDealFieldsInput",
+          "output_type": "DealRevisionOutput",
+          "deprecation": {
+            "since": "2026-11-25",
+            "successor": "crm.deals.update"
+          }
+        },
+        {
           "public_id": "crm.deals.create",
           "command": "crm deals create",
           "tool": "crm_deals_create",
@@ -1813,11 +1921,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -1995,11 +2098,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -2173,8 +2271,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -2196,11 +2294,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -2354,8 +2447,177 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_DEAL_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_SALES_PIPELINE_STAGE_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "PRECONDITION_FAILED",
+              "status": 412,
+              "retryable": false
+            },
+            {
+              "code": "PRECONDITION_REQUIRED",
+              "status": 428,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "MoveDealStage",
+          "input_type": "MoveDealStageInput",
+          "output_type": "DealRevisionOutput",
+          "deprecation": {
+            "since": "2026-11-25",
+            "successor": "crm.deals.update"
+          }
+        },
+        {
+          "public_id": "crm.deals.update",
+          "command": "crm deals update",
+          "tool": "crm_deals_update",
+          "method": "PATCH",
+          "path": "/v1/deals/:id",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.deal.read",
+              "crm.deal.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
               "retryable": false
             },
             {
@@ -2484,163 +2746,8 @@
               "retryable": false
             },
             {
-              "code": "UNAUTHORIZED",
-              "status": 401,
-              "retryable": false
-            },
-            {
-              "code": "VALIDATION_FAILED",
-              "status": 422,
-              "retryable": false
-            }
-          ],
-          "go_method": "MoveDealStage",
-          "input_type": "MoveDealStageInput",
-          "output_type": "DealRevisionOutput"
-        },
-        {
-          "public_id": "crm.deals.update",
-          "command": "crm deals update",
-          "tool": "crm_deals_update",
-          "method": "PATCH",
-          "path": "/v1/deals/:id/fields",
-          "effect": {
-            "mutation": "non_additive",
-            "interaction": "closed",
-            "risks": []
-          },
-          "permissions": {
-            "allOf": [
-              "crm.deal.read",
-              "crm.deal.write"
-            ]
-          },
-          "outlet_scope": "filtered",
-          "idempotency": "safe",
-          "errors": [
-            {
-              "code": "BAD_REQUEST",
-              "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_UPGRADE_REQUIRED",
-              "status": 426,
-              "retryable": false
-            },
-            {
-              "code": "CONFLICT",
-              "status": 409,
-              "retryable": false
-            },
-            {
-              "code": "CRM_SALES_PIPELINE_DEAL_NOT_FOUND",
-              "status": 404,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
-              "status": 401,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_INACTIVE",
-              "status": 401,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "DELEGATED_ACCESS_UNSUPPORTED",
-              "status": 401,
-              "retryable": false
-            },
-            {
-              "code": "FORBIDDEN",
-              "status": 403,
-              "retryable": false
-            },
-            {
-              "code": "INTERNAL_ERROR",
-              "status": 500,
-              "retryable": false
-            },
-            {
-              "code": "PRECONDITION_FAILED",
-              "status": 412,
+              "code": "PRECONDITION_REQUIRED",
+              "status": 428,
               "retryable": false
             },
             {
@@ -2708,8 +2815,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -2731,11 +2838,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -2877,14 +2979,6 @@
           "retryable": false,
           "title": "The request is invalid.",
           "schema": "#/components/schemas/BadRequestProblem"
-        },
-        {
-          "code": "CLIENT_CLOSED_REQUEST",
-          "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-          "status": 499,
-          "retryable": false,
-          "title": "The client closed the request.",
-          "schema": "#/components/schemas/ClientClosedRequestProblem"
         },
         {
           "code": "CLIENT_UPGRADE_REQUIRED",
@@ -3247,6 +3341,14 @@
           "schema": "#/components/schemas/PreconditionFailedProblem"
         },
         {
+          "code": "PRECONDITION_REQUIRED",
+          "type": "https://docs.gatherdeal.ai/errors/PRECONDITION_REQUIRED",
+          "status": 428,
+          "retryable": false,
+          "title": "This request must be conditional. Send If-Match with the revision from the latest read.",
+          "schema": "#/components/schemas/PreconditionRequiredProblem"
+        },
+        {
           "code": "UNAUTHORIZED",
           "type": "https://docs.gatherdeal.ai/errors/UNAUTHORIZED",
           "status": 401,
@@ -3271,9 +3373,172 @@
       "service_path": "/identity",
       "contract": "contracts/identity/v1/openapi.json",
       "go_package": "internal/generated/identity/v1",
-      "digest": "sha256:784112d188758115fbe617166a79d3ae32bf302d2327540c1b014ccc41982a60",
-      "generated_go_digest": "sha256:c2cea1ee10d4aca9a9cd8bc1d1e4bd652a8c6c67229cc50dcdd82129cb21ffe1",
+      "digest": "sha256:20a18556aa4626641cd15566b01e76505b18847c405fc819cf874d2fc1811d3d",
+      "generated_go_digest": "sha256:0202aef7f6a8bd437a888311927bb10e6ccff42a97e050dfd0bc796a710e7845",
       "operations": [
+        {
+          "public_id": "identity.outlets.get",
+          "command": "identity outlets get",
+          "tool": "identity_outlets_get",
+          "method": "GET",
+          "path": "/v1/outlets/:id",
+          "effect": {
+            "mutation": "none",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "identity.outlet.read"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "safe",
+          "delegated_expansions": [
+            "with_organization",
+            "with_owner"
+          ],
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDENTITY_DISTRIBUTION_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "IDENTITY_ORGANIZATION_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDENTITY_OUTLET_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "FetchOutletByID",
+          "input_type": "FetchOutletByIDInput",
+          "output_type": "FetchOutletByIDOutput"
+        },
         {
           "public_id": "identity.outlets.list",
           "command": "identity outlets list",
@@ -3451,8 +3716,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -3474,11 +3739,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -3630,14 +3890,6 @@
           "retryable": false,
           "title": "The request is invalid.",
           "schema": "#/components/schemas/BadRequestProblem"
-        },
-        {
-          "code": "CLIENT_CLOSED_REQUEST",
-          "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-          "status": 499,
-          "retryable": false,
-          "title": "The client closed the request.",
-          "schema": "#/components/schemas/ClientClosedRequestProblem"
         },
         {
           "code": "CLIENT_UPGRADE_REQUIRED",
@@ -3816,6 +4068,14 @@
           "schema": "#/components/schemas/IdentityOutletMembershipRequiredProblem"
         },
         {
+          "code": "IDENTITY_OUTLET_NOT_FOUND",
+          "type": "https://docs.gatherdeal.ai/errors/IDENTITY_OUTLET_NOT_FOUND",
+          "status": 404,
+          "retryable": false,
+          "title": "Outlet not found.",
+          "schema": "#/components/schemas/IdentityOutletNotFoundProblem"
+        },
+        {
           "code": "INTERNAL_ERROR",
           "type": "https://docs.gatherdeal.ai/errors/INTERNAL_ERROR",
           "status": 500,
@@ -3864,8 +4124,8 @@
       "service_path": "/whatsapp",
       "contract": "contracts/whatsapp/v1/openapi.json",
       "go_package": "internal/generated/whatsapp/v1",
-      "digest": "sha256:b5e9aab59eea25933fbf9492804d9d56e3a1c58ed0e404a4367f61017b23bf08",
-      "generated_go_digest": "sha256:dcc9575b655b1f387541e9e0011ddd99ecc34b6e87bd2733da92ef964949492a",
+      "digest": "sha256:4304dea41118530bf47a1b42410604caf386245e862785152c5e7191e7990b06",
+      "generated_go_digest": "sha256:cd479fc0e66ffd59c54e60d76177752832e5c1f1dba083f3959a203ece67d5c6",
       "operations": [
         {
           "public_id": "whatsapp.agents.create",
@@ -3889,11 +4149,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -4078,11 +4333,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -4237,11 +4487,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -4386,8 +4631,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -4409,11 +4654,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -4542,9 +4782,9 @@
           "output_type": "FetchAgentsOutput"
         },
         {
-          "public_id": "whatsapp.agents.pairing",
-          "command": "whatsapp agents pairing",
-          "tool": "whatsapp_agents_pairing",
+          "public_id": "whatsapp.agents.pairing.get",
+          "command": "whatsapp agents pairing get",
+          "tool": "whatsapp_agents_pairing_get",
           "method": "GET",
           "path": "/v1/agents/:agent_id/pairing",
           "effect": {
@@ -4563,11 +4803,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -4715,11 +4950,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -4830,6 +5060,11 @@
               "retryable": false
             },
             {
+              "code": "PRECONDITION_REQUIRED",
+              "status": 428,
+              "retryable": false
+            },
+            {
               "code": "UNAUTHORIZED",
               "status": 401,
               "retryable": false
@@ -4886,11 +5121,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -5050,11 +5280,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -5201,8 +5426,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -5224,11 +5449,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -5380,11 +5600,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -5540,11 +5755,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -5712,11 +5922,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -5859,8 +6064,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -5882,11 +6087,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -6036,11 +6236,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -6195,11 +6390,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -6384,11 +6574,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -6546,8 +6731,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -6569,11 +6754,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -6731,11 +6911,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -6898,11 +7073,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -7076,11 +7246,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -7246,11 +7411,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -7393,11 +7553,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -7545,11 +7700,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -7693,8 +7843,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -7716,11 +7866,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -7854,9 +7999,9 @@
           "output_type": "FetchChatsOutput"
         },
         {
-          "public_id": "whatsapp.chats.messages",
-          "command": "whatsapp chats messages",
-          "tool": "whatsapp_chats_messages",
+          "public_id": "whatsapp.chats.messages.list",
+          "command": "whatsapp chats messages list",
+          "tool": "whatsapp_chats_messages_list",
           "method": "GET",
           "path": "/v1/chats/:chat_id/messages",
           "effect": {
@@ -7874,8 +8019,8 @@
           "idempotency": "safe",
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -7897,11 +8042,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -8041,7 +8181,7 @@
           "method": "POST",
           "path": "/v1/message-templates",
           "effect": {
-            "mutation": "non_additive",
+            "mutation": "additive",
             "interaction": "external",
             "risks": [
               "external_communication"
@@ -8053,16 +8193,11 @@
             ]
           },
           "outlet_scope": "organization_level",
-          "idempotency": "none",
+          "idempotency": "keyed",
           "errors": [
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -8166,6 +8301,16 @@
               "retryable": false
             },
             {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
               "code": "INTERNAL_ERROR",
               "status": 500,
               "retryable": false
@@ -8220,11 +8365,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -8377,11 +8517,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -8525,8 +8660,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -8548,11 +8683,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -8706,11 +8836,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -8836,9 +8961,9 @@
           "output_type": "PreviewMessageTemplateOutput"
         },
         {
-          "public_id": "whatsapp.message_templates.update",
-          "command": "whatsapp message-templates update",
-          "tool": "whatsapp_message_templates_update",
+          "public_id": "whatsapp.message_templates.replace",
+          "command": "whatsapp message-templates replace",
+          "tool": "whatsapp_message_templates_replace",
           "method": "PUT",
           "path": "/v1/message-templates/:template_id",
           "effect": {
@@ -8854,16 +8979,11 @@
             ]
           },
           "outlet_scope": "organization_level",
-          "idempotency": "none",
+          "idempotency": "safe",
           "errors": [
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -8992,8 +9112,8 @@
               "retryable": false
             }
           ],
-          "go_method": "UpdateMessageTemplate",
-          "input_type": "UpdateMessageTemplateInput",
+          "go_method": "ReplaceMessageTemplate",
+          "input_type": "ReplaceMessageTemplateInput",
           "output_type": "MessageTemplateOutput"
         },
         {
@@ -9020,11 +9140,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -9237,11 +9352,6 @@
               "retryable": false
             },
             {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
-              "retryable": false
-            },
-            {
               "code": "CLIENT_UPGRADE_REQUIRED",
               "status": 426,
               "retryable": false
@@ -9384,8 +9494,8 @@
           ],
           "pagination": {
             "style": "adaptive",
-            "page_param": "p",
-            "page_size_param": "count",
+            "page_param": "page",
+            "page_size_param": "limit",
             "after_param": "after",
             "before_param": "before",
             "total_param": "total",
@@ -9407,11 +9517,6 @@
             {
               "code": "BAD_REQUEST",
               "status": 400,
-              "retryable": false
-            },
-            {
-              "code": "CLIENT_CLOSED_REQUEST",
-              "status": 499,
               "retryable": false
             },
             {
@@ -9548,14 +9653,6 @@
           "retryable": false,
           "title": "The request is invalid.",
           "schema": "#/components/schemas/BadRequestProblem"
-        },
-        {
-          "code": "CLIENT_CLOSED_REQUEST",
-          "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-          "status": 499,
-          "retryable": false,
-          "title": "The client closed the request.",
-          "schema": "#/components/schemas/ClientClosedRequestProblem"
         },
         {
           "code": "CLIENT_UPGRADE_REQUIRED",
@@ -9764,6 +9861,14 @@
           "retryable": false,
           "title": "A precondition of the request was not met.",
           "schema": "#/components/schemas/PreconditionFailedProblem"
+        },
+        {
+          "code": "PRECONDITION_REQUIRED",
+          "type": "https://docs.gatherdeal.ai/errors/PRECONDITION_REQUIRED",
+          "status": 428,
+          "retryable": false,
+          "title": "This request must be conditional. Send If-Match with the revision from the latest read.",
+          "schema": "#/components/schemas/PreconditionRequiredProblem"
         },
         {
           "code": "UNAUTHORIZED",

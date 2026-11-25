@@ -398,6 +398,11 @@ func parse(env *Env, cmd *Command, args []string, helpMode bool) (*Invocation, e
 			return nil, usageError("--%s must be one of %s", f.Name, strings.Join(f.Values, ", "))
 		}
 	}
+	if cmd.Operation != "" && inv.set["sort"] && len(cmd.Contract().SortableFields) > 0 {
+		if err := validateSort(inv.str("sort"), cmd.Contract().SortableFields); err != nil {
+			return nil, err
+		}
+	}
 	if cmd.FilterFields != nil && inv.isSet("filter") {
 		if err := validateFilter(inv.str("filter"), cmd.FilterFields); err != nil {
 			return nil, err
@@ -418,6 +423,9 @@ func writeCommandHelp(w io.Writer, c *Command) {
 		fmt.Fprintf(&b, " %s", a.argUsage())
 	}
 	fmt.Fprintf(&b, "\n\n%s\n", c.Summary)
+	if d := c.deprecation(); d != nil {
+		fmt.Fprintf(&b, "\nDeprecated since %s; it will be removed in a later release. Use `gatherdeal %s`.\n", d.Since, d.Successor)
+	}
 	if len(c.Args) > 0 {
 		b.WriteString("\nArguments:\n")
 		for _, a := range c.Args {

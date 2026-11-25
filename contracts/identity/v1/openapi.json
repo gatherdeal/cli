@@ -183,16 +183,21 @@
             "identity.outlet.read"
           ]
         },
+        "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-delegated-expansions": [
           "with_organization",
           "with_owner"
         ],
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -220,6 +225,7 @@
           {
             "name": "organization_id",
             "in": "query",
+            "description": "UUID of the organization whose outlets to list. Anonymous callers need it,\nor an id or code selector, to receive rows; authenticated callers only\never see outlets of their own organization.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -230,7 +236,10 @@
             "in": "query",
             "description": "Filter by one or more outlet UUIDs.",
             "schema": {
-              "type": "array",
+              "type": [
+                "array",
+                "null"
+              ],
               "items": {
                 "type": "string",
                 "format": "uuid"
@@ -240,7 +249,7 @@
           {
             "name": "name",
             "in": "query",
-            "description": "Filter by outlet display name (partial match).",
+            "description": "Case-insensitive substring of the outlet name.",
             "schema": {
               "type": "string"
             }
@@ -248,9 +257,12 @@
           {
             "name": "code",
             "in": "query",
-            "description": "Filter by one or more outlet codes.",
+            "description": "Exact outlet codes; repeat the parameter to match any of several.",
             "schema": {
-              "type": "array",
+              "type": [
+                "array",
+                "null"
+              ],
               "items": {
                 "type": "string"
               }
@@ -259,7 +271,7 @@
           {
             "name": "is_master",
             "in": "query",
-            "description": "Filter by master outlet status. Nil means no filter.",
+            "description": "Return only master (true) or only non-master (false) outlets. Omit for both.",
             "schema": {
               "type": [
                 "boolean",
@@ -286,13 +298,13 @@
           {
             "name": "q",
             "in": "query",
-            "description": "Free-text search query matched against searchable fields.",
+            "description": "Case-insensitive substring of the outlet name.",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -301,7 +313,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -338,25 +350,12 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:id|create_at|update_at|name|code))(,-?(?:id|create_at|update_at|name|code))*$"
-            }
-          },
-          {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
             }
           },
           {
@@ -372,7 +371,8 @@
                   "type": "null"
                 }
               ]
-            }
+            },
+            "x-gd-encoding": "base64url-json"
           },
           {
             "$ref": "#/components/parameters/AcceptLanguage"
@@ -680,8 +680,8 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+          "500": {
+            "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -701,13 +701,380 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                      "$ref": "#/components/schemas/InternalErrorProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                      "INTERNAL_ERROR": "#/components/schemas/InternalErrorProblem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/outlets/{id}": {
+      "get": {
+        "operationId": "fetchOutletByID",
+        "summary": "Fetch Outlet By ID",
+        "tags": [
+          "outlets"
+        ],
+        "x-gd-public-id": "identity.outlets.get",
+        "x-gd-effect": {
+          "mutation": "none",
+          "interaction": "closed",
+          "risks": []
+        },
+        "x-required-permissions": {
+          "allOf": [
+            "identity.outlet.read"
+          ]
+        },
+        "x-gd-organization-keys-admitted": true,
+        "x-gd-idempotency": "safe",
+        "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
+        "x-gd-delegated-expansions": [
+          "with_organization",
+          "with_owner"
+        ],
+        "security": [
+          {},
+          {
+            "gatherdealBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID of the outlet to fetch. To find an outlet by its code, list\noutlets with the exact code selector.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "with_owner",
+            "in": "query",
+            "description": "When true, include a lightweight owner object (id, name, profile image).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "with_organization",
+            "in": "query",
+            "description": "When true, include a lightweight organization object (id, code, name, logo).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success envelope (`status: \"success\"`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchOutletByIDOutputEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: problem document (BAD_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: problem document (DELEGATED_ACCESS_CREDENTIAL_LOCATION, DELEGATED_ACCESS_INACTIVE, DELEGATED_ACCESS_UNSUPPORTED, UNAUTHORIZED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_CREDENTIAL_LOCATION": "#/components/schemas/DelegatedAccessCredentialLocationProblem",
+                      "DELEGATED_ACCESS_INACTIVE": "#/components/schemas/DelegatedAccessInactiveProblem",
+                      "DELEGATED_ACCESS_UNSUPPORTED": "#/components/schemas/DelegatedAccessUnsupportedProblem",
+                      "UNAUTHORIZED": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN, IDENTITY_OUTLET_MEMBERSHIP_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdentityOutletMembershipRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_AUDIENCE_MISMATCH": "#/components/schemas/DelegatedAccessAudienceMismatchProblem",
+                      "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem",
+                      "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem",
+                      "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem",
+                      "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
+                      "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
+                      "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
+                      "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
+                      "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
+                      "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
+                      "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
+                      "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem",
+                      "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED": "#/components/schemas/IdentityOutletMembershipRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found: problem document (IDENTITY_DISTRIBUTION_NOT_FOUND, IDENTITY_ORGANIZATION_NOT_FOUND, IDENTITY_OUTLET_NOT_FOUND)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/IdentityDistributionNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdentityOrganizationNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdentityOutletNotFoundProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "IDENTITY_DISTRIBUTION_NOT_FOUND": "#/components/schemas/IdentityDistributionNotFoundProblem",
+                      "IDENTITY_ORGANIZATION_NOT_FOUND": "#/components/schemas/IdentityOrganizationNotFoundProblem",
+                      "IDENTITY_OUTLET_NOT_FOUND": "#/components/schemas/IdentityOutletNotFoundProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Upgrade Required: problem document (CLIENT_UPGRADE_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Upgrade": {
+                "$ref": "#/components/headers/Upgrade"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
                     }
                   }
                 }
@@ -845,13 +1212,16 @@
         "properties": {
           "intervals": {
             "type": "array",
+            "description": "Opening intervals of the day in start order, at most eight; empty when closed.",
             "items": {
               "$ref": "#/components/schemas/BusinessHoursIntervalOutput"
-            }
+            },
+            "maxItems": 8
           },
           "revision": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Revision of this day, changed only when the day is edited or reset."
           }
         },
         "required": [
@@ -864,64 +1234,17 @@
         "description": "BusinessHoursInterval is a half-open local-time interval within one day.\nMidnight-crossing openings are split into intervals on consecutive days.",
         "properties": {
           "start": {
-            "type": "string"
+            "type": "string",
+            "description": "Opening time in local HH:mm, e.g. \"09:00\"."
           },
           "end": {
-            "type": "string"
+            "type": "string",
+            "description": "Closing time in local HH:mm, after start; \"24:00\" closes at midnight."
           }
         },
         "required": [
           "start",
           "end"
-        ]
-      },
-      "ClientClosedRequestProblem": {
-        "type": "object",
-        "description": "CLIENT_CLOSED_REQUEST (499): The client closed the request.",
-        "properties": {
-          "type": {
-            "type": "string",
-            "format": "uri",
-            "const": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
-          },
-          "title": {
-            "type": "string",
-            "description": "Localized by Accept-Language; English: \"The client closed the request.\""
-          },
-          "status": {
-            "type": "integer",
-            "const": 499
-          },
-          "detail": {
-            "type": "string",
-            "description": "Localized instance-specific text."
-          },
-          "instance": {
-            "type": "string",
-            "description": "urn:gatherdeal:request:<correlation_id>"
-          },
-          "code": {
-            "type": "string",
-            "const": "CLIENT_CLOSED_REQUEST"
-          },
-          "retryable": {
-            "type": "boolean",
-            "const": false
-          },
-          "correlation_id": {
-            "type": "string"
-          },
-          "record": {
-            "$ref": "#/components/schemas/ProblemRecord"
-          }
-        },
-        "required": [
-          "type",
-          "title",
-          "status",
-          "code",
-          "retryable"
         ]
       },
       "ClientUpgradeRequiredDetails": {
@@ -2169,6 +2492,36 @@
           "details"
         ]
       },
+      "FetchOutletByIDOutput": {
+        "type": "object",
+        "properties": {
+          "outlet": {
+            "$ref": "#/components/schemas/Outlet"
+          }
+        },
+        "required": [
+          "outlet"
+        ]
+      },
+      "FetchOutletByIDOutputEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FetchOutletByIDOutput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "const": "success"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        ]
+      },
       "FetchOutletsOutput": {
         "type": "object",
         "properties": {
@@ -2253,7 +2606,10 @@
         "description": "Group combines `rules` and nested `groups` using `conjunction` (`AND` or\n`OR`). Set `negated` to true to reverse the result of the whole group.\n\nTo filter by related resources, set `edge` to the relationship name and\nchoose a supported `quantifier` (`SOME`, `EVERY`, or `NONE`). Use field\nnames from the related resource in that group's rules.",
         "properties": {
           "groups": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "oneOf": [
                 {
@@ -2266,7 +2622,10 @@
             }
           },
           "rules": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "oneOf": [
                 {
@@ -2290,7 +2649,8 @@
           "negated": {
             "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "IdentityDistributionNotFoundProblem": {
         "type": "object",
@@ -2439,6 +2799,55 @@
           "retryable"
         ]
       },
+      "IdentityOutletNotFoundProblem": {
+        "type": "object",
+        "description": "IDENTITY_OUTLET_NOT_FOUND (404): Outlet not found.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/IDENTITY_OUTLET_NOT_FOUND",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"Outlet not found.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 404
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "IDENTITY_OUTLET_NOT_FOUND"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "InternalErrorProblem": {
         "type": "object",
         "description": "INTERNAL_ERROR (500): Internal server error.",
@@ -2495,14 +2904,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Outlet"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/Outlet"
             }
           },
           "page_size": {
@@ -2564,35 +2966,43 @@
       },
       "Outlet": {
         "type": "object",
-        "description": "An outlet and its organization, owner, and operating settings.",
+        "description": "An outlet and its organization, owner, and operating settings. Anonymous\ncallers receive the basic directory projection, which omits the audit\ninstants, description and owner.",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "UUID of the outlet."
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the outlet was created (UTC). Absent in the basic directory projection."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the outlet was last updated (UTC). Absent in the basic directory projection."
           },
           "delete_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the outlet was deleted (UTC). Always absent here: outlet reads never\nreturn deleted outlets."
           },
           "code": {
-            "type": "string"
+            "type": "string",
+            "description": "Business code of the outlet, unique across organizations. Look an outlet\nup by code with the list's exact code selector."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name of the outlet."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Free-text description. Absent when unset or in the basic directory projection."
           },
           "address": {
             "type": "object",
+            "description": "Physical address of the outlet. Absent when unset.",
             "properties": {
               "attention": {
                 "type": "string"
@@ -2650,7 +3060,7 @@
           },
           "timezone": {
             "type": "string",
-            "description": "Timezone override for this outlet; empty inherits the organization's value (see embedded organization)."
+            "description": "IANA time zone override for this outlet, e.g. \"Asia/Kuala_Lumpur\". Empty\nor absent means the organization's timezone applies (see the organization\nexpansion)."
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
@@ -2667,21 +3077,25 @@
           },
           "business_hours_revision": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Revision of the outlet's whole business-hours schedule, kept across\nresets; an inheriting outlet uses its own revision."
           },
           "is_master": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether this is a master (headquarters) outlet of its organization."
           },
           "organization_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "UUID of the organization that owns the outlet."
           },
           "organization": {
             "$ref": "#/components/schemas/OutletOrganization"
           },
           "owner_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "UUID of the outlet's owner. Absent in the basic directory projection."
           },
           "owner": {
             "$ref": "#/components/schemas/UserBrief"
@@ -2696,7 +3110,7 @@
       },
       "OutletOrganization": {
         "type": "object",
-        "description": "Organization details included in an outlet response.",
+        "description": "Organization details included in an outlet response. The contact fields\n(phone, address, email, website) appear only in the basic directory\nprojection.",
         "properties": {
           "phone": {
             "type": "string",
@@ -2707,10 +3121,11 @@
               "+60 12-345 6789",
               "(60)123456789"
             ],
-            "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+            "description": "Public contact phone of the organization. Basic directory projection only; absent when unset."
           },
           "address": {
             "type": "object",
+            "description": "Public address of the organization. Basic directory projection only; absent when unset.",
             "properties": {
               "attention": {
                 "type": "string"
@@ -2767,24 +3182,25 @@
             }
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "description": "Public contact email of the organization. Basic directory projection only; may be empty."
           },
           "website": {
-            "type": "string"
-          },
-          "distribution_id": {
             "type": "string",
-            "format": "uuid"
+            "description": "Website of the organization. Basic directory projection only; may be empty."
           },
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "UUID of the organization."
           },
           "code": {
-            "type": "string"
+            "type": "string",
+            "description": "Business code of the organization."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name of the organization."
           },
           "timezone": {
             "type": "string",
@@ -2805,14 +3221,17 @@
           },
           "business_hours_revision": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Revision of the organization's whole business-hours schedule, kept across resets."
           },
           "logo": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Logo of the organization. Absent when unset."
           }
         },
         "required": [
+          "id",
           "business_hours",
           "business_hours_revision"
         ]
@@ -3153,7 +3572,8 @@
             "$ref": "#/components/schemas/Operator"
           },
           "value": {}
-        }
+        },
+        "additionalProperties": false
       },
       "TotalMode": {
         "type": "string",
@@ -3218,16 +3638,22 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "UUID of the user."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name of the user. Absent when the user has no name."
           },
           "profile_image": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Profile image of the user. Absent when unset."
           }
-        }
+        },
+        "required": [
+          "id"
+        ]
       },
       "ValidationFailedProblem": {
         "type": "object",
@@ -3380,6 +3806,17 @@
       }
     },
     {
+      "code": "IDENTITY_OUTLET_NOT_FOUND",
+      "type": "https://docs.gatherdeal.ai/errors/IDENTITY_OUTLET_NOT_FOUND",
+      "status": 404,
+      "retryable": false,
+      "title": "Outlet not found.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/IdentityOutletNotFoundProblem"
+      }
+    },
+    {
       "code": "IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
       "type": "https://docs.gatherdeal.ai/errors/IDENTITY_OUTLET_MEMBERSHIP_REQUIRED",
       "status": 403,
@@ -3445,17 +3882,6 @@
       },
       "problem": {
         "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
-      }
-    },
-    {
-      "code": "CLIENT_CLOSED_REQUEST",
-      "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-      "status": 499,
-      "retryable": false,
-      "title": "The client closed the request.",
-      "details": null,
-      "problem": {
-        "$ref": "#/components/schemas/ClientClosedRequestProblem"
       }
     },
     {

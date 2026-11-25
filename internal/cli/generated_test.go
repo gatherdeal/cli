@@ -11,6 +11,7 @@ import (
 
 	"github.com/gatherdeal/cli/contracts"
 	"github.com/gatherdeal/cli/internal/crm"
+	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
 )
 
 func TestGeneratedCommandSkipsNewExternalWrite(t *testing.T) {
@@ -49,13 +50,13 @@ func TestGeneratedTagList(t *testing.T) {
 			te.keyring.mu.Lock()
 			clear(te.keyring.items)
 			te.keyring.mu.Unlock()
-			if q.Has("after") || q.Get("count") != "2" {
+			if q.Has("after") || q.Get("limit") != "2" {
 				t.Errorf("first page: %v", q)
 			}
 			writeJSON(w, 200, `{"status":"success","tags":{"data":[{"id":"1","name":"VIP"}],"has_next_page":true,"next_cursor":"c2"}}`)
 			return
 		}
-		if q.Get("after") != "c2" || q.Get("count") != "1" {
+		if q.Get("after") != "c2" || q.Get("limit") != "1" {
 			t.Errorf("second page: %v", q)
 		}
 		writeJSON(w, 200, `{"status":"success","tags":{"data":[{"id":"2","name":"VIP2"}],"has_next_page":false}}`)
@@ -330,7 +331,7 @@ func TestGeneratedCRMWrites(t *testing.T) {
 	}{
 		{"create contact", http.MethodPost, contacts, `{"kind":"personal","name":"Amina"}`, []string{"contacts", "create"}, true},
 		{"update contact", http.MethodPatch, contacts + "/" + id, `{"remark":null}`, []string{"contacts", "update", id}, false},
-		{"assign tag", http.MethodPut, membership, "", []string{"contact-tags", "assign", id, tag}, true},
+		{"assign tag", http.MethodPut, membership, "", []string{"contact-tags", "assign", id, tag}, false},
 		{"remove tag", http.MethodDelete, membership, "", []string{"contact-tags", "remove", id, tag}, false},
 		{"create log", http.MethodPost, logs, `{"contact_id":"` + id + `","content":" Follow-up "}`, []string{"contact-logs", "create"}, true},
 	} {
@@ -357,7 +358,7 @@ func TestGeneratedCRMWrites(t *testing.T) {
 				case len(keys) == 1:
 					w.WriteHeader(http.StatusBadGateway)
 				default:
-					writeJSON(w, 200, `{"status":"success","id":"`+id+`"}`)
+					writeJSON(w, http.StatusCreated, `{"status":"success","id":"`+id+`"}`)
 				}
 			}
 			args := append([]string{"crm"}, tc.args...)
@@ -409,12 +410,16 @@ func TestGeneratedCRMDealPreconditions(t *testing.T) {
 	const deal = "44444444-4444-4444-8444-444444444444"
 	const stage = "55555555-5555-4555-8555-555555555555"
 	const revision = `"r1:AbC-9"`
+	// The deprecated commands send their input through deals update.
 	for _, tc := range []struct {
-		name, method, path, body string
-		args                     []string
+		name, body string
+		args       []string
+		deprecated bool
 	}{
-		{"move stage", http.MethodPut, "/crm/v1/deals/" + deal + "/stage", `{"stage_id":"` + stage + `"}`, []string{"move-stage", deal}},
-		{"update", http.MethodPatch, "/crm/v1/deals/" + deal + "/fields", `{"priority":"high","remark":null}`, []string{"update", deal}},
+		{"update stage", `{"stage_id":"` + stage + `"}`, []string{"deals", "update", deal}, false},
+		{"update fields", `{"priority":"high","remark":null}`, []string{"deals", "update", deal}, false},
+		{"move stage", `{"stage_id":"` + stage + `"}`, []string{"deals", "move-stage", deal}, true},
+		{"deal fields", `{"priority":"high","remark":null}`, []string{"deal-fields", "update", deal}, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f, te := loggedIn(t)
@@ -426,7 +431,7 @@ func TestGeneratedCRMDealPreconditions(t *testing.T) {
 				if err := json.NewDecoder(r.Body).Decode(&sent); err != nil || json.Unmarshal([]byte(tc.body), &want) != nil || !reflect.DeepEqual(sent, want) {
 					t.Errorf("body %v, want %s: %v", sent, tc.body, err)
 				}
-				if r.Method != tc.method || r.URL.Path != tc.path || r.Header.Get("Idempotency-Key") != "" {
+				if r.Method != http.MethodPatch || r.URL.Path != "/crm/v1/deals/"+deal || r.Header.Get("Idempotency-Key") != "" {
 					t.Errorf("unexpected deal write: %s %s", r.Method, r.URL)
 				}
 				if status != http.StatusOK {
@@ -435,7 +440,7 @@ func TestGeneratedCRMDealPreconditions(t *testing.T) {
 				}
 				writeJSON(w, http.StatusOK, `{"status":"success","revision":"\"r2\""}`)
 			}
-			args := append([]string{"crm", "deals"}, tc.args...)
+			args := append([]string{"crm"}, tc.args...)
 			args = append(args, "--input", tc.body)
 			for _, bad := range [][]string{
 				{"--yes"}, {"--dry-run"}, {"--yes", "--if-match", ""},
@@ -457,6 +462,12 @@ func TestGeneratedCRMDealPreconditions(t *testing.T) {
 			r := te.run(append(args, "--yes")...)
 			if r.exit != 0 || r.data()["revision"] != `"r2"` || !reflect.DeepEqual(tags, []string{revision}) {
 				t.Fatal(r.stdout, tags)
+			}
+			deprecation, _ := r.env["meta"].(map[string]any)["deprecation"].(map[string]any)
+			warned := strings.Contains(r.stderr, "is deprecated since 2026-11-25") && strings.Contains(r.stderr, "use `gatherdeal crm deals update`")
+			if tc.deprecated != (deprecation != nil) || tc.deprecated != warned ||
+				(tc.deprecated && (deprecation["successor"] != "crm deals update" || deprecation["since"] != "2026-11-25")) {
+				t.Fatal(r.stdout, r.stderr)
 			}
 			status = http.StatusPreconditionFailed
 			r = te.run(append(args, "--yes")...)
@@ -483,7 +494,7 @@ func TestGeneratedCRMDealCreate(t *testing.T) {
 			writeJSON(w, http.StatusConflict, problemJSON(http.StatusConflict, "IDEMPOTENCY_KEY_CONFLICT", "The key was used for other input.", nil))
 			return
 		}
-		writeJSON(w, http.StatusOK, `{"status":"success","id":"`+deal+`"}`)
+		writeJSON(w, http.StatusCreated, `{"status":"success","id":"`+deal+`"}`)
 	}
 	args := []string{"crm", "deals", "create", "--outlet", outlet, "--input", body}
 	if r := te.run(args...); r.exit != 9 || len(keys) != 0 {
@@ -505,5 +516,66 @@ func TestGeneratedCRMDealCreate(t *testing.T) {
 	meta = r.env["meta"].(map[string]any)["write"].(map[string]any)
 	if r.exit != 6 || r.errorCode() != "IDEMPOTENCY_KEY_CONFLICT" || len(keys) != 2 || keys[1] != keys[0] || meta["idempotency_key"] != keys[0] || meta["idempotency_key_generated"] != nil {
 		t.Fatal(r.stdout, keys)
+	}
+}
+
+// A deprecated CRM command sends its body through the successor, so every
+// body member of the deprecated operation must be a successor member with
+// the same schema.
+func TestDeprecatedCRMBodiesFitSuccessor(t *testing.T) {
+	m, err := contracts.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := m.Bundles[0].OpenAPI()
+	if err != nil || m.Bundles[0].Service != "crm" {
+		t.Fatal("crm bundle", err)
+	}
+	var doc struct {
+		Paths map[string]map[string]struct {
+			ID          string `json:"x-gd-public-id"`
+			RequestBody struct {
+				Content map[string]struct {
+					Schema struct {
+						Ref string `json:"$ref"`
+					}
+				}
+			}
+		}
+		Components struct {
+			Schemas map[string]struct {
+				Properties map[string]json.RawMessage
+			}
+		}
+	}
+	if err := json.Unmarshal(data, &doc); err != nil {
+		t.Fatal(err)
+	}
+	body := map[string]map[string]json.RawMessage{}
+	for _, path := range doc.Paths {
+		for _, op := range path {
+			ref := strings.TrimPrefix(op.RequestBody.Content["application/json"].Schema.Ref, "#/components/schemas/")
+			body[op.ID] = doc.Components.Schemas[ref].Properties
+		}
+	}
+	checked := 0
+	for _, b := range crmv1.CLIBindings() {
+		d := contracts.MustOperation(b.PublicID).Deprecation
+		if d == nil {
+			continue
+		}
+		checked++
+		crmSuccessor(b, d.Successor) // panics on different arguments
+		if len(body[b.PublicID]) == 0 {
+			t.Errorf("%s has no body members", b.PublicID)
+		}
+		for name, schema := range body[b.PublicID] {
+			if got, ok := body[d.Successor][name]; !ok || string(got) != string(schema) {
+				t.Errorf("%s member %s is not a %s member with the same schema", b.PublicID, name, d.Successor)
+			}
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no deprecated CRM operation checked")
 	}
 }

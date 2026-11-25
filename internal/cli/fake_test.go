@@ -194,7 +194,7 @@ func (f *fakeServer) handle(w http.ResponseWriter, r *http.Request) {
 		f.crm(w, r)
 	case r.URL.Path == "/crm/v1/contact-tags" && f.contactTags != nil:
 		f.contactTags(w, r)
-	case r.URL.Path == "/identity/v1/outlets" && f.outlets != nil:
+	case (r.URL.Path == "/identity/v1/outlets" || strings.HasPrefix(r.URL.Path, "/identity/v1/outlets/")) && f.outlets != nil:
 		f.outlets(w, r)
 	case strings.HasPrefix(r.URL.Path, "/whatsapp/") && f.whatsapp != nil:
 		f.whatsapp(w, r)

@@ -18,15 +18,15 @@ import (
 
 // whatsappSummaries are the command summaries, keyed by operation.
 var whatsappSummaries = map[string]string{
-	"agents.list":     "List WhatsApp agents in the outlets this access may read.",
-	"agents.get":      "Show one WhatsApp agent.",
-	"agents.pairing":  "Check a WhatsApp agent's pairing once, without requesting a new code.",
-	"agents.create":   "Create a WhatsApp agent and return its pairing instructions.",
-	"agents.update":   "Change a WhatsApp agent's outlet.",
-	"agents.delete":   "Delete a WhatsApp agent and unlink its device.",
-	"messages.list":   "List WhatsApp messages in the outlets this access may read.",
-	"messages.get":    "Show one WhatsApp message and its status.",
-	"messages.create": "Send a WhatsApp message to one recipient.",
+	"agents.list":        "List WhatsApp agents in the outlets this access may read.",
+	"agents.get":         "Show one WhatsApp agent.",
+	"agents.pairing.get": "Check a WhatsApp agent's pairing once, without requesting a new code.",
+	"agents.create":      "Create a WhatsApp agent and return its pairing instructions.",
+	"agents.update":      "Change a WhatsApp agent's outlet.",
+	"agents.delete":      "Delete a WhatsApp agent and unlink its device.",
+	"messages.list":      "List WhatsApp messages in the outlets this access may read.",
+	"messages.get":       "Show one WhatsApp message and its status.",
+	"messages.create":    "Send a WhatsApp message to one recipient.",
 }
 
 func whatsappCommands() []*Command {
@@ -40,14 +40,14 @@ func whatsappCommands() []*Command {
 		}
 		flags := append([]FlagSpec{}, targetFlags...)
 		flags = append(flags, pageFlags("whatsapp."+r+".list", r)...)
-		flags = append(flags, flagOutlet, FlagSpec{Name: "sort", Kind: kindString, Usage: "Field to sort by."}, FlagSpec{Name: "order", Kind: kindString, Values: []string{"asc", "desc"}, Usage: "Sort direction."})
+		flags = append(flags, flagOutlet, sortFlag("whatsapp."+r+".list"))
 		if r == "messages" {
 			flags = append(flags, FlagSpec{Name: "agent", Kind: kindString, Usage: "Filter by agent id."}, FlagSpec{Name: "status", Kind: kindString, Values: wa.MessageStatus("").Values(), Usage: "Runtime acceptance status, not recipient delivery."}, FlagSpec{Name: "to", Kind: kindString, Usage: "Recipient filter."}, FlagSpec{Name: "from", Kind: kindString, Usage: "Sender filter."})
 		}
 		cmds = append(cmds, &Command{Operation: "whatsapp." + r + ".list", Summary: whatsappSummaries[r+".list"], Flags: flags, Record: record, Output: "json", Network: true, Run: runWhatsAppList})
 		cmds = append(cmds, &Command{Operation: "whatsapp." + r + ".get", Summary: whatsappSummaries[r+".get"], Args: []ArgSpec{{Name: "id", Usage: idUsage}}, Flags: append(append([]FlagSpec{}, targetFlags...), flagOutlet), Record: record, Output: "json", Network: true, Run: runWhatsAppGet})
 	}
-	cmds = append(cmds, &Command{Operation: "whatsapp.agents.pairing", Summary: whatsappSummaries["agents.pairing"], Args: []ArgSpec{{Name: "agent_id", Usage: "Agent id (UUID)."}}, Flags: append(append([]FlagSpec{}, targetFlags...), flagOutlet), Output: "json", Network: true, Run: runWhatsAppPairing})
+	cmds = append(cmds, &Command{Operation: "whatsapp.agents.pairing.get", Summary: whatsappSummaries["agents.pairing.get"], Args: []ArgSpec{{Name: "agent_id", Usage: "Agent id (UUID)."}}, Flags: append(append([]FlagSpec{}, targetFlags...), flagOutlet), Output: "json", Network: true, Run: runWhatsAppPairing})
 	for _, op := range []string{"agents.create", "agents.update", "agents.delete", "messages.create"} {
 		c := &Command{Operation: "whatsapp." + op, Summary: whatsappSummaries[op], Flags: append(append([]FlagSpec{}, targetFlags...), flagOutlet), Output: "json", Network: true, Run: runWhatsAppWrite}
 		confirmation := ConfirmConfig
@@ -57,7 +57,7 @@ func whatsappCommands() []*Command {
 		c.Write = &WritePolicy{Confirmation: confirmation, Preview: previewWhatsAppWrite}
 		if op == "agents.create" {
 			c.Flags[len(c.Flags)-1].Usage = "Outlet UUID or code; codes are resolved through the scoped outlets list."
-			c.Flags = append(c.Flags, FlagSpec{Name: "phone", Kind: kindString, Usage: "Phone in E.164, including leading +, for phone-number pairing."}, FlagSpec{Name: "no-wait", Kind: kindBool, Usage: "Return pairing instructions immediately (exit 9); check later with agents pairing."})
+			c.Flags = append(c.Flags, FlagSpec{Name: "phone", Kind: kindString, Usage: "Phone in E.164, including leading +, for phone-number pairing."}, FlagSpec{Name: "no-wait", Kind: kindBool, Usage: "Return pairing instructions immediately (exit 9); check later with whatsapp agents pairing get."})
 		}
 		if op == "agents.update" || op == "agents.delete" {
 			c.Args = []ArgSpec{{Name: "agent_id", Usage: "Agent id (UUID)."}}
@@ -115,9 +115,9 @@ func runWhatsAppList(ctx context.Context, inv *Invocation) (any, error) {
 	var correlation string
 	walk, limit := inv.walk()
 	if inv.Command.Operation == "whatsapp.agents.list" {
-		data, page, correlation, err = c.FetchAgents(ctx, wa.FetchAgentsInput{Page: inv.integer("page"), PageSize: inv.integer("page-size"), After: inv.str("after"), Total: wa.TotalMode(inv.str("total")), SortBy: inv.str("sort"), SortOrder: inv.str("order")}, inv.str("outlet"), walk, limit)
+		data, page, correlation, err = c.FetchAgents(ctx, wa.FetchAgentsInput{Page: inv.integer("page"), PageSize: inv.integer("page-size"), After: inv.str("after"), Total: wa.TotalMode(inv.str("total")), SortBy: inv.str("sort")}, inv.str("outlet"), walk, limit)
 	} else {
-		data, page, correlation, err = c.FetchMessages(ctx, wa.FetchMessagesInput{Page: inv.integer("page"), PageSize: inv.integer("page-size"), After: inv.str("after"), Total: wa.TotalMode(inv.str("total")), SortBy: inv.str("sort"), SortOrder: inv.str("order"), AgentID: inv.str("agent"), Status: wa.MessageStatus(inv.str("status")), To: inv.str("to"), From: inv.str("from")}, inv.str("outlet"), walk, limit)
+		data, page, correlation, err = c.FetchMessages(ctx, wa.FetchMessagesInput{Page: inv.integer("page"), PageSize: inv.integer("page-size"), After: inv.str("after"), Total: wa.TotalMode(inv.str("total")), SortBy: inv.str("sort"), AgentID: inv.str("agent"), Status: wa.MessageStatus(inv.str("status")), To: inv.str("to"), From: inv.str("from")}, inv.str("outlet"), walk, limit)
 	}
 	inv.Meta.CorrelationID = correlation
 	if err != nil {
@@ -196,9 +196,6 @@ func whatsappInput(inv *Invocation) (any, error) {
 			return nil, err
 		}
 		in.AgentID = id
-		if in.Revision.IsZero() {
-			return nil, usageError("input revision is required")
-		}
 		if in.OutletID.Present && in.OutletID.Value != nil && !uuidRE.MatchString(*in.OutletID.Value) {
 			return nil, usageError("input outlet_id must be a UUID or null")
 		}
@@ -258,6 +255,13 @@ func previewWhatsAppWrite(_ context.Context, inv *Invocation) (any, error) {
 	if _, err = inv.whatsappClient(); err != nil {
 		return nil, err
 	}
+	if update, ok := in.(*wa.UpdateAgentInput); ok {
+		return struct {
+			AgentID  string                `json:"agent_id"`
+			OutletID wa.Patchable[*string] `json:"outlet_id,omitzero"`
+			IfMatch  string                `json:"if_match"`
+		}{update.AgentID, update.OutletID, inv.str("if-match")}, nil
+	}
 	if create, ok := in.(*wa.CreateAgentInput); ok {
 		if _, err = pairingPage(inv, "preview"); err != nil {
 			return nil, err
@@ -296,14 +300,22 @@ func runWhatsAppWrite(ctx context.Context, inv *Invocation) (any, error) {
 	var data any
 	switch in := in.(type) {
 	case *wa.CreateAgentInput:
-		var out *wa.CreateAgentOutput
-		out, inv.Meta.CorrelationID, err = c.CreateAgent(ctx, in, in.OutletID, inv.Meta.Write.IdempotencyKey)
+		var agent *wa.Agent
+		agent, inv.Meta.CorrelationID, err = c.CreateAgent(ctx, in, in.OutletID, inv.Meta.Write.IdempotencyKey)
 		if err != nil {
 			return nil, auth.Explain(err)
 		}
-		return awaitPairing(ctx, inv, c, out.Agent.ID, out.Pairing)
+		// The agent exists from here on; a failed pairing read is retried with agents pairing get.
+		var p *wa.AgentPairing
+		p, inv.Meta.CorrelationID, err = c.FetchAgentPairing(ctx, &wa.FetchAgentPairingInput{AgentID: agent.ID}, in.OutletID)
+		if err != nil {
+			return struct {
+				AgentID string `json:"agent_id"`
+			}{agent.ID}, output.AsError(auth.Explain(err)).WithHint("The agent was created. Run `gatherdeal whatsapp agents pairing get " + agent.ID + "` to read its pairing instructions.")
+		}
+		return awaitPairing(ctx, inv, c, agent.ID, p)
 	case *wa.UpdateAgentInput:
-		data, inv.Meta.CorrelationID, err = c.UpdateAgent(ctx, in, inv.str("outlet"))
+		data, inv.Meta.CorrelationID, err = c.UpdateAgent(ctx, in, inv.str("outlet"), inv.str("if-match"))
 	case *wa.DeleteAgentInput:
 		data, inv.Meta.CorrelationID, err = c.DeleteAgent(ctx, in, inv.str("outlet"))
 	case *wa.CreateMessageInput:

@@ -36,10 +36,14 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -66,6 +70,7 @@
           {
             "name": "outlet_id",
             "in": "query",
+            "description": "Only agents assigned to this outlet.",
             "schema": {
               "type": [
                 "string",
@@ -75,7 +80,7 @@
             }
           },
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -84,7 +89,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -121,25 +126,12 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:id|create_at|update_at))(,-?(?:id|create_at|update_at))*$"
-            }
-          },
-          {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
             }
           },
           {
@@ -406,40 +398,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -495,6 +453,10 @@
         },
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -528,8 +490,18 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
+          "201": {
+            "description": "Created; `Location` names the new resource (`whatsapp.agents.get`). Success envelope (`status: \"success\"`)",
+            "headers": {
+              "Location": {
+                "description": "Relative reference to the created resource at `whatsapp.agents.get`, resolved against the request URI (RFC 3986, section 5.2).",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -829,40 +801,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -965,6 +903,10 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -975,6 +917,7 @@
             "name": "agent_id",
             "in": "path",
             "required": true,
+            "description": "The agent to read.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -1270,40 +1213,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -1359,6 +1268,14 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
+        "x-gd-if-match": {
+          "operation": "whatsapp.agents.get",
+          "pointer": "/agent/revision"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -1366,9 +1283,19 @@
         ],
         "parameters": [
           {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "Send the `revision` field returned by `whatsapp_agents_get` unchanged as the strong ETag. A stale value returns 412 Precondition Failed, so re-fetch, re-apply the change, and retry.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "agent_id",
             "in": "path",
             "required": true,
+            "description": "The agent to update.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -1750,8 +1677,8 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+          "428": {
+            "description": "Precondition Required: problem document (PRECONDITION_REQUIRED)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -1771,13 +1698,13 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                      "$ref": "#/components/schemas/PreconditionRequiredProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                      "PRECONDITION_REQUIRED": "#/components/schemas/PreconditionRequiredProblem"
                     }
                   }
                 }
@@ -1878,6 +1805,10 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -1888,6 +1819,7 @@
             "name": "agent_id",
             "in": "path",
             "required": true,
+            "description": "The agent to delete.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -1898,8 +1830,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
+          "202": {
+            "description": "Accepted; the work completes asynchronously. Success envelope (`status: \"success\"`)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2217,40 +2149,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -2332,7 +2230,7 @@
         "tags": [
           "agents"
         ],
-        "x-gd-public-id": "whatsapp.agents.pairing",
+        "x-gd-public-id": "whatsapp.agents.pairing.get",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -2345,6 +2243,10 @@
         },
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -2355,6 +2257,7 @@
             "name": "agent_id",
             "in": "path",
             "required": true,
+            "description": "The agent being paired.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -2650,40 +2553,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -2747,8 +2616,8 @@
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -2773,7 +2642,7 @@
         ],
         "parameters": [
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -2782,7 +2651,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -2819,30 +2688,18 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at))(,-?(?:create_at))*$"
             }
           },
           {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
-            }
-          },
-          {
             "name": "to",
             "in": "query",
+            "description": "Only the suppression of this phone number.",
             "schema": {
               "type": [
                 "string",
@@ -3122,40 +2979,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -3195,6 +3018,7 @@
       "post": {
         "operationId": "addBroadcastSuppressions",
         "summary": "Add Broadcast Suppressions",
+        "description": "Adds numbers to the organization's broadcast suppression list; broadcasts skip them from then on. A number already on the list is counted as a duplicate.",
         "tags": [
           "broadcast-suppressions"
         ],
@@ -3538,40 +3362,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -3642,6 +3432,7 @@
             "name": "suppression_id",
             "in": "path",
             "required": true,
+            "description": "The suppression to remove.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -3964,40 +3755,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -4061,8 +3818,8 @@
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -4087,7 +3844,7 @@
         ],
         "parameters": [
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -4096,7 +3853,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -4133,30 +3890,18 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at))(,-?(?:create_at))*$"
             }
           },
           {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
-            }
-          },
-          {
             "name": "status",
             "in": "query",
+            "description": "Only broadcasts in this status.",
             "schema": {
               "$ref": "#/components/schemas/BroadcastStatus"
             }
@@ -4425,40 +4170,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -4516,6 +4227,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -4549,8 +4264,18 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
+          "201": {
+            "description": "Created; `Location` names the new resource (`whatsapp.broadcasts.get`). Success envelope (`status: \"success\"`)",
+            "headers": {
+              "Location": {
+                "description": "Relative reference to the created resource at `whatsapp.broadcasts.get`, resolved against the request URI (RFC 3986, section 5.2).",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -4880,40 +4605,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -4984,7 +4675,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "The broadcast."
             }
           },
           {
@@ -5277,40 +4969,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -5368,6 +5026,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -5378,6 +5040,7 @@
             "name": "broadcast_id",
             "in": "path",
             "required": true,
+            "description": "The draft broadcast to update.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -5729,40 +5392,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -5804,6 +5433,7 @@
       "post": {
         "operationId": "cancelBroadcast",
         "summary": "Cancel Broadcast",
+        "description": "Cancels a broadcast in any state but completed, a draft included. Every recipient not yet sent becomes canceled; a send already in flight still settles.",
         "tags": [
           "broadcasts"
         ],
@@ -5835,7 +5465,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "The broadcast."
             }
           },
           {
@@ -6160,40 +5791,6 @@
                     "propertyName": "code",
                     "mapping": {
                       "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
                     }
                   }
                 }
@@ -6241,6 +5838,7 @@
       "post": {
         "operationId": "pauseBroadcast",
         "summary": "Pause Broadcast",
+        "description": "Pauses a scheduled or running broadcast. Messages not yet handed to WhatsApp are recalled and their recipients wait again.",
         "tags": [
           "broadcasts"
         ],
@@ -6270,7 +5868,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "The broadcast."
             }
           },
           {
@@ -6595,40 +6194,6 @@
                     "propertyName": "code",
                     "mapping": {
                       "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
                     }
                   }
                 }
@@ -6699,8 +6264,8 @@
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -6728,13 +6293,14 @@
             "name": "broadcast_id",
             "in": "path",
             "required": true,
+            "description": "The broadcast whose recipients to list.",
             "schema": {
               "type": "string",
               "format": "uuid"
             }
           },
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -6743,7 +6309,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -6780,30 +6346,18 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:position|settled_at))(,-?(?:position|settled_at))*$"
             }
           },
           {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
-            }
-          },
-          {
             "name": "status",
             "in": "query",
+            "description": "Only recipients in this status.",
             "schema": {
               "$ref": "#/components/schemas/BroadcastRecipientStatus"
             }
@@ -6811,6 +6365,7 @@
           {
             "name": "agent_id",
             "in": "query",
+            "description": "Only recipients assigned to this sender agent.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -6819,6 +6374,7 @@
           {
             "name": "to",
             "in": "query",
+            "description": "Only the recipient with this phone number.",
             "schema": {
               "type": [
                 "string",
@@ -7132,40 +6688,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -7205,6 +6727,7 @@
       "post": {
         "operationId": "addBroadcastRecipients",
         "summary": "Add Broadcast Recipients",
+        "description": "Adds recipients to a draft broadcast. A number the broadcast already has is counted as a duplicate (the first wins) and not added again.",
         "tags": [
           "broadcasts"
         ],
@@ -7244,6 +6767,7 @@
             "name": "broadcast_id",
             "in": "path",
             "required": true,
+            "description": "The draft broadcast to add recipients to.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -7607,40 +7131,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -7711,6 +7201,7 @@
             "name": "broadcast_id",
             "in": "path",
             "required": true,
+            "description": "The draft broadcast.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -7720,6 +7211,7 @@
             "name": "recipient_id",
             "in": "path",
             "required": true,
+            "description": "The recipient to remove.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -8050,40 +7542,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -8125,6 +7583,7 @@
       "post": {
         "operationId": "resumeBroadcast",
         "summary": "Resume Broadcast",
+        "description": "Resumes a paused broadcast; it becomes scheduled or running again. A sender that is no longer usable is marked lost.",
         "tags": [
           "broadcasts"
         ],
@@ -8145,6 +7604,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -8157,7 +7620,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "The broadcast."
             }
           },
           {
@@ -8492,40 +7956,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -8567,6 +7997,7 @@
       "post": {
         "operationId": "startBroadcast",
         "summary": "Start Broadcast",
+        "description": "Starts a draft broadcast: it becomes scheduled until not_before, then running. Content, senders and recipients cannot change afterwards.",
         "tags": [
           "broadcasts"
         ],
@@ -8587,6 +8018,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -8599,7 +8034,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "The broadcast."
             }
           },
           {
@@ -8942,40 +8378,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -9035,6 +8437,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -9360,40 +8766,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -9453,6 +8825,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -9463,6 +8839,7 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "description": "The chat message to read.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -9758,40 +9135,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -9854,10 +9197,14 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -9891,7 +9238,7 @@
             }
           },
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -9900,7 +9247,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -9937,25 +9284,12 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:update_at|create_at))(,-?(?:update_at|create_at))*$"
-            }
-          },
-          {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
             }
           },
           {
@@ -10256,40 +9590,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -10348,6 +9648,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -10358,6 +9662,7 @@
             "name": "chat_id",
             "in": "path",
             "required": true,
+            "description": "The chat.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -10653,40 +9958,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -10731,7 +10002,7 @@
         "tags": [
           "chats"
         ],
-        "x-gd-public-id": "whatsapp.chats.messages",
+        "x-gd-public-id": "whatsapp.chats.messages.list",
         "x-gd-effect": {
           "mutation": "none",
           "interaction": "closed",
@@ -10746,10 +10017,14 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -10777,13 +10052,14 @@
             "name": "chat_id",
             "in": "path",
             "required": true,
+            "description": "The chat whose messages to list.",
             "schema": {
               "type": "string",
               "format": "uuid"
             }
           },
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -10792,7 +10068,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -11126,40 +10402,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -11224,8 +10466,8 @@
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -11250,7 +10492,7 @@
         ],
         "parameters": [
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -11259,7 +10501,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -11296,30 +10538,18 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at))(,-?(?:create_at))*$"
             }
           },
           {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
-            }
-          },
-          {
             "name": "name",
             "in": "query",
+            "description": "Only templates whose name starts with this prefix.",
             "schema": {
               "type": "string"
             }
@@ -11588,40 +10818,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -11666,7 +10862,7 @@
         ],
         "x-gd-public-id": "whatsapp.message_templates.create",
         "x-gd-effect": {
-          "mutation": "non_additive",
+          "mutation": "additive",
           "interaction": "external",
           "risks": [
             "external_communication"
@@ -11678,7 +10874,7 @@
           ]
         },
         "x-gd-organization-keys-admitted": true,
-        "x-gd-idempotency": "none",
+        "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "organization_level",
         "security": [
           {
@@ -11686,6 +10882,18 @@
           }
         ],
         "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Reuse the key when retrying the same logical operation.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[!-~]+$",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
           {
             "$ref": "#/components/parameters/AcceptLanguage"
           }
@@ -11701,8 +10909,18 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
+          "201": {
+            "description": "Created; `Location` names the new resource (`whatsapp.message_templates.get`). Success envelope (`status: \"success\"`)",
+            "headers": {
+              "Location": {
+                "description": "Relative reference to the created resource at `whatsapp.message_templates.get`, resolved against the request URI (RFC 3986, section 5.2).",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -11712,7 +10930,7 @@
             }
           },
           "400": {
-            "description": "Bad Request: problem document (BAD_REQUEST)",
+            "description": "Bad Request: problem document (BAD_REQUEST, IDEMPOTENCY_KEY_REQUIRED)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -11733,12 +10951,16 @@
                   "oneOf": [
                     {
                       "$ref": "#/components/schemas/BadRequestProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdempotencyKeyRequiredProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
-                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem"
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem",
+                      "IDEMPOTENCY_KEY_REQUIRED": "#/components/schemas/IdempotencyKeyRequiredProblem"
                     }
                   }
                 }
@@ -11882,7 +11104,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (CONFLICT, WHATSAPP_TEMPLATE_NAME_TAKEN)",
+            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT, WHATSAPP_TEMPLATE_NAME_TAKEN)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -11905,6 +11127,9 @@
                       "$ref": "#/components/schemas/ConflictProblem"
                     },
                     {
+                      "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
+                    },
+                    {
                       "$ref": "#/components/schemas/WhatsAppTemplateNameTakenProblem"
                     }
                   ],
@@ -11912,6 +11137,7 @@
                     "propertyName": "code",
                     "mapping": {
                       "CONFLICT": "#/components/schemas/ConflictProblem",
+                      "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem",
                       "WHATSAPP_TEMPLATE_NAME_TAKEN": "#/components/schemas/WhatsAppTemplateNameTakenProblem"
                     }
                   }
@@ -11994,40 +11220,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -12097,6 +11289,7 @@
             "name": "template_id",
             "in": "path",
             "required": true,
+            "description": "The message template to read.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -12392,40 +11585,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -12463,12 +11622,12 @@
         }
       },
       "put": {
-        "operationId": "updateMessageTemplate",
-        "summary": "Update Message Template",
+        "operationId": "replaceMessageTemplate",
+        "summary": "Replace Message Template",
         "tags": [
           "message-templates"
         ],
-        "x-gd-public-id": "whatsapp.message_templates.update",
+        "x-gd-public-id": "whatsapp.message_templates.replace",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "external",
@@ -12482,7 +11641,7 @@
           ]
         },
         "x-gd-organization-keys-admitted": true,
-        "x-gd-idempotency": "none",
+        "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "organization_level",
         "security": [
           {
@@ -12494,6 +11653,7 @@
             "name": "template_id",
             "in": "path",
             "required": true,
+            "description": "The message template to replace.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -12508,7 +11668,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateMessageTemplateInput"
+                "$ref": "#/components/schemas/ReplaceMessageTemplateInput"
               }
             }
           }
@@ -12837,40 +11997,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -12940,6 +12066,7 @@
             "name": "template_id",
             "in": "path",
             "required": true,
+            "description": "The message template to delete.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -13262,40 +12389,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -13365,6 +12458,7 @@
             "name": "template_id",
             "in": "path",
             "required": true,
+            "description": "The message template to render.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -13674,40 +12768,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -13769,10 +12829,14 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -13799,6 +12863,7 @@
           {
             "name": "outlet_id",
             "in": "query",
+            "description": "Only messages sent by agents of this outlet.",
             "schema": {
               "type": [
                 "string",
@@ -13808,7 +12873,7 @@
             }
           },
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -13817,7 +12882,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -13854,30 +12919,18 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at))(,-?(?:create_at))*$"
             }
           },
           {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
-            }
-          },
-          {
             "name": "agent_id",
             "in": "query",
+            "description": "Only messages sent by this agent.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -13886,6 +12939,7 @@
           {
             "name": "status",
             "in": "query",
+            "description": "Only messages in this status.",
             "schema": {
               "$ref": "#/components/schemas/MessageStatus"
             }
@@ -13893,6 +12947,7 @@
           {
             "name": "to",
             "in": "query",
+            "description": "Only messages to this phone number.",
             "schema": {
               "type": [
                 "string",
@@ -13911,6 +12966,7 @@
           {
             "name": "from",
             "in": "query",
+            "description": "Only messages from this sender phone number.",
             "schema": {
               "type": [
                 "string",
@@ -13929,6 +12985,7 @@
           {
             "name": "create_at[gte]",
             "in": "query",
+            "description": "Only messages accepted at or after this time.",
             "schema": {
               "type": [
                 "string",
@@ -13940,6 +12997,7 @@
           {
             "name": "create_at[lte]",
             "in": "query",
+            "description": "Only messages accepted at or before this time.",
             "schema": {
               "type": [
                 "string",
@@ -14212,40 +13270,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -14304,6 +13328,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -14337,8 +13365,18 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
+          "201": {
+            "description": "Created; `Location` names the new resource (`whatsapp.messages.get`). Success envelope (`status: \"success\"`)",
+            "headers": {
+              "Location": {
+                "description": "Relative reference to the created resource at `whatsapp.messages.get`, resolved against the request URI (RFC 3986, section 5.2).",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -14733,40 +13771,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -14862,6 +13866,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -14872,6 +13880,7 @@
             "name": "message_id",
             "in": "path",
             "required": true,
+            "description": "The message to read.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -15167,40 +14176,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -15245,7 +14220,10 @@
         "type": "object",
         "properties": {
           "recipients": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "description": "Up to 1000 recipients; a number the broadcast already has is a\nduplicate (the first wins).",
             "items": {
               "$ref": "#/components/schemas/BroadcastRecipientInput"
@@ -15256,16 +14234,19 @@
         },
         "required": [
           "recipients"
-        ]
+        ],
+        "additionalProperties": false
       },
       "AddBroadcastRecipientsOutput": {
         "type": "object",
         "properties": {
           "added": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients added."
           },
           "duplicates": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients skipped as duplicates."
           }
         },
         "required": [
@@ -15296,7 +14277,10 @@
         "type": "object",
         "properties": {
           "to": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "description": "Up to 1000 numbers; a number already on the list is a duplicate.",
             "items": {
               "type": [
@@ -15317,12 +14301,14 @@
           },
           "note": {
             "type": "string",
-            "maxLength": 200
+            "maxLength": 200,
+            "description": "Free-text note stored with every added number."
           }
         },
         "required": [
           "to"
-        ]
+        ],
+        "additionalProperties": false
       },
       "Agent": {
         "type": "object",
@@ -15330,11 +14316,12 @@
         "properties": {
           "runtime": {
             "type": "string",
-            "description": "The connection runtime, when assigned."
+            "description": "The connection runtime: eks for a controller-managed agent; absent at\nruntime generation zero."
           },
           "runtime_generation": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "The agent's runtime generation, including zero; visible only to platform operators."
           },
           "current_run": {
             "$ref": "#/components/schemas/AgentCurrentRun"
@@ -15344,7 +14331,12 @@
           },
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Agent ID."
+          },
+          "revision": {
+            "type": "string",
+            "description": "The agent's revision, an opaque quoted entity tag. Send it in If-Match\nto update the agent; it changes when the outlet assignment changes."
           },
           "phone": {
             "type": "string",
@@ -15355,46 +14347,54 @@
               "+60 12-345 6789",
               "(60)123456789"
             ],
-            "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+            "description": "The WhatsApp phone number the agent is linked to; absent until paired."
           },
           "status": {
             "$ref": "#/components/schemas/AgentStatus"
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the agent was created."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the agent was last changed."
           },
           "distribution_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Distribution the agent belongs to."
           },
           "outlet_id": {
             "type": [
               "string",
               "null"
             ],
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Outlet the agent is assigned to; null when it is not assigned to an outlet."
           },
           "organization_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Organization that owns the agent."
           },
-          "system": {
+          "is_system": {
             "type": "boolean",
             "description": "Whether the agent is reserved for platform use; visible only to platform operators."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name; empty when none was set."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Free-text description; empty when none was set."
           },
           "error_message": {
-            "type": "string"
+            "type": "string",
+            "description": "Error from the agent's last failure; absent when there is none."
           },
           "wa_version": {
             "type": "string",
@@ -15415,7 +14415,8 @@
           },
           "last_heartbeat_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the agent last reported a heartbeat; absent until its first one."
           },
           "status_changed_at": {
             "type": "string",
@@ -15434,7 +14435,14 @@
           }
         },
         "required": [
-          "outlet_id"
+          "id",
+          "revision",
+          "status",
+          "create_at",
+          "update_at",
+          "outlet_id",
+          "name",
+          "description"
         ]
       },
       "AgentCurrentRun": {
@@ -15442,25 +14450,30 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Run ID."
           },
           "generation": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Runtime generation the run belongs to."
           },
           "capacity_state": {
             "$ref": "#/components/schemas/RunCapacityState"
           },
           "started_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the run started; absent until it starts."
           },
           "online_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the run first came online; absent until then."
           },
           "node_ref": {
-            "type": "string"
+            "type": "string",
+            "description": "Runtime node hosting the run; visible only to platform operators."
           }
         },
         "required": [
@@ -15474,14 +14487,16 @@
         "properties": {
           "agent_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The agent being deleted."
           },
           "status": {
-            "type": "string"
+            "$ref": "#/components/schemas/AgentDeletionStatus"
           },
           "requested_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the deletion was requested."
           }
         },
         "required": [
@@ -15490,19 +14505,29 @@
           "requested_at"
         ]
       },
+      "AgentDeletionStatus": {
+        "type": "string",
+        "enum": [
+          "deleted",
+          "deleting"
+        ]
+      },
       "AgentEgress": {
         "type": "object",
         "properties": {
           "egress_group_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Egress group the agent sends through."
           },
           "active_ipv6": {
-            "type": "string"
+            "type": "string",
+            "description": "Active IPv6 egress address (/128); absent when the group has none active."
           },
           "shard_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Egress shard of the active address, when one is active."
           }
         },
         "required": [
@@ -15515,7 +14540,8 @@
         "properties": {
           "agent_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The agent that was not found."
           }
         },
         "required": [
@@ -15529,14 +14555,17 @@
             "$ref": "#/components/schemas/AgentPairingStatus"
           },
           "qr": {
-            "type": "string"
+            "type": "string",
+            "description": "The current QR code payload to render and scan; present only while\npending and the code has not yet rotated out."
           },
           "pairing_code": {
-            "type": "string"
+            "type": "string",
+            "description": "The current linking code to enter on the phone; present only while\npending, when a phone number was given at create."
           },
           "expires_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the pairing attempt expires."
           }
         },
         "required": [
@@ -15558,10 +14587,12 @@
         "description": "The pending message count and the maximum allowed for the agent.",
         "properties": {
           "limit": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum pending messages allowed for the agent."
           },
           "pending": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Messages currently pending for the agent."
           }
         },
         "required": [
@@ -15665,14 +14696,17 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Broadcast ID."
           },
           "organization_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Organization that owns the broadcast."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Broadcast name."
           },
           "status": {
             "$ref": "#/components/schemas/BroadcastStatus"
@@ -15697,7 +14731,8 @@
             "description": "The most broadcast messages each sender sends in a rolling 24 hours,\ncounted across every broadcast using it."
           },
           "priority_offset": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Orders the broadcast's messages within the broadcast class."
           },
           "send_window": {
             "$ref": "#/components/schemas/SendWindowOutput"
@@ -15714,28 +14749,34 @@
           },
           "started_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the broadcast was first started."
           },
           "completed_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the broadcast completed or was canceled."
           },
           "senders": {
             "type": "array",
+            "description": "The broadcast's sender agents and their progress.",
             "items": {
               "$ref": "#/components/schemas/BroadcastSender"
-            }
+            },
+            "maxItems": 20
           },
           "progress": {
             "$ref": "#/components/schemas/BroadcastProgress"
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the broadcast was created."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the broadcast was last changed."
           }
         },
         "required": [
@@ -15793,7 +14834,8 @@
         },
         "required": [
           "type"
-        ]
+        ],
+        "additionalProperties": false
       },
       "BroadcastContentOutput": {
         "type": "object",
@@ -15835,18 +14877,21 @@
           "min_ms": {
             "type": "integer",
             "minimum": 10000,
-            "maximum": 600000
+            "maximum": 600000,
+            "description": "Shortest cooldown, in milliseconds."
           },
           "max_ms": {
             "type": "integer",
             "minimum": 10000,
-            "maximum": 600000
+            "maximum": 600000,
+            "description": "Longest cooldown, in milliseconds; at least min_ms."
           }
         },
         "required": [
           "min_ms",
           "max_ms"
-        ]
+        ],
+        "additionalProperties": false
       },
       "BroadcastIntervalOutput": {
         "type": "object",
@@ -15855,12 +14900,14 @@
           "min_ms": {
             "type": "integer",
             "minimum": 10000,
-            "maximum": 600000
+            "maximum": 600000,
+            "description": "Shortest cooldown, in milliseconds."
           },
           "max_ms": {
             "type": "integer",
             "minimum": 10000,
-            "maximum": 600000
+            "maximum": 600000,
+            "description": "Longest cooldown, in milliseconds; at least min_ms."
           }
         },
         "required": [
@@ -15873,10 +14920,12 @@
         "description": "The limit that was reached and the count it applies to.",
         "properties": {
           "limit": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The limit that was reached."
           },
           "count": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The current count the limit applies to; for recipients, it includes the requested ones."
           }
         },
         "required": [
@@ -15890,7 +14939,8 @@
         "properties": {
           "broadcast_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The broadcast that was not found."
           }
         },
         "required": [
@@ -15903,7 +14953,10 @@
           "broadcast": {
             "$ref": "#/components/schemas/Broadcast"
           }
-        }
+        },
+        "required": [
+          "broadcast"
+        ]
       },
       "BroadcastOutputEnvelope": {
         "allOf": [
@@ -15939,28 +14992,36 @@
         "description": "BroadcastProgress counts the recipients by status.",
         "properties": {
           "total": {
-            "type": "integer"
+            "type": "integer",
+            "description": "All recipients of the broadcast."
           },
           "pending": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients not yet handed to a sender."
           },
           "queued": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients whose message is queued on a sender."
           },
           "delivered": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients whose message was sent to WhatsApp."
           },
           "failed": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients whose send failed."
           },
           "expired": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients not sent before the broadcast's not_after."
           },
           "canceled": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients canceled with the broadcast."
           },
           "suppressed": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients skipped because their number is suppressed."
           }
         },
         "required": [
@@ -15979,10 +15040,12 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Recipient ID."
           },
           "position": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The recipient's place in upload order."
           },
           "to": {
             "type": [
@@ -15996,10 +15059,11 @@
               "+60 12-345 6789",
               "(60)123456789"
             ],
-            "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+            "description": "The recipient's phone number."
           },
           "params": {
             "type": "object",
+            "description": "The template values for this recipient, by parameter name; absent for\ntext content.",
             "additionalProperties": {
               "oneOf": [
                 {
@@ -16049,15 +15113,18 @@
           },
           "settled_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the recipient reached a final status."
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the recipient was added."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the recipient last changed."
           }
         },
         "required": [
@@ -16097,10 +15164,14 @@
               "+60 12-345 6789",
               "(60)123456789"
             ],
-            "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+            "description": "The recipient's phone number."
           },
           "params": {
-            "type": "object",
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "The template's values for this recipient, by parameter name; required\nfor template content, not allowed for text content.",
             "additionalProperties": {
               "oneOf": [
                 {
@@ -16130,7 +15201,8 @@
         },
         "required": [
           "to"
-        ]
+        ],
+        "additionalProperties": false
       },
       "BroadcastRecipientStatus": {
         "type": "string",
@@ -16150,22 +15222,27 @@
         "properties": {
           "agent_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The sender agent."
           },
           "position": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The sender's place in the broadcast's sender order."
           },
           "state": {
             "$ref": "#/components/schemas/BroadcastSenderState"
           },
           "queued": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients queued on this sender."
           },
           "delivered": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients this sender delivered."
           },
           "failed": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Recipients whose send failed on this sender."
           }
         },
         "required": [
@@ -16191,7 +15268,8 @@
         "properties": {
           "agent_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The sender agent the broadcast cannot use."
           }
         },
         "required": [
@@ -16203,7 +15281,8 @@
         "description": "The broadcast's current status, which does not allow the action.",
         "properties": {
           "status": {
-            "type": "string"
+            "type": "string",
+            "description": "The broadcast's current status."
           }
         },
         "required": [
@@ -16227,7 +15306,8 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Suppression ID."
           },
           "to": {
             "type": [
@@ -16241,19 +15321,22 @@
               "+60 12-345 6789",
               "(60)123456789"
             ],
-            "description": "Phone with an explicit country code: \"+<country code> <number>\" or \"(<country code>)<number>\", e.g. \"+60 123456789\". A space or hyphen may separate a plus-prefixed country code from the number. The number accepts spaces, hyphens, periods, and simple balanced parentheses around area codes. Compact E.164 strings such as \"+60123456789\" use assigned ITU calling codes, validated at runtime. Output is canonical \"(60)123456789\"."
+            "description": "The suppressed phone number; broadcasts skip it."
           },
           "note": {
-            "type": "string"
+            "type": "string",
+            "description": "Free-text note given when the number was added; empty when none."
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the number was suppressed."
           }
         },
         "required": [
           "id",
           "to",
+          "note",
           "create_at"
         ]
       },
@@ -16263,12 +15346,14 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The message template to render."
           }
         },
         "required": [
           "id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "BroadcastTemplateReferenceOutput": {
         "type": "object",
@@ -16276,7 +15361,8 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The message template to render."
           }
         },
         "required": [
@@ -16289,11 +15375,13 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Chat ID."
           },
           "agent_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The agent whose chat this is."
           },
           "type": {
             "$ref": "#/components/schemas/ChatType"
@@ -16303,11 +15391,11 @@
           },
           "group_jid": {
             "type": "string",
-            "description": "The group JID, \"<id>@g.us\"."
+            "description": "The group JID, \"<id>@g.us\"; absent for a direct chat."
           },
           "name": {
             "type": "string",
-            "description": "The group subject."
+            "description": "The group subject; absent for a direct chat or an unnamed group."
           },
           "ephemeral_seconds": {
             "type": "integer",
@@ -16315,7 +15403,8 @@
           },
           "last_message_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the chat's latest message was sent; absent before any message."
           },
           "merged_into_id": {
             "type": "string",
@@ -16324,11 +15413,13 @@
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the chat was first seen."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the chat last changed."
           }
         },
         "required": [
@@ -16346,7 +15437,8 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Chat message ID."
           },
           "rev": {
             "type": "integer",
@@ -16360,11 +15452,13 @@
           },
           "agent_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The agent whose ledger holds the message; absent on a tombstone."
           },
           "chat_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The chat the message belongs to; absent on a tombstone."
           },
           "sender": {
             "$ref": "#/components/schemas/ChatParty"
@@ -16377,7 +15471,7 @@
           },
           "wid": {
             "type": "string",
-            "description": "The WhatsApp message ID."
+            "description": "The WhatsApp message ID; absent on a tombstone."
           },
           "content": {
             "$ref": "#/components/schemas/Content"
@@ -16394,36 +15488,35 @@
           },
           "sent_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the message was sent, as WhatsApp reports it."
           },
           "edited_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the message was last edited."
           },
           "revoked_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the message was deleted for everyone."
           },
           "expires_at": {
             "type": "string",
             "format": "date-time",
             "description": "When a disappearing message's content goes away."
           },
-          "view_once": {
-            "type": "boolean"
+          "is_view_once": {
+            "type": "boolean",
+            "description": "True for a view-once message; absent otherwise."
           },
           "reactions": {
             "type": "array",
+            "description": "Current reactions, one per reacting user; absent when there are none.",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ChatReaction"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
+              "$ref": "#/components/schemas/ChatReaction"
+            },
+            "maxItems": 1024
           },
           "receipt": {
             "$ref": "#/components/schemas/MessageReceipt"
@@ -16456,7 +15549,8 @@
         "properties": {
           "chat_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The chat that was not found."
           }
         },
         "required": [
@@ -16469,29 +15563,33 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "WhatsApp user ID in this service."
           },
           "lid": {
             "type": "string",
-            "description": "The user's LID (privacy identity), \"<digits>@lid\"."
+            "description": "The user's LID (privacy identity), \"<digits>@lid\"; absent when unknown."
           },
           "phone": {
             "type": "string",
-            "description": "The user's phone JID, \"<digits>@s.whatsapp.net\", when known."
+            "description": "The user's phone JID, \"<digits>@s.whatsapp.net\"; absent when unknown."
           },
-          "self": {
+          "is_self": {
             "type": "boolean",
-            "description": "The agent's own account."
+            "description": "Whether this is the agent's own account."
           },
           "push_name": {
-            "type": "string"
+            "type": "string",
+            "description": "The name the user set on WhatsApp; absent when unknown."
           },
           "business_name": {
-            "type": "string"
+            "type": "string",
+            "description": "The user's WhatsApp Business name; absent when not a business or unknown."
           }
         },
         "required": [
-          "id"
+          "id",
+          "is_self"
         ]
       },
       "ChatReaction": {
@@ -16500,14 +15598,17 @@
         "properties": {
           "user_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The reacting WhatsApp user."
           },
           "emoji": {
-            "type": "string"
+            "type": "string",
+            "description": "The reaction emoji."
           },
           "reacted_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the user reacted."
           }
         },
         "required": [
@@ -16521,13 +15622,15 @@
         "description": "ChatRef identifies a chat from the receiving account's perspective. Set\nexactly one of `group_jid` (a group address ending in `@g.us`) and `user`\n(the direct counterpart, which can be the account itself in a notes chat).\nAnnouncement and community subgroups are supported. Community parents,\nbroadcast lists, status, newsletters, and interop chats are excluded.\n\nWhen present, `send_jid` is the sending address. It must equal `group_jid`\nor match one of the JIDs in `user`, depending on the chat type.",
         "properties": {
           "group_jid": {
-            "type": "string"
+            "type": "string",
+            "description": "The group JID ending in `@g.us`; absent for a direct chat."
           },
           "user": {
             "$ref": "#/components/schemas/Party"
           },
           "send_jid": {
-            "type": "string"
+            "type": "string",
+            "description": "The address messages to the chat are sent to; absent when unknown."
           }
         }
       },
@@ -16536,55 +15639,6 @@
         "enum": [
           "direct",
           "group"
-        ]
-      },
-      "ClientClosedRequestProblem": {
-        "type": "object",
-        "description": "CLIENT_CLOSED_REQUEST (499): The client closed the request.",
-        "properties": {
-          "type": {
-            "type": "string",
-            "format": "uri",
-            "const": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
-          },
-          "title": {
-            "type": "string",
-            "description": "Localized by Accept-Language; English: \"The client closed the request.\""
-          },
-          "status": {
-            "type": "integer",
-            "const": 499
-          },
-          "detail": {
-            "type": "string",
-            "description": "Localized instance-specific text."
-          },
-          "instance": {
-            "type": "string",
-            "description": "urn:gatherdeal:request:<correlation_id>"
-          },
-          "code": {
-            "type": "string",
-            "const": "CLIENT_CLOSED_REQUEST"
-          },
-          "retryable": {
-            "type": "boolean",
-            "const": false
-          },
-          "correlation_id": {
-            "type": "string"
-          },
-          "record": {
-            "$ref": "#/components/schemas/ProblemRecord"
-          }
-        },
-        "required": [
-          "type",
-          "title",
-          "status",
-          "code",
-          "retryable"
         ]
       },
       "ClientUpgradeRequiredDetails": {
@@ -16717,10 +15771,12 @@
         "description": "ContactCard is one shared contact.",
         "properties": {
           "display_name": {
-            "type": "string"
+            "type": "string",
+            "description": "The name shown for the contact; absent when the sender supplied none."
           },
           "vcard": {
-            "type": "string"
+            "type": "string",
+            "description": "The contact as a vCard."
           }
         },
         "required": [
@@ -16869,7 +15925,8 @@
             "$ref": "#/components/schemas/MediaMeta"
           },
           "voice_note": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the audio is a push-to-talk voice note; absent when false."
           }
         },
         "required": [
@@ -16881,10 +15938,12 @@
         "description": "ContentButton is one button or list row. `id` is the reply identifier.",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "The WhatsApp reply identifier of the button, not a UUID; absent when\nthe message gave none."
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "The button or row label."
           }
         },
         "required": [
@@ -16896,10 +15955,12 @@
         "description": "ContentCall records an unanswered incoming call.",
         "properties": {
           "call_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The WhatsApp call identifier, not a UUID."
           },
           "video": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True for a video call; absent for a voice call."
           }
         },
         "required": [
@@ -16912,9 +15973,11 @@
         "properties": {
           "contacts": {
             "type": "array",
+            "description": "The shared contact cards, 1 to 256.",
             "items": {
               "$ref": "#/components/schemas/ContactCard"
-            }
+            },
+            "maxItems": 256
           }
         },
         "required": [
@@ -16930,12 +15993,15 @@
           },
           "mentions": {
             "type": "array",
+            "description": "The mentioned users, at most 1,024; absent when there are none.",
             "items": {
               "$ref": "#/components/schemas/Party"
-            }
+            },
+            "maxItems": 1024
           },
           "forwarded": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the message was forwarded; absent when false."
           }
         }
       },
@@ -16944,13 +16010,16 @@
         "description": "ContentDocument is a document with an optional `caption`. Its file name\nis available in `media.file_name` when supplied.",
         "properties": {
           "caption": {
-            "type": "string"
+            "type": "string",
+            "description": "The document caption; absent when there is none."
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "The document title; absent when the sender supplied none."
           },
           "page_count": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The number of pages; absent when unknown."
           },
           "media": {
             "$ref": "#/components/schemas/MediaMeta"
@@ -16965,7 +16034,8 @@
         "description": "ContentImage is an image with an optional `caption`.",
         "properties": {
           "caption": {
-            "type": "string"
+            "type": "string",
+            "description": "The image caption; absent when there is none."
           },
           "media": {
             "$ref": "#/components/schemas/MediaMeta"
@@ -16980,19 +16050,24 @@
         "description": "ContentInteractive is a best-effort rendering of a buttons, list, template,\ninteractive or highly structured message: its texts and its buttons (list\nrows included).",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "The message title; absent when there is none."
           },
           "body": {
-            "type": "string"
+            "type": "string",
+            "description": "The message body; absent when there is none."
           },
           "footer": {
-            "type": "string"
+            "type": "string",
+            "description": "The message footer; absent when there is none."
           },
           "buttons": {
             "type": "array",
+            "description": "The buttons and list rows, at most 64; absent when there are none.",
             "items": {
               "$ref": "#/components/schemas/ContentButton"
-            }
+            },
+            "maxItems": 64
           }
         }
       },
@@ -17001,10 +16076,12 @@
         "description": "ContentInteractiveReply is a reply to an interactive message, including\nbuttons, lists, and templates. `selected_id` identifies the user's choice\nand `text` gives the text they saw. `context.quoted` identifies the\noriginal message.",
         "properties": {
           "selected_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The WhatsApp reply identifier of the chosen button or row, not a\nUUID; absent when WhatsApp sent none. At least one of `selected_id`\nand `text` is present."
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "The label the user saw; absent when WhatsApp sent none."
           }
         }
       },
@@ -17013,13 +16090,16 @@
         "description": "ContentLinkPreview contains the link details WhatsApp attached to a text\nmessage. The preview omits the thumbnail.",
         "properties": {
           "url": {
-            "type": "string"
+            "type": "string",
+            "description": "The previewed link; absent when WhatsApp sent none."
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "description": "The page title; absent when WhatsApp sent none."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "The page description; absent when WhatsApp sent none."
           }
         }
       },
@@ -17029,26 +16109,33 @@
         "properties": {
           "latitude": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "description": "Latitude in degrees, from -90 to 90."
           },
           "longitude": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "description": "Longitude in degrees, from -180 to 180."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The place name; absent when there is none."
           },
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "The place address; absent when there is none."
           },
           "url": {
-            "type": "string"
+            "type": "string",
+            "description": "A link for the place; absent when there is none."
           },
           "caption": {
-            "type": "string"
+            "type": "string",
+            "description": "The location caption; absent when there is none."
           },
           "live": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the location is the start of a live location; absent when\nfalse."
           }
         },
         "required": [
@@ -17061,16 +16148,20 @@
         "description": "ContentPoll is a poll. `selectable_count` limits the number of options a\nvoter may select. Zero allows any number.",
         "properties": {
           "question": {
-            "type": "string"
+            "type": "string",
+            "description": "The poll question."
           },
           "options": {
             "type": "array",
+            "description": "The option labels, 1 to 64 distinct values.",
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 64
           },
           "selectable_count": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The most options a voter may select; absent when any number is\nallowed."
           }
         },
         "required": [
@@ -17087,9 +16178,11 @@
           },
           "option_hashes": {
             "type": "array",
+            "description": "Lowercase hex SHA-256 hashes of the selected option labels, at most\n64; absent when the vote clears an earlier one.",
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 64
           }
         },
         "required": [
@@ -17104,7 +16197,8 @@
             "$ref": "#/components/schemas/MediaMeta"
           },
           "animated": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True for an animated sticker; absent when false."
           }
         },
         "required": [
@@ -17116,25 +16210,32 @@
         "description": "ContentSystem describes a chat event, such as a group change. The message\nkey's `sender` identifies the actor when WhatsApp reports one. `event`\ndetermines which fields have values.\n\n  - `ephemeral_changed` uses `ephemeral_seconds`. Zero disables the timer.\n  - `group_name_changed` uses `name` and `group_topic_changed` uses `topic`.\n    An empty topic indicates removal.\n  - `group_participants_*` uses `participants`, with at least one entry.\n  - `group_announce_changed` and `group_locked_changed` use `enabled`.",
         "properties": {
           "event": {
-            "type": "string"
+            "type": "string",
+            "description": "The kind of chat event; it determines which other fields are present."
           },
           "ephemeral_seconds": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The new disappearing-message timer in seconds for\n`ephemeral_changed`; zero disables it. Absent for other events."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The new group name for `group_name_changed`; absent for other events."
           },
           "topic": {
-            "type": "string"
+            "type": "string",
+            "description": "The new group topic for `group_topic_changed`; absent for other\nevents and when the topic was removed."
           },
           "participants": {
             "type": "array",
+            "description": "The affected participants for `group_participants_*`, 1 to 1,024;\nabsent for other events.",
             "items": {
               "$ref": "#/components/schemas/Party"
-            }
+            },
+            "maxItems": 1024
           },
           "enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "The new setting for `group_announce_changed` (only admins may send)\nand `group_locked_changed` (only admins may edit group info); absent\nfor other events."
           }
         },
         "required": [
@@ -17146,7 +16247,8 @@
         "description": "ContentText contains a plain or extended text message in `body`.",
         "properties": {
           "body": {
-            "type": "string"
+            "type": "string",
+            "description": "The message text."
           },
           "preview": {
             "$ref": "#/components/schemas/ContentLinkPreview"
@@ -17183,7 +16285,8 @@
         "description": "ContentUnavailable indicates that message content is unavailable. When\nknown, `expected_type` names the format, such as `image` for a view-once\nphoto. If a poll vote could not be decrypted, `target` identifies the poll.",
         "properties": {
           "reason": {
-            "type": "string"
+            "type": "string",
+            "description": "Why the content is unavailable."
           },
           "expected_type": {
             "$ref": "#/components/schemas/ContentType"
@@ -17201,14 +16304,17 @@
         "description": "ContentUnsupported indicates that a message's content could not be\nrepresented. Read `reason` for the cause.",
         "properties": {
           "proto_field": {
-            "type": "string"
+            "type": "string",
+            "description": "The WhatsApp protocol field that carried the content; absent when no\nknown field was set."
           },
           "field_number": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "description": "The protocol field number of `proto_field`; absent when no known\nfield was set."
           },
           "reason": {
-            "type": "string"
+            "type": "string",
+            "description": "Why the content is not represented."
           }
         },
         "required": [
@@ -18244,16 +17350,19 @@
         "description": "ContentVideo is a video. `gif_playback` marks a GIF and `video_note` marks\na round video note.",
         "properties": {
           "caption": {
-            "type": "string"
+            "type": "string",
+            "description": "The video caption; absent when there is none."
           },
           "media": {
             "$ref": "#/components/schemas/MediaMeta"
           },
           "gif_playback": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the video plays as a GIF; absent when false."
           },
           "video_note": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the video is a round video note; absent when false."
           }
         },
         "required": [
@@ -18265,7 +17374,8 @@
         "properties": {
           "outlet_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Outlet the new agent is assigned to."
           },
           "phone": {
             "type": "string",
@@ -18274,18 +17384,19 @@
         },
         "required": [
           "outlet_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "CreateAgentOutput": {
         "type": "object",
         "properties": {
           "agent": {
             "$ref": "#/components/schemas/Agent"
-          },
-          "pairing": {
-            "$ref": "#/components/schemas/AgentPairing"
           }
-        }
+        },
+        "required": [
+          "agent"
+        ]
       },
       "CreateAgentOutputEnvelope": {
         "allOf": [
@@ -18312,13 +17423,17 @@
           "name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
+            "description": "Broadcast name."
           },
           "content": {
             "$ref": "#/components/schemas/BroadcastContent"
           },
           "sender_agent_ids": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "description": "Up to 20 sender agents. Setting them, start and resume require\nwhatsapp.message.create on every sender.",
             "items": {
               "type": "string",
@@ -18368,7 +17483,8 @@
               "string",
               "null"
             ],
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Sending does not start before this time."
           },
           "not_after": {
             "type": [
@@ -18382,7 +17498,8 @@
         "required": [
           "name",
           "content"
-        ]
+        ],
+        "additionalProperties": false
       },
       "CreateMessageInput": {
         "type": "object",
@@ -18532,7 +17649,8 @@
             "template": "#/components/schemas/CreateMessageInputVariant4",
             "text": "#/components/schemas/CreateMessageInputVariant5"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "CreateMessageInputVariant1": {
         "type": "object",
@@ -18990,7 +18108,10 @@
           "message": {
             "$ref": "#/components/schemas/Message"
           }
-        }
+        },
+        "required": [
+          "message"
+        ]
       },
       "CreateMessageOutputEnvelope": {
         "allOf": [
@@ -19015,25 +18136,36 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Template name, at most 64 characters."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Free-text description, at most 255 characters."
           },
           "locale": {
             "$ref": "#/components/schemas/TemplateLocale"
           },
           "timezone": {
-            "type": "string"
+            "type": "string",
+            "description": "IANA timezone that date and datetime values render in."
           },
           "params": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "The parameters each send supplies, at most 20.",
             "items": {
               "$ref": "#/components/schemas/TemplateParam"
             }
           },
           "variants": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "The text variants, at most 20; at least one must be enabled.",
             "items": {
               "$ref": "#/components/schemas/TemplateVariantInput"
             }
@@ -19045,7 +18177,8 @@
           "timezone",
           "params",
           "variants"
-        ]
+        ],
+        "additionalProperties": false
       },
       "CreateMessageType": {
         "type": "string",
@@ -20038,7 +19171,10 @@
           "deletion": {
             "$ref": "#/components/schemas/AgentDeletion"
           }
-        }
+        },
+        "required": [
+          "deletion"
+        ]
       },
       "DeleteAgentOutputEnvelope": {
         "allOf": [
@@ -20065,7 +19201,10 @@
           "agent": {
             "$ref": "#/components/schemas/Agent"
           }
-        }
+        },
+        "required": [
+          "agent"
+        ]
       },
       "FetchAgentOutputEnvelope": {
         "allOf": [
@@ -20092,7 +19231,10 @@
           "pairing": {
             "$ref": "#/components/schemas/AgentPairing"
           }
-        }
+        },
+        "required": [
+          "pairing"
+        ]
       },
       "FetchAgentPairingOutputEnvelope": {
         "allOf": [
@@ -20119,7 +19261,10 @@
           "agents": {
             "$ref": "#/components/schemas/ListPageAgent"
           }
-        }
+        },
+        "required": [
+          "agents"
+        ]
       },
       "FetchAgentsOutputEnvelope": {
         "allOf": [
@@ -20146,7 +19291,10 @@
           "recipients": {
             "$ref": "#/components/schemas/ListPageBroadcastRecipient"
           }
-        }
+        },
+        "required": [
+          "recipients"
+        ]
       },
       "FetchBroadcastRecipientsOutputEnvelope": {
         "allOf": [
@@ -20173,7 +19321,10 @@
           "suppressions": {
             "$ref": "#/components/schemas/ListPageBroadcastSuppression"
           }
-        }
+        },
+        "required": [
+          "suppressions"
+        ]
       },
       "FetchBroadcastSuppressionsOutputEnvelope": {
         "allOf": [
@@ -20200,7 +19351,10 @@
           "broadcasts": {
             "$ref": "#/components/schemas/ListPageBroadcast"
           }
-        }
+        },
+        "required": [
+          "broadcasts"
+        ]
       },
       "FetchBroadcastsOutputEnvelope": {
         "allOf": [
@@ -20227,7 +19381,10 @@
           "message": {
             "$ref": "#/components/schemas/ChatMessage"
           }
-        }
+        },
+        "required": [
+          "message"
+        ]
       },
       "FetchChatMessageOutputEnvelope": {
         "allOf": [
@@ -20254,7 +19411,10 @@
           "messages": {
             "$ref": "#/components/schemas/ListPageChatMessage"
           }
-        }
+        },
+        "required": [
+          "messages"
+        ]
       },
       "FetchChatMessagesOutputEnvelope": {
         "allOf": [
@@ -20281,7 +19441,10 @@
           "chat": {
             "$ref": "#/components/schemas/Chat"
           }
-        }
+        },
+        "required": [
+          "chat"
+        ]
       },
       "FetchChatOutputEnvelope": {
         "allOf": [
@@ -20308,7 +19471,10 @@
           "chats": {
             "$ref": "#/components/schemas/ListPageChat"
           }
-        }
+        },
+        "required": [
+          "chats"
+        ]
       },
       "FetchChatsOutputEnvelope": {
         "allOf": [
@@ -20335,7 +19501,10 @@
           "message": {
             "$ref": "#/components/schemas/Message"
           }
-        }
+        },
+        "required": [
+          "message"
+        ]
       },
       "FetchMessageOutputEnvelope": {
         "allOf": [
@@ -20362,7 +19531,10 @@
           "templates": {
             "$ref": "#/components/schemas/ListPageMessageTemplate"
           }
-        }
+        },
+        "required": [
+          "templates"
+        ]
       },
       "FetchMessageTemplatesOutputEnvelope": {
         "allOf": [
@@ -20389,7 +19561,10 @@
           "messages": {
             "$ref": "#/components/schemas/ListPageMessage"
           }
-        }
+        },
+        "required": [
+          "messages"
+        ]
       },
       "FetchMessagesOutputEnvelope": {
         "allOf": [
@@ -20613,14 +19788,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Agent"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/Agent"
             }
           },
           "page_size": {
@@ -20662,14 +19830,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Broadcast"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/Broadcast"
             }
           },
           "page_size": {
@@ -20711,14 +19872,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/BroadcastRecipient"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/BroadcastRecipient"
             }
           },
           "page_size": {
@@ -20760,14 +19914,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/BroadcastSuppression"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/BroadcastSuppression"
             }
           },
           "page_size": {
@@ -20809,14 +19956,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Chat"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/Chat"
             }
           },
           "page_size": {
@@ -20858,14 +19998,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ChatMessage"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/ChatMessage"
             }
           },
           "page_size": {
@@ -20907,14 +20040,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Message"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/Message"
             }
           },
           "page_size": {
@@ -20956,14 +20082,7 @@
           "data": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/MessageTemplate"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "$ref": "#/components/schemas/MessageTemplate"
             }
           },
           "page_size": {
@@ -21003,27 +20122,32 @@
         "description": "MediaMeta describes a media file with metadata such as its size or MIME type.",
         "properties": {
           "mimetype": {
-            "type": "string"
+            "type": "string",
+            "description": "The MIME type, such as `image/jpeg`; absent when WhatsApp sent none."
           },
           "size": {
             "type": "integer",
-            "description": "File length in bytes before encryption."
+            "description": "File length in bytes before encryption; absent when unknown."
           },
           "sha256": {
             "type": "string",
-            "description": "SHA-256 hash of the file before encryption, encoded as lowercase hex."
+            "description": "SHA-256 hash of the file before encryption, encoded as lowercase hex;\nabsent when unknown."
           },
           "file_name": {
-            "type": "string"
+            "type": "string",
+            "description": "The original file name; absent when the sender supplied none."
           },
           "width": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Width in pixels of an image, video or sticker; absent when unknown."
           },
           "height": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Height in pixels of an image, video or sticker; absent when unknown."
           },
           "duration_seconds": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Duration in seconds of a video or audio file; absent when unknown."
           }
         }
       },
@@ -21035,15 +20159,18 @@
           },
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Message ID."
           },
           "agent_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The agent sending the message."
           },
           "organization_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Organization of the sending agent; absent when the agent is hidden."
           },
           "from": {
             "type": "string",
@@ -21086,9 +20213,14 @@
           "reaction": {
             "$ref": "#/components/schemas/MessageReactionEmoji"
           },
-          "redacted": {
+          "is_redacted": {
             "type": "boolean",
             "description": "Whether the message text is withheld from this response."
+          },
+          "redacted": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Whether the message text is withheld from this response; equals is_redacted.\n\nDeprecated: use `is_redacted` instead."
           },
           "status": {
             "$ref": "#/components/schemas/MessageStatus"
@@ -21110,23 +20242,26 @@
             "$ref": "#/components/schemas/SendPriorityClass"
           },
           "priority_offset": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Priority offset within the class the message was accepted with."
           },
           "error": {
             "$ref": "#/components/schemas/MessageError"
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the message was accepted."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the message last changed."
           },
           "delivered_at": {
             "type": "string",
             "format": "date-time",
-            "description": "When the message was sent to WhatsApp (single tick); it does not\nconfirm receipt by the recipient: see receipt."
+            "description": "When the message was sent to WhatsApp (single tick); it does not\nconfirm receipt by the recipient: see receipt. Absent until sent."
           },
           "receipt": {
             "$ref": "#/components/schemas/MessageReceipt"
@@ -21141,6 +20276,7 @@
           "id",
           "agent_id",
           "type",
+          "is_redacted",
           "status",
           "priority_offset",
           "create_at",
@@ -21153,26 +20289,31 @@
         "properties": {
           "target_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The chat message to edit."
           },
           "body": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "description": "The new message text."
           }
         },
         "required": [
           "target_id",
           "body"
-        ]
+        ],
+        "additionalProperties": false
       },
       "MessageError": {
         "type": "object",
         "properties": {
           "code": {
-            "type": "string"
+            "type": "string",
+            "description": "Stable failure code."
           },
           "detail": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable failure description."
           }
         },
         "required": [
@@ -21191,7 +20332,8 @@
             "$ref": "#/components/schemas/Party"
           },
           "wid": {
-            "type": "string"
+            "type": "string",
+            "description": "The WhatsApp message ID, not a UUID."
           }
         },
         "required": [
@@ -21223,7 +20365,8 @@
         "properties": {
           "target_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The chat message the operation names."
           },
           "reason": {
             "$ref": "#/components/schemas/MessageOperationRefusal"
@@ -21262,7 +20405,8 @@
         },
         "required": [
           "target_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "MessageReactionEmoji": {
         "type": "object",
@@ -21286,19 +20430,23 @@
           },
           "sent_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When WhatsApp accepted the message."
           },
           "delivered_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the recipient's device reported delivery."
           },
           "read_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the recipient reported reading it."
           },
           "played_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the recipient played a voice or video note."
           }
         },
         "required": [
@@ -21322,12 +20470,14 @@
         "properties": {
           "target_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The chat message to delete for everyone."
           }
         },
         "required": [
           "target_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "MessageStatus": {
         "type": "string",
@@ -21359,43 +20509,54 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Template ID."
           },
           "organization_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Organization that owns the template."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Template name."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Free-text description; empty when none."
           },
           "locale": {
             "$ref": "#/components/schemas/TemplateLocale"
           },
           "timezone": {
-            "type": "string"
+            "type": "string",
+            "description": "IANA timezone that date and datetime values render in."
           },
           "params": {
             "type": "array",
+            "description": "The parameters each send supplies.",
             "items": {
               "$ref": "#/components/schemas/TemplateParamOutput"
-            }
+            },
+            "maxItems": 20
           },
           "variants": {
             "type": "array",
+            "description": "The text variants; each send uses one enabled variant.",
             "items": {
               "$ref": "#/components/schemas/TemplateVariant"
-            }
+            },
+            "maxItems": 20
           },
           "create_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the template was created."
           },
           "update_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the template was last changed."
           }
         },
         "required": [
@@ -21417,7 +20578,10 @@
           "template": {
             "$ref": "#/components/schemas/MessageTemplate"
           }
-        }
+        },
+        "required": [
+          "template"
+        ]
       },
       "MessageTemplateOutputEnvelope": {
         "allOf": [
@@ -21443,11 +20607,13 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The message template rendered."
           },
           "variant_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The template variant sent."
           }
         },
         "required": [
@@ -21460,19 +20626,22 @@
         "properties": {
           "body": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "description": "The message text."
           }
         },
         "required": [
           "body"
-        ]
+        ],
+        "additionalProperties": false
       },
       "MessageTextOutput": {
         "type": "object",
         "properties": {
           "body": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "description": "The message text."
           }
         },
         "required": [
@@ -21639,13 +20808,16 @@
         "description": "Party identifies a WhatsApp user from the receiving account's perspective.\nSupply at least one of `lid` and `phone` as a device-less JID (`<digits>@<server>`).\n\n  - `lid` is the canonical identity: server `lid`, or `hosted.lid` for a\n    Cloud-API-hosted business account (it behaves like a LID).\n  - `phone` is the non-LID alias: server `s.whatsapp.net`, `hosted` (a hosted\n    account's phone alias) or `bot` (Meta AI and other WhatsApp bots, which\n    have no LID).\n\n`self` marks the receiving account itself.",
         "properties": {
           "lid": {
-            "type": "string"
+            "type": "string",
+            "description": "The user's LID JID (`<digits>@lid` or `<digits>@hosted.lid`); absent\nwhen unknown. At least one of `lid` and `phone` is present."
           },
           "phone": {
-            "type": "string"
+            "type": "string",
+            "description": "The user's phone JID (`<digits>@s.whatsapp.net`, `@hosted` or\n`@bot`); absent when unknown."
           },
           "self": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the party is the receiving account itself; absent when\nfalse."
           }
         }
       },
@@ -21656,15 +20828,9 @@
             "type": "array",
             "description": "New, changed and merged messages in revision order; a merged copy is\na tombstone (id, rev, merged_into_id).",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ChatMessage"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "maxItems": 500
           },
           "after_rev": {
             "type": "integer",
@@ -21750,11 +20916,64 @@
           "retryable"
         ]
       },
+      "PreconditionRequiredProblem": {
+        "type": "object",
+        "description": "PRECONDITION_REQUIRED (428): This request must be conditional. Send If-Match with the revision from the latest read.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/PRECONDITION_REQUIRED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This request must be conditional. Send If-Match with the revision from the latest read.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 428
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "PRECONDITION_REQUIRED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "PreviewMessageTemplateInput": {
         "type": "object",
         "properties": {
           "params": {
-            "type": "object",
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "A value for every template parameter, by parameter name.",
             "additionalProperties": {
               "oneOf": [
                 {
@@ -21784,16 +21003,19 @@
         },
         "required": [
           "params"
-        ]
+        ],
+        "additionalProperties": false
       },
       "PreviewMessageTemplateOutput": {
         "type": "object",
         "properties": {
           "variants": {
             "type": "array",
+            "description": "Every variant rendered with the given values.",
             "items": {
               "$ref": "#/components/schemas/RenderedTemplateVariant"
-            }
+            },
+            "maxItems": 20
           }
         },
         "required": [
@@ -21985,29 +21207,105 @@
         "properties": {
           "variant_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The template variant rendered."
           },
-          "enabled": {
-            "type": "boolean"
+          "is_enabled": {
+            "type": "boolean",
+            "description": "Whether the variant is used for sends."
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "The rendered message text."
           },
           "length": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Length of the rendered text, in characters."
           },
-          "too_long": {
+          "is_too_long": {
             "type": "boolean",
             "description": "Whether the rendered variant exceeds the message length limit, even\nwhen the variant is disabled."
           }
         },
         "required": [
           "variant_id",
-          "enabled",
+          "is_enabled",
           "text",
           "length",
-          "too_long"
+          "is_too_long"
         ]
+      },
+      "ReplaceMessageTemplateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Template name, at most 64 characters."
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-text description, at most 255 characters."
+          },
+          "locale": {
+            "$ref": "#/components/schemas/TemplateLocale"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone that date and datetime values render in."
+          },
+          "params": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "The parameters each send supplies, at most 20.",
+            "items": {
+              "$ref": "#/components/schemas/TemplateParam"
+            }
+          },
+          "variants": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "The complete set of text variants, at most 20; at least one must be\nenabled. Variants absent from the list are removed.",
+            "items": {
+              "$ref": "#/components/schemas/ReplaceTemplateVariantInput"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "locale",
+          "timezone",
+          "params",
+          "variants"
+        ],
+        "additionalProperties": false
+      },
+      "ReplaceTemplateVariantInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The variant's ID: an existing variant's ID keeps that variant; a new\nUUID you generate adds one. IDs of another template's variants are\nrejected."
+          },
+          "text": {
+            "type": "string",
+            "description": "Variant text with {{name}} parameter placeholders."
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "description": "Whether the variant is used for sends."
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "is_enabled"
+        ],
+        "additionalProperties": false
       },
       "RunCapacityState": {
         "type": "string",
@@ -22034,10 +21332,15 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The message template to render."
           },
           "params": {
-            "type": "object",
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "A value for every template parameter, by parameter name.",
             "additionalProperties": {
               "oneOf": [
                 {
@@ -22068,17 +21371,20 @@
         "required": [
           "id",
           "params"
-        ]
+        ],
+        "additionalProperties": false
       },
       "SendPacingOutput": {
         "type": "object",
         "description": "SendPacing controls the delay between the start of consecutive message\nsends. Set `min_interval_ms` and `max_interval_ms` to bound the randomly\nchosen delay in milliseconds. Set both to zero to disable spacing.",
         "properties": {
           "min_interval_ms": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The shortest delay between the starts of consecutive sends, in\nmilliseconds; at most `max_interval_ms`."
           },
           "max_interval_ms": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The longest delay between the starts of consecutive sends, in\nmilliseconds, at most 600000 (10 minutes)."
           }
         },
         "required": [
@@ -22116,18 +21422,23 @@
             "description": "IANA timezone name, e.g. Asia/Kuala_Lumpur."
           },
           "days": {
-            "type": "array",
-            "description": "Weekdays on which the window opens, unique; empty means every day.\nA window that wraps past midnight belongs to the day it opens.",
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "Weekdays on which the window opens, unique; absent or empty means\nevery day. A window that wraps past midnight belongs to the day it opens.",
             "items": {
               "$ref": "#/components/schemas/Weekday"
-            }
+            },
+            "maxItems": 7
           }
         },
         "required": [
           "from",
           "to",
           "timezone"
-        ]
+        ],
+        "additionalProperties": false
       },
       "SendWindowOutput": {
         "type": "object",
@@ -22149,10 +21460,11 @@
           },
           "days": {
             "type": "array",
-            "description": "Weekdays on which the window opens, unique; empty means every day.\nA window that wraps past midnight belongs to the day it opens.",
+            "description": "Weekdays on which the window opens, unique; absent or empty means\nevery day. A window that wraps past midnight belongs to the day it opens.",
             "items": {
               "$ref": "#/components/schemas/Weekday"
-            }
+            },
+            "maxItems": 7
           }
         },
         "required": [
@@ -22169,13 +21481,15 @@
             "const": "date"
           },
           "date": {
-            "type": "string"
+            "type": "string",
+            "description": "Calendar date, YYYY-MM-DD."
           }
         },
         "required": [
           "kind",
           "date"
-        ]
+        ],
+        "additionalProperties": false
       },
       "TemplateDateValueOutput": {
         "type": "object",
@@ -22185,7 +21499,8 @@
             "const": "date"
           },
           "date": {
-            "type": "string"
+            "type": "string",
+            "description": "Calendar date, YYYY-MM-DD."
           }
         },
         "required": [
@@ -22201,13 +21516,15 @@
             "const": "datetime"
           },
           "datetime": {
-            "type": "string"
+            "type": "string",
+            "description": "RFC 3339 instant, rendered in the template's timezone."
           }
         },
         "required": [
           "kind",
           "datetime"
-        ]
+        ],
+        "additionalProperties": false
       },
       "TemplateDatetimeValueOutput": {
         "type": "object",
@@ -22217,7 +21534,8 @@
             "const": "datetime"
           },
           "datetime": {
-            "type": "string"
+            "type": "string",
+            "description": "RFC 3339 instant, rendered in the template's timezone."
           }
         },
         "required": [
@@ -22229,7 +21547,8 @@
         "type": "object",
         "properties": {
           "limit": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum message templates allowed for the organization."
           }
         },
         "required": [
@@ -22253,17 +21572,20 @@
             "const": "money"
           },
           "amount": {
-            "type": "string"
+            "type": "string",
+            "description": "Decimal amount."
           },
           "currency": {
-            "type": "string"
+            "type": "string",
+            "description": "ISO 4217 currency code."
           }
         },
         "required": [
           "kind",
           "amount",
           "currency"
-        ]
+        ],
+        "additionalProperties": false
       },
       "TemplateMoneyValueOutput": {
         "type": "object",
@@ -22273,10 +21595,12 @@
             "const": "money"
           },
           "amount": {
-            "type": "string"
+            "type": "string",
+            "description": "Decimal amount."
           },
           "currency": {
-            "type": "string"
+            "type": "string",
+            "description": "ISO 4217 currency code."
           }
         },
         "required": [
@@ -22290,7 +21614,8 @@
         "properties": {
           "template_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The message template that was not found."
           }
         },
         "required": [
@@ -22301,12 +21626,18 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Parameter name, referenced as {{name}} in variant texts."
           },
           "kind": {
             "$ref": "#/components/schemas/TemplateParamKind"
           }
-        }
+        },
+        "required": [
+          "name",
+          "kind"
+        ],
+        "additionalProperties": false
       },
       "TemplateParamKind": {
         "type": "string",
@@ -22321,7 +21652,8 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Parameter name, referenced as {{name}} in variant texts."
           },
           "kind": {
             "$ref": "#/components/schemas/TemplateParamKind"
@@ -22336,14 +21668,17 @@
         "type": "object",
         "properties": {
           "length": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Length of the rendered text."
           },
           "limit": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Maximum message length."
           },
           "variant_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The variant whose rendered text is too long."
           }
         },
         "required": [
@@ -22360,13 +21695,15 @@
             "const": "text"
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "The text to insert."
           }
         },
         "required": [
           "kind",
           "text"
-        ]
+        ],
+        "additionalProperties": false
       },
       "TemplateTextValueOutput": {
         "type": "object",
@@ -22376,7 +21713,8 @@
             "const": "text"
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "The text to insert."
           }
         },
         "required": [
@@ -22386,22 +21724,26 @@
       },
       "TemplateVariant": {
         "type": "object",
+        "description": "TemplateVariant is one text variant of a message template.",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Variant ID."
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "Variant text with {{name}} parameter placeholders."
           },
-          "enabled": {
-            "type": "boolean"
+          "is_enabled": {
+            "type": "boolean",
+            "description": "Whether the variant is used for sends."
           }
         },
         "required": [
           "id",
           "text",
-          "enabled"
+          "is_enabled"
         ]
       },
       "TemplateVariantInput": {
@@ -22412,19 +21754,23 @@
               "string",
               "null"
             ],
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The variant's ID, a UUID unique among the organization's template\nvariants; omit it to have one assigned."
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "description": "Variant text with {{name}} parameter placeholders."
           },
-          "enabled": {
-            "type": "boolean"
+          "is_enabled": {
+            "type": "boolean",
+            "description": "Whether the variant is used for sends."
           }
         },
         "required": [
           "text",
-          "enabled"
-        ]
+          "is_enabled"
+        ],
+        "additionalProperties": false
       },
       "TotalMode": {
         "type": "string",
@@ -22540,19 +21886,16 @@
       "UpdateAgentInput": {
         "type": "object",
         "properties": {
-          "revision": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The last-read update_at value at millisecond precision."
-          },
           "outlet_id": {
             "type": [
               "string",
               "null"
             ],
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Outlet to assign the agent to; null removes the assignment."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "UpdateAgentOutput": {
         "type": "object",
@@ -22560,7 +21903,10 @@
           "agent": {
             "$ref": "#/components/schemas/Agent"
           }
-        }
+        },
+        "required": [
+          "agent"
+        ]
       },
       "UpdateAgentOutputEnvelope": {
         "allOf": [
@@ -22585,13 +21931,18 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "New broadcast name."
           },
           "content": {
             "$ref": "#/components/schemas/BroadcastContent"
           },
           "sender_agent_ids": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "New sender agents, up to 20; replaces the list. Requires whatsapp.message.create on every sender.",
             "items": {
               "type": "string",
               "format": "uuid"
@@ -22607,10 +21958,12 @@
             "$ref": "#/components/schemas/BroadcastInterval"
           },
           "sender_daily_limit": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The most broadcast messages each sender sends in a rolling 24 hours, at most 2000."
           },
           "priority_offset": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Orders the broadcast's messages within the broadcast class, -2 to 2."
           },
           "send_window": {
             "oneOf": [
@@ -22627,52 +21980,19 @@
               "string",
               "null"
             ],
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Sending does not start before this time; null removes it."
           },
           "not_after": {
             "type": [
               "string",
               "null"
             ],
-            "format": "date-time"
-          }
-        }
-      },
-      "UpdateMessageTemplateInput": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "locale": {
-            "$ref": "#/components/schemas/TemplateLocale"
-          },
-          "timezone": {
-            "type": "string"
-          },
-          "params": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TemplateParam"
-            }
-          },
-          "variants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TemplateVariantInput"
-            }
+            "format": "date-time",
+            "description": "Recipients not sent by then expire, at most 30 days after the start; null restores the default."
           }
         },
-        "required": [
-          "name",
-          "locale",
-          "timezone",
-          "params",
-          "variants"
-        ]
+        "additionalProperties": false
       },
       "ValidationFailedProblem": {
         "type": "object",
@@ -24673,6 +23993,17 @@
       }
     },
     {
+      "code": "PRECONDITION_REQUIRED",
+      "type": "https://docs.gatherdeal.ai/errors/PRECONDITION_REQUIRED",
+      "status": 428,
+      "retryable": false,
+      "title": "This request must be conditional. Send If-Match with the revision from the latest read.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/PreconditionRequiredProblem"
+      }
+    },
+    {
       "code": "CLIENT_UPGRADE_REQUIRED",
       "type": "https://docs.gatherdeal.ai/errors/CLIENT_UPGRADE_REQUIRED",
       "status": 426,
@@ -24683,17 +24014,6 @@
       },
       "problem": {
         "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
-      }
-    },
-    {
-      "code": "CLIENT_CLOSED_REQUEST",
-      "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-      "status": 499,
-      "retryable": false,
-      "title": "The client closed the request.",
-      "details": null,
-      "problem": {
-        "$ref": "#/components/schemas/ClientClosedRequestProblem"
       }
     },
     {

@@ -32,13 +32,13 @@ func TestContactsList(t *testing.T) {
 	fake.contactsBody = contactsPage
 	res := te.run("crm", "contacts", "list", "--page", "2", "--page-size", "1", "--search", "ali", "--with-phones", "--with-tags",
 		"--tag", "VIP", "--tag-id", "66666666-6666-6666-6666-666666666666", "--outlet", "33333333-3333-3333-3333-333333333333",
-		"--sort", "name", "--order", "asc")
+		"--sort", "-name,create_at")
 	if res.exit != 0 {
 		t.Fatalf("exit %d %s", res.exit, res.stdout)
 	}
 	q := fake.contactsQuery
-	for k, want := range map[string]string{"p": "2", "count": "1", "q": "ali", "with_phones": "true", "with_tags": "true",
-		"outlet_id": "33333333-3333-3333-3333-333333333333", "s": "name", "o": "asc"} {
+	for k, want := range map[string]string{"page": "2", "limit": "1", "q": "ali", "with_phones": "true", "with_tags": "true",
+		"outlet_id": "33333333-3333-3333-3333-333333333333", "sort": "-name,create_at"} {
 		if q.Get(k) != want {
 			t.Errorf("query %s = %q, want %q", k, q.Get(k), want)
 		}
@@ -119,7 +119,7 @@ func TestContactsListCursor(t *testing.T) {
 		t.Fatal(res.stdout)
 	}
 	q := fake.contactsQuery
-	if q.Get("after") != "cur-3" || q.Get("count") != "5" || q.Get("total") != "none" || q.Has("p") {
+	if q.Get("after") != "cur-3" || q.Get("limit") != "5" || q.Get("total") != "none" || q.Has("page") {
 		t.Fatalf("query %s", q.Encode())
 	}
 	pi := res.env["meta"].(map[string]any)["page_info"].(map[string]any)
@@ -133,7 +133,7 @@ func TestContactsListCursor(t *testing.T) {
 		}
 	}
 	// No --page and no --page-size: the server defaults apply.
-	if res := te.run("crm", "contacts", "list"); res.exit != 0 || fake.contactsQuery.Has("p") || fake.contactsQuery.Has("count") {
+	if res := te.run("crm", "contacts", "list"); res.exit != 0 || fake.contactsQuery.Has("page") || fake.contactsQuery.Has("limit") {
 		t.Fatalf("defaults: %s %s", fake.contactsQuery.Encode(), res.stdout)
 	}
 }
@@ -148,7 +148,7 @@ func TestContactsListAll(t *testing.T) {
 	if res.exit != 0 || len(res.env["data"].([]any)) != 3 {
 		t.Fatalf("exit %d %s", res.exit, res.stdout)
 	}
-	if q := fake.contactsQuery; q.Get("after") != "c1" || q.Get("total") != "none" || q.Get("count") != "100" || q.Get("q") != "x" {
+	if q := fake.contactsQuery; q.Get("after") != "c1" || q.Get("total") != "none" || q.Get("limit") != "100" || q.Get("q") != "x" {
 		t.Fatalf("last query %s", q.Encode())
 	}
 	pi := res.env["meta"].(map[string]any)["page_info"].(map[string]any)
@@ -168,7 +168,7 @@ func TestContactsListAll(t *testing.T) {
 	// --limit alone walks too, across pages, shrinking the last request.
 	res = te.run("crm", "contacts", "list", "--limit", "3")
 	pi = res.env["meta"].(map[string]any)["page_info"].(map[string]any)
-	if res.exit != 0 || len(res.env["data"].([]any)) != 3 || pi["has_next_page"] != false || fake.contactsQuery.Get("count") != "1" || fake.contactsQuery.Get("after") != "c1" {
+	if res.exit != 0 || len(res.env["data"].([]any)) != 3 || pi["has_next_page"] != false || fake.contactsQuery.Get("limit") != "1" || fake.contactsQuery.Get("after") != "c1" {
 		t.Fatalf("limit 3: %s (last query %s)", res.stdout, fake.contactsQuery.Encode())
 	}
 }
@@ -360,5 +360,25 @@ func compareGolden(t *testing.T, name, got string) {
 	}
 	if string(want) != got {
 		t.Fatalf("%s differs from golden:\n%s", name, got)
+	}
+}
+
+func TestSortFieldsChecked(t *testing.T) {
+	fake, te := loggedIn(t)
+	fake.contactsBody = contactsPage
+	before := fake.requests.Load()
+	for _, bad := range []string{"phone", "-", "name,", "+name", "name desc"} {
+		if res := te.run("crm", "contacts", "list", "--sort", bad); res.exit != 2 || res.errorCode() != "CLI_USAGE" {
+			t.Fatalf("--sort %q: %s", bad, res.stdout)
+		}
+	}
+	if fake.requests.Load() != before {
+		t.Fatal("an invalid --sort reached the server")
+	}
+	if res := te.run("crm", "contacts", "list", "--sort", "-create_at,name"); res.exit != 0 || fake.contactsQuery.Get("sort") != "-create_at,name" {
+		t.Fatal(res.stdout)
+	}
+	if res := te.run("crm", "contacts", "list", "--order", "asc"); res.exit != 2 {
+		t.Fatal(res.stdout)
 	}
 }

@@ -96,7 +96,7 @@ func runContactsList(ctx context.Context, inv *Invocation) (any, error) {
 	params := crm.ListContactsParams{
 		Page: inv.integer("page"), PageSize: inv.integer("page-size"),
 		After: inv.str("after"), Total: crmv1.TotalMode(inv.str("total")),
-		Search: inv.str("search"), SortBy: inv.str("sort"), SortOrder: inv.str("order"),
+		Search: inv.str("search"), Sort: inv.str("sort"),
 		OutletID: inv.str("outlet"), Expand: inv.expansions(),
 		TagIDs: inv.list("tag-id"), TagNames: inv.list("tag"),
 	}
