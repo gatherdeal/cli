@@ -246,8 +246,13 @@ gatherdeal crm contacts list --search ali --after <next_cursor>
 gatherdeal crm contact-tags list --search VIP --fields id,name
 gatherdeal crm contacts list --tag VIP --limit 500
 gatherdeal crm contacts list --tag VIP --all
+gatherdeal crm contacts list --sort -create_at --limit 50
 gatherdeal crm contacts get <contact-id> --with-emails --with-tags
 ```
+
+`--sort` takes one or more comma-separated fields. A field sorts ascending;
+prefix it with `-` to sort descending, for example `--sort -create_at,name`.
+Each list command's `--help` names the fields it can sort by.
 
 Use `--dry-run` on `crm contacts list` to preview the selection, walk limit and output fields without reading any contacts.
 
@@ -303,10 +308,10 @@ Contact updates accept `name`, `phone`, `email`, `remark` and
 `preferred_language`. Tag assignment and removal take both IDs in the order
 shown above.
 
-Contact creation, tag assignment and contact-log creation generate an
-idempotency key and report it in `meta.write.idempotency_key`. When retrying
-the same request, pass its original key with `--idempotency-key`. A later
-assignment after removal is a new operation and needs a fresh key.
+Contact creation and contact-log creation generate an idempotency key and
+report it in `meta.write.idempotency_key`. When retrying the same request,
+pass its original key with `--idempotency-key`. Tag assignment and removal
+take no key: repeating them leaves the same result.
 
 ## Read sales pipelines and deals
 
@@ -322,7 +327,7 @@ gatherdeal crm deals get <deal-id>
 If a pipeline has more than 50 stages, `--with-stages` returns HTTP 422
 (`CRM_SALES_PIPELINE_STAGE_LIMIT`). Omit the flag to read the pipeline list.
 
-## Create, update and move deals
+## Create and update deals
 
 These commands require `crm.deal.write`. Creation needs a pipeline and one of
 its stages; CRM names the deal and returns its `id`. The deal belongs to the
@@ -333,18 +338,23 @@ idempotency key like the other CRM creates.
 ```sh
 gatherdeal crm deals create --outlet <outlet-id> --input '{"pipeline_id":"<pipeline-id>","stage_id":"<stage-id>","priority":"high"}' --yes
 gatherdeal crm deals get <deal-id> --jq .revision
-gatherdeal crm deals move-stage <deal-id> --input '{"stage_id":"<stage-id>"}' --if-match '<revision>' --yes
+gatherdeal crm deals update <deal-id> --input '{"stage_id":"<stage-id>"}' --if-match '<revision>' --yes
 gatherdeal crm deals update <deal-id> --input '{"remark":null,"type":"existing"}' --if-match '<revision>' --yes
 ```
 
-Moving and updating require `--if-match` with the deal's `revision` from the
-latest `deals get`, passed unchanged. The value includes its own double
-quotes, so wrap it in single quotes for the shell as shown. Each successful
-change returns the next `revision`. If the deal changed in between, the
-command fails with `PRECONDITION_FAILED` (HTTP 412, exit 6); read the deal
-again before deciding whether to repeat the change. Updates accept
+Updates require `--if-match` with the deal's `revision` from the latest
+`deals get`, passed unchanged. The value includes its own double quotes, so
+wrap it in single quotes for the shell as shown. Each successful change
+returns the next `revision`. If the deal changed in between, the command
+fails with `PRECONDITION_FAILED` (HTTP 412, exit 6); read the deal again
+before deciding whether to repeat the change. Updates accept `stage_id`,
 `priority`, `type` and `remark`; an omitted member stays unchanged and `null`
-clears it.
+clears it. `stage_id` moves the deal to another stage of its own pipeline.
+
+`crm deals move-stage` and `crm deal-fields update` are deprecated and will be
+removed in a later release. They still accept their earlier input and send it
+as a `crm deals update`, print a warning on stderr and report
+`meta.deprecation`. Use `crm deals update` instead.
 
 ## Read outlets
 
@@ -357,11 +367,14 @@ gatherdeal outlets get <outlet-id>
 
 `outlets list` reads the authorized outlets through the identity API's outlet
 list. It supports the same bounded pagination as CRM, plus repeatable
-`--id` and `--code` filters, `--name`, `--search`, `--is-master`, `--sort`, and
-`--order`. `--is-master=false` selects non-master outlets.
+`--id` and `--code` filters, `--name`, `--search`, `--is-master` and `--sort`.
+`--is-master=false` selects non-master outlets.
 
-`outlets get` resolves an exact UUID or code through that same scoped list.
-An absent or out-of-scope outlet returns `CLI_OUTLET_NOT_FOUND` (exit 5).
+`outlets get` reads one outlet by UUID. A code is first looked up with the
+outlet list's exact code selector. `--with-owner` and `--with-organization`
+add those details. An absent or out-of-scope outlet returns
+`IDENTITY_OUTLET_NOT_FOUND` for a UUID and `CLI_OUTLET_NOT_FOUND` for a code
+(exit 5 for both).
 Keep the same profile; never retry a denial or not-found in another organization.
 
 ## WhatsApp API
@@ -381,18 +394,21 @@ its slot asynchronously.
 gatherdeal whatsapp agents list --all
 gatherdeal whatsapp agents get <agent-id>
 gatherdeal whatsapp agents create --outlet <outlet-id-or-code> --phone +60123456789 --yes --no-wait
-gatherdeal whatsapp agents pairing <agent-id>
-gatherdeal whatsapp agents update <agent-id> --input update.json --yes
+gatherdeal whatsapp agents pairing get <agent-id>
+gatherdeal whatsapp agents update <agent-id> --input update.json --if-match '<revision>' --yes
 gatherdeal whatsapp agents delete <agent-id> --yes
 gatherdeal whatsapp messages list --agent <agent-id> --limit 100
 gatherdeal whatsapp messages get <message-id>
 gatherdeal whatsapp messages create --input message.json --send
 ```
 
-Create returns pairing instructions under `data.action`, the agent ID,
-`expires_at`, `pairing_url` and an optional `pairing_code` formatted XXXX-XXXX.
-With `--no-wait` it returns immediately, exit 9 while pending. Otherwise it
-waits at most five minutes or until expiry. `agents pairing` checks once:
+Create creates the agent, then reads its pairing and returns the
+instructions under `data.action`, the agent ID, `expires_at`, `pairing_url`
+and an optional `pairing_code` formatted XXXX-XXXX. If that read fails, the
+agent still exists: the result carries `data.agent_id`, and
+`agents pairing get` reads the instructions. With `--no-wait` it returns
+immediately, exit 9 while pending. Otherwise it waits at most five minutes or
+until expiry. `agents pairing get` checks once:
 pending → 9, connected → 0, expired/failed → 6. A bounded wait that ends while
 still pending returns the same instructions and exit 9. It never requests a
 replacement code. The QR code refreshes on the pairing page.
@@ -402,12 +418,19 @@ from the profile: `/whatsapp/pairing/<agent_id>?org=<code>`. Missing context
 stops creation before dispatch; log in to establish the profile. Environment
 tokens have no cached profile binding.
 
-An update body includes the agent's `update_at` as `revision`, and optional
-`outlet_id` (UUID or null). For example:
+An update takes `--if-match` with the agent's `revision` from the latest
+`agents get`, passed unchanged with its double quotes, and a body with
+`outlet_id` (UUID, or null to remove the assignment). If the agent changed in
+between, the update fails with `PRECONDITION_FAILED` (exit 6). For example:
 
 ```json
-{"revision":"2026-10-29T10:00:00Z","outlet_id":"55555555-5555-4555-8555-555555555555"}
+{"outlet_id":"55555555-5555-4555-8555-555555555555"}
 ```
+
+`whatsapp message-templates replace` sends the complete template. Each
+variant carries an `id`: an existing variant's ID keeps it, a new UUID you
+generate adds one, and variants left out are removed. Template creation takes
+an idempotency key like the other creates.
 
 A new text or template message names an agent and recipient. A reply can use
 `reply_to_id` for its chat, and a reaction, edit, or revoke uses its payload’s
@@ -420,7 +443,7 @@ A new text or template message names an agent and recipient. A reply can use
 Message status describes runtime acceptance, not recipient delivery.
 `--input` accepts inline JSON (starting with `{` or `[` after whitespace), a file path, or `-` for stdin. Writes accept `--dry-run` for a validated
 preview without dispatch. Configuration writes require `--yes`; message
-creation requires `--send`. Agent and message creation accept
+creation requires `--send`. Agent, message and template creation accept
 `--idempotency-key`. Keys must match `^[A-Za-z0-9._:-]{8,128}$` and may
 not contain a credential, even within a longer key or with different casing.
 When the key is omitted the CLI generates one and reports it in
@@ -559,7 +582,9 @@ and lists the valid next segments. `--search` matches the command path,
 the command summary and the summary of the resource that holds the command,
 ignoring case; no match is a success with an empty `commands` array. The
 filtered output keeps the same envelope and schema, including the complete
-`exit_codes` and `environment` sections.
+`exit_codes` and `environment` sections. A deprecated command carries
+`deprecated` with the date it was deprecated (`since`) and the command to use
+instead (`successor`).
 
 ## Exit codes
 
@@ -608,7 +633,7 @@ Add `--phone +60123456789` for phone-number pairing. Show the person
 `data.pairing_url`, `data.expires_at` and `data.pairing_code` (when present),
 with the **Link with phone number instead** instruction. Phones require the
 leading `+`. Never request a new code or repeat create while they type it.
-Afterward use `whatsapp agents pairing <agent_id>` to check once.
+Afterward use `whatsapp agents pairing get <agent_id>` to check once.
 
 ### Install an agent skill
 
