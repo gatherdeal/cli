@@ -50,6 +50,17 @@ type Meta struct {
 	CredentialExpiresAt OptionalTime `json:"credential_expires_at,omitzero"`
 	// CredentialExpiryWarning is true within 7 days of expiry.
 	CredentialExpiryWarning bool `json:"credential_expiry_warning,omitempty"`
+	// Deprecation is set when the command is deprecated.
+	Deprecation *Deprecation `json:"deprecation,omitempty"`
+}
+
+// Deprecation describes a deprecated command and the command to use
+// instead.
+type Deprecation struct {
+	// Since is the date (YYYY-MM-DD) the command was deprecated.
+	Since string `json:"since"`
+	// Successor is the command that replaces it, such as "crm deals update".
+	Successor string `json:"successor"`
 }
 
 // PageInfo mirrors the API's ListPage keys. Absent members were not in the

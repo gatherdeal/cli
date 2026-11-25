@@ -43,8 +43,8 @@ func TestUnknownGroupChoices(t *testing.T) {
 		{[]string{"pos"}, "unknown app or command"},
 		{[]string{"contacts", "list"}, "crm"}, // Resources live under their app only.
 		{[]string{"crm", "orders"}, "unknown resource"},
-		{[]string{"crm", "orders"}, "valid choices: contact-logs, contact-tags, contacts, deals, sales-pipelines"},
-		{[]string{"crm", "contact_tags", "list"}, `unknown resource "contact_tags"; valid choices: contact-logs, contact-tags, contacts, deals, sales-pipelines`},
+		{[]string{"crm", "orders"}, "valid choices: contact-logs, contact-tags, contacts, deal-fields, deals, sales-pipelines"},
+		{[]string{"crm", "contact_tags", "list"}, `unknown resource "contact_tags"; valid choices: contact-logs, contact-tags, contacts, deal-fields, deals, sales-pipelines`},
 		{[]string{"whatsapp", "chat_messages", "list"}, `unknown resource "chat_messages"`},
 		{[]string{"whatsapp", "broadcast_suppressions", "list"}, `unknown resource "broadcast_suppressions"`},
 		{[]string{"whatsapp", "message_templates", "list"}, `unknown resource "message_templates"`},

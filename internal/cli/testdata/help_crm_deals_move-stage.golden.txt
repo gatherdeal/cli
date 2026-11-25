@@ -1,6 +1,8 @@
 gatherdeal crm deals move-stage <id>
 
-Move Deal Stage.
+[deprecated] Move Deal Stage (use crm deals update).
+
+Deprecated since 2026-11-25; it will be removed in a later release. Use `gatherdeal crm deals update`.
 
 Arguments:
   id                       Deal identifier.

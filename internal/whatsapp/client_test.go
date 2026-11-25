@@ -78,15 +78,15 @@ func TestListAllUsesBoundedPaging(t *testing.T) {
 	c, err := New(httpx.New(httpx.Options{Origin: base, Base: roundTripper(func(r *http.Request) (*http.Response, error) {
 		calls++
 		q := r.URL.Query()
-		if q.Get("outlet_id") != "outlet" || q.Get("total") != "none" || q.Has("p") {
+		if q.Get("outlet_id") != "outlet" || q.Get("total") != "none" || q.Has("page") {
 			t.Errorf("query %s", q)
 		}
 		body := `{"status":"success","agents":{"data":[{"id":"a"},{"id":"b"}],"has_next_page":true,"next_cursor":"next"}}`
-		if calls == 1 && q.Get("count") != "3" {
-			t.Errorf("size %s", q.Get("count"))
+		if calls == 1 && q.Get("limit") != "3" {
+			t.Errorf("size %s", q.Get("limit"))
 		}
 		if calls == 2 {
-			if q.Get("count") != "1" || q.Get("after") != "next" {
+			if q.Get("limit") != "1" || q.Get("after") != "next" {
 				t.Errorf("query %s", q)
 			}
 			body = `{"status":"success","agents":{"data":[{"id":"c"}],"has_next_page":true,"next_cursor":"resume"}}`

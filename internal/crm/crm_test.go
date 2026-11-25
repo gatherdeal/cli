@@ -86,7 +86,7 @@ func TestListContactsPage(t *testing.T) {
 		`"page":2,"page_size":1,"total_items":3,"total_pages":3,"has_next_page":true}}`}
 	c := newClient(t, f)
 	res, err := c.ListContacts(t.Context(), ListContactsParams{
-		Page: 2, PageSize: 1, Search: "ali", SortBy: "name", SortOrder: "asc", OutletID: outletID,
+		Page: 2, PageSize: 1, Search: "ali", Sort: "-name", OutletID: outletID,
 		Expand: Expansions{"with_phones", "with_tags"}, TagNames: []string{"VIP"},
 	})
 	if err != nil {
@@ -95,7 +95,7 @@ func TestListContactsPage(t *testing.T) {
 	if f.path != "/crm/v1/contacts" {
 		t.Fatalf("path %s", f.path)
 	}
-	for k, want := range map[string]string{"p": "2", "count": "1", "q": "ali", "s": "name", "o": "asc",
+	for k, want := range map[string]string{"page": "2", "limit": "1", "q": "ali", "sort": "-name",
 		"outlet_id": outletID, "with_phones": "true", "with_tags": "true"} {
 		if got := f.query.Get(k); got != want {
 			t.Errorf("query %s = %q, want %q", k, got, want)
@@ -126,7 +126,7 @@ func TestListContactsCursor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if f.query.Get("after") != "c1" || f.query.Get("total") != "exact" || f.query.Has("p") {
+	if f.query.Get("after") != "c1" || f.query.Get("total") != "exact" || f.query.Has("page") {
 		t.Fatalf("query %s", f.query.Encode())
 	}
 	pi := res.PageInfo
@@ -177,7 +177,7 @@ func TestListAllContacts(t *testing.T) {
 		t.Fatalf("result %+v", res)
 	}
 	q := (*queries)[0]
-	if q.Has("p") || q.Get("total") != "none" || q.Get("count") != "100" || q.Get("q") != "x" {
+	if q.Has("page") || q.Get("total") != "none" || q.Get("limit") != "100" || q.Get("q") != "x" {
 		t.Fatalf("first query %s", q.Encode())
 	}
 	if (*queries)[2].Get("after") != "c2" || (*queries)[2].Get("q") != "x" {
@@ -468,7 +468,7 @@ func TestListAllContactsResume(t *testing.T) {
 	var counts []int
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start, _ := strconv.Atoi(r.URL.Query().Get("after"))
-		count, _ := strconv.Atoi(r.URL.Query().Get("count"))
+		count, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 		counts = append(counts, count)
 		end := min(start+count, 7)
 		var ids []string
@@ -519,7 +519,7 @@ func TestListAllContactsOverfilledPage(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !res.Truncated || res.NextCursor != "" || len(res.Contacts) != 1 || decodeContact(t, res.Contacts[0]).ID != "a" || (*queries)[0].Get("count") != "1" {
+		if !res.Truncated || res.NextCursor != "" || len(res.Contacts) != 1 || decodeContact(t, res.Contacts[0]).ID != "a" || (*queries)[0].Get("limit") != "1" {
 			t.Fatalf("overfilled: %+v queries %v", res, queries)
 		}
 	}

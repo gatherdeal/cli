@@ -89,7 +89,7 @@ func (c *Client) Invoke(ctx context.Context, binding crmv1.CLIBinding, input any
 func listInput(p ListContactsParams) (*crmv1.FetchContactsInput, error) {
 	in := &crmv1.FetchContactsInput{
 		Page: p.Page, PageSize: p.PageSize, After: p.After, Total: p.Total,
-		SearchTerm: p.Search, SortBy: p.SortBy, SortOrder: p.SortOrder,
+		SearchTerm: p.Search, SortBy: p.Sort,
 	}
 	if err := SetExpansions(in, p.Expand); err != nil {
 		return nil, err

@@ -111,15 +111,13 @@ func parameterFor(op contracts.Operation, a bindingArgument) commandParameter {
 			p.shared = true
 		}
 	}
-	switch a.WireName {
-	case "q":
+	switch {
+	case p.shared:
+	case a.WireName == "q":
 		p.flag = flagSearch
-	case "s":
-		p.flag.Name = "sort"
-	case "o":
-		p.flag.Name = "order"
-		p.flag.Values = []string{"asc", "desc"}
-	case "limit":
+	case a.WireName == "sort" && len(op.SortableFields) > 0:
+		p.flag = sortFlag(op.PublicID)
+	case a.WireName == "limit":
 		p.flag.Name = "count" // Single-poll record count. --limit means a cursor walk.
 	}
 	p.flag.Required = a.Required

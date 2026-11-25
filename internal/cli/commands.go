@@ -11,6 +11,7 @@ import (
 	"github.com/gatherdeal/cli/internal/buildinfo"
 	"github.com/gatherdeal/cli/internal/crm"
 	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
+	wa "github.com/gatherdeal/cli/internal/generated/whatsapp/v1"
 	"github.com/gatherdeal/cli/internal/output"
 	"github.com/gatherdeal/cli/internal/update"
 )
@@ -31,8 +32,7 @@ func Commands() []*Command {
 	listFlags = append(listFlags,
 		FlagSpec{Name: "dry-run", Kind: kindBool, Usage: "Preview the contact selection and output fields without reading contacts."},
 		flagSearch,
-		FlagSpec{Name: "sort", Kind: kindString, Usage: "Field to sort by, e.g. create_at or name."},
-		FlagSpec{Name: "order", Kind: kindString, Values: []string{"asc", "desc"}, Usage: "Sort direction."},
+		sortFlag(crm.ListOperation),
 		FlagSpec{Name: "tag", Kind: kindStrings, Usage: "Only contacts with a tag of this name (repeatable; any match)."},
 		FlagSpec{Name: "tag-id", Kind: kindStrings, Usage: "Only contacts with this tag id (repeatable; any match)."},
 		flagOutlet,
@@ -118,8 +118,8 @@ func Commands() []*Command {
 		if len(c.Path) == 0 || (c.Presentation == nil && (len(c.Path) < 3 || c.Path[0] != c.App)) {
 			panic("contract command path must start with its app: " + c.Operation)
 		}
-		// Only CRM bindings pass --if-match to their generated client.
-		if c.App != crmv1.Service && requiresIfMatch(c.Operation) {
+		// Only CRM and WhatsApp bindings pass --if-match to their generated client.
+		if c.App != crmv1.Service && c.App != wa.Service && requiresIfMatch(c.Operation) {
 			panic("bind the If-Match option of the generated client for " + c.Operation)
 		}
 	}
@@ -127,6 +127,18 @@ func Commands() []*Command {
 		addShapingFlags(c)
 	}
 	return cmds
+}
+
+// deprecation reports the command's deprecation from its contract, or nil.
+func (c *Command) deprecation() *output.Deprecation {
+	if c.Operation == "" {
+		return nil
+	}
+	d := c.Contract().Deprecation
+	if d == nil {
+		return nil
+	}
+	return &output.Deprecation{Since: d.Since, Successor: contracts.MustOperation(d.Successor).Command}
 }
 
 type commandInfo struct {
@@ -143,6 +155,9 @@ type commandInfo struct {
 	Output       string              `json:"output"`
 	Network      bool                `json:"network"`
 	ReadOnly     bool                `json:"read_only"`
+	// Deprecated is set on a command that will be removed in a later
+	// release.
+	Deprecated *output.Deprecation `json:"deprecated,omitempty"`
 }
 
 type envVarInfo struct {
@@ -183,7 +198,7 @@ func runCommands(_ context.Context, inv *Invocation) (any, error) {
 		if flags == nil {
 			flags = []FlagSpec{}
 		}
-		out = append(out, commandInfo{App: c.App, Name: c.Name(), Summary: c.Summary, Operation: c.Operation, Args: args, Flags: flags, RecordFields: recordFields(c.Record), FilterFields: c.FilterFields, Output: c.Output, Network: c.Network, ReadOnly: c.ReadOnly})
+		out = append(out, commandInfo{App: c.App, Name: c.Name(), Summary: c.Summary, Operation: c.Operation, Args: args, Flags: flags, RecordFields: recordFields(c.Record), FilterFields: c.FilterFields, Output: c.Output, Network: c.Network, ReadOnly: c.ReadOnly, Deprecated: c.deprecation()})
 	}
 	return commandsData{
 		EnvelopeSchemaVersion: output.SchemaVersion,

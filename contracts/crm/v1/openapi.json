@@ -67,10 +67,14 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -95,7 +99,7 @@
         ],
         "parameters": [
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -104,7 +108,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -141,25 +145,12 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at))(,-?(?:create_at))*$"
-            }
-          },
-          {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
             }
           },
           {
@@ -175,7 +166,8 @@
                   "type": "null"
                 }
               ]
-            }
+            },
+            "x-gd-encoding": "base64url-json"
           },
           {
             "name": "contact_id",
@@ -460,40 +452,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -552,6 +510,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -585,8 +547,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
+          "201": {
+            "description": "Created. Success envelope (`status: \"success\"`)",
             "content": {
               "application/json": {
                 "schema": {
@@ -920,40 +882,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -1026,7 +954,7 @@
             ]
           },
           {
-            "name": "is_archive",
+            "name": "is_archived",
             "kind": "bool",
             "ops": [
               "EQ"
@@ -1070,8 +998,8 @@
         "x-gd-outlet-scope": "organization_level",
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -1096,7 +1024,7 @@
         ],
         "parameters": [
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -1105,7 +1033,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -1150,25 +1078,12 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at|name))(,-?(?:create_at|name))*$"
-            }
-          },
-          {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
             }
           },
           {
@@ -1184,7 +1099,8 @@
                   "type": "null"
                 }
               ]
-            }
+            },
+            "x-gd-encoding": "base64url-json"
           },
           {
             "$ref": "#/components/parameters/AcceptLanguage"
@@ -1450,40 +1366,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -1651,6 +1533,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-delegated-edge-filters": [
           "tags"
         ],
@@ -1662,8 +1548,8 @@
         ],
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -1838,25 +1724,12 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at|name))(,-?(?:create_at|name))*$"
-            }
-          },
-          {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
             }
           },
           {
@@ -1872,7 +1745,8 @@
                   "type": "null"
                 }
               ]
-            }
+            },
+            "x-gd-encoding": "base64url-json"
           },
           {
             "name": "start_at",
@@ -1893,7 +1767,7 @@
             }
           },
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -1902,7 +1776,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -2238,40 +2112,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -2328,6 +2168,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -2361,8 +2205,18 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
+          "201": {
+            "description": "Created; `Location` names the new resource (`crm.contacts.get`). Success envelope (`status: \"success\"`)",
+            "headers": {
+              "Location": {
+                "description": "Relative reference to the created resource at `crm.contacts.get`, resolved against the request URI (RFC 3986, section 5.2).",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2704,40 +2558,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -2779,13 +2599,13 @@
       "put": {
         "operationId": "assignContactTag",
         "summary": "Assign Contact Tag",
-        "description": "Assigns one tag to a contact. A satisfied assignment preserves its history, including after the tag is archived.",
+        "description": "Assigns one tag to a contact. Assigning a tag the contact already has changes nothing, including after the tag is archived.",
         "tags": [
           "contact-tags"
         ],
         "x-gd-public-id": "crm.contact_tags.assign",
         "x-gd-effect": {
-          "mutation": "additive",
+          "mutation": "non_additive",
           "interaction": "closed",
           "risks": []
         },
@@ -2796,26 +2616,18 @@
           ]
         },
         "x-gd-organization-keys-admitted": true,
-        "x-gd-idempotency": "keyed",
+        "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
           }
         ],
         "parameters": [
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "description": "Reuse the key when retrying the same logical operation.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[!-~]+$",
-              "minLength": 1,
-              "maxLength": 128
-            }
-          },
           {
             "name": "contact_id",
             "in": "path",
@@ -2841,18 +2653,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KeyedAcknowledgmentEnvelope"
-                }
-              }
-            }
+          "204": {
+            "description": "No content"
           },
           "400": {
-            "description": "Bad Request: problem document (BAD_REQUEST, IDEMPOTENCY_KEY_REQUIRED)",
+            "description": "Bad Request: problem document (BAD_REQUEST)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -2873,16 +2678,12 @@
                   "oneOf": [
                     {
                       "$ref": "#/components/schemas/BadRequestProblem"
-                    },
-                    {
-                      "$ref": "#/components/schemas/IdempotencyKeyRequiredProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
-                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem",
-                      "IDEMPOTENCY_KEY_REQUIRED": "#/components/schemas/IdempotencyKeyRequiredProblem"
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem"
                     }
                   }
                 }
@@ -3064,7 +2865,7 @@
             }
           },
           "409": {
-            "description": "Conflict: problem document (CONFLICT, IDEMPOTENCY_KEY_CONFLICT)",
+            "description": "Conflict: problem document (CONFLICT)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -3085,16 +2886,12 @@
                   "oneOf": [
                     {
                       "$ref": "#/components/schemas/ConflictProblem"
-                    },
-                    {
-                      "$ref": "#/components/schemas/IdempotencyKeyConflictProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
-                      "CONFLICT": "#/components/schemas/ConflictProblem",
-                      "IDEMPOTENCY_KEY_CONFLICT": "#/components/schemas/IdempotencyKeyConflictProblem"
+                      "CONFLICT": "#/components/schemas/ConflictProblem"
                     }
                   }
                 }
@@ -3172,40 +2969,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -3266,6 +3029,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -3613,40 +3380,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -3706,6 +3439,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-delegated-expansions": [
           "with_attributes",
           "with_emails",
@@ -4054,40 +3791,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -4145,6 +3848,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -4520,40 +4227,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -4647,10 +4320,14 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -4675,7 +4352,7 @@
         ],
         "parameters": [
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -4684,7 +4361,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -4721,25 +4398,12 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at))(,-?(?:create_at))*$"
-            }
-          },
-          {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
             }
           },
           {
@@ -4755,7 +4419,8 @@
                   "type": "null"
                 }
               ]
-            }
+            },
+            "x-gd-encoding": "base64url-json"
           },
           {
             "name": "pipeline_id",
@@ -5054,40 +4719,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -5146,6 +4777,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "keyed",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -5179,8 +4814,18 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success envelope (`status: \"success\"`)",
+          "201": {
+            "description": "Created; `Location` names the new resource (`crm.deals.get`). Success envelope (`status: \"success\"`)",
+            "headers": {
+              "Location": {
+                "description": "Relative reference to the created resource at `crm.deals.get`, resolved against the request URI (RFC 3986, section 5.2).",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5518,40 +5163,6 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "500": {
             "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
@@ -5611,6 +5222,10 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -5917,8 +5532,8 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+          "500": {
+            "description": "Internal Server Error: problem document (INTERNAL_ERROR)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -5938,13 +5553,480 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                      "$ref": "#/components/schemas/InternalErrorProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                      "INTERNAL_ERROR": "#/components/schemas/InternalErrorProblem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateDeal",
+        "summary": "Update Deal",
+        "description": "Changes a deal's stage, priority, type and remark. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Values equal to the stored ones change nothing.",
+        "tags": [
+          "deals"
+        ],
+        "x-gd-public-id": "crm.deals.update",
+        "x-gd-effect": {
+          "mutation": "non_additive",
+          "interaction": "closed",
+          "risks": []
+        },
+        "x-required-permissions": {
+          "allOf": [
+            "crm.deal.read",
+            "crm.deal.write"
+          ]
+        },
+        "x-gd-organization-keys-admitted": true,
+        "x-gd-idempotency": "safe",
+        "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
+        "x-gd-if-match": {
+          "operation": "crm.deals.get",
+          "pointer": "/deal/revision"
+        },
+        "security": [
+          {
+            "gatherdealBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "Send the `revision` field returned by `crm_deals_get` unchanged as the strong ETag. A stale value returns 412 Precondition Failed, so re-fetch, re-apply the change, and retry.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Deal identifier.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AcceptLanguage"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDealInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success envelope (`status: \"success\"`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DealRevisionOutputEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: problem document (BAD_REQUEST)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BadRequestProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "BAD_REQUEST": "#/components/schemas/BadRequestProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: problem document (DELEGATED_ACCESS_CREDENTIAL_LOCATION, DELEGATED_ACCESS_INACTIVE, DELEGATED_ACCESS_UNSUPPORTED, UNAUTHORIZED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessCredentialLocationProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessUnsupportedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_CREDENTIAL_LOCATION": "#/components/schemas/DelegatedAccessCredentialLocationProblem",
+                      "DELEGATED_ACCESS_INACTIVE": "#/components/schemas/DelegatedAccessInactiveProblem",
+                      "DELEGATED_ACCESS_UNSUPPORTED": "#/components/schemas/DelegatedAccessUnsupportedProblem",
+                      "UNAUTHORIZED": "#/components/schemas/UnauthorizedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: problem document (DELEGATED_ACCESS_AUDIENCE_MISMATCH, DELEGATED_ACCESS_EFFECT_NOT_ALLOWED, DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED, DELEGATED_ACCESS_FEATURE_NOT_ENTITLED, DELEGATED_ACCESS_FILTER_NOT_ALLOWED, DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED, DELEGATED_ACCESS_KIND_NOT_ALLOWED, DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED, DELEGATED_ACCESS_ORGANIZATION_MISMATCH, DELEGATED_ACCESS_OUTLET_NOT_ALLOWED, DELEGATED_ACCESS_PERMISSION_DENIED, DELEGATED_ACCESS_PRINCIPAL_INACTIVE, DELEGATED_ACCESS_ROUTE_NOT_ALLOWED, DELEGATED_ACCESS_TARGET_MISMATCH, FORBIDDEN)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessAudienceMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessKindNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPermissionDeniedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DelegatedAccessTargetMismatchProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ForbiddenProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "DELEGATED_ACCESS_AUDIENCE_MISMATCH": "#/components/schemas/DelegatedAccessAudienceMismatchProblem",
+                      "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED": "#/components/schemas/DelegatedAccessEffectNotAllowedProblem",
+                      "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessExpansionNotAllowedProblem",
+                      "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED": "#/components/schemas/DelegatedAccessFeatureNotEntitledProblem",
+                      "DELEGATED_ACCESS_FILTER_NOT_ALLOWED": "#/components/schemas/DelegatedAccessFilterNotAllowedProblem",
+                      "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED": "#/components/schemas/DelegatedAccessImpersonationNotAllowedProblem",
+                      "DELEGATED_ACCESS_KIND_NOT_ALLOWED": "#/components/schemas/DelegatedAccessKindNotAllowedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED": "#/components/schemas/DelegatedAccessOrganizationKeyNotAdmittedProblem",
+                      "DELEGATED_ACCESS_ORGANIZATION_MISMATCH": "#/components/schemas/DelegatedAccessOrganizationMismatchProblem",
+                      "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED": "#/components/schemas/DelegatedAccessOutletNotAllowedProblem",
+                      "DELEGATED_ACCESS_PERMISSION_DENIED": "#/components/schemas/DelegatedAccessPermissionDeniedProblem",
+                      "DELEGATED_ACCESS_PRINCIPAL_INACTIVE": "#/components/schemas/DelegatedAccessPrincipalInactiveProblem",
+                      "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED": "#/components/schemas/DelegatedAccessRouteNotAllowedProblem",
+                      "DELEGATED_ACCESS_TARGET_MISMATCH": "#/components/schemas/DelegatedAccessTargetMismatchProblem",
+                      "FORBIDDEN": "#/components/schemas/ForbiddenProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found: problem document (CRM_SALES_PIPELINE_DEAL_NOT_FOUND, CRM_SALES_PIPELINE_NOT_FOUND, CRM_SALES_PIPELINE_STAGE_NOT_FOUND)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineNotFoundProblem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CRMSalesPipelineStageNotFoundProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CRM_SALES_PIPELINE_DEAL_NOT_FOUND": "#/components/schemas/CRMSalesPipelineDealNotFoundProblem",
+                      "CRM_SALES_PIPELINE_NOT_FOUND": "#/components/schemas/CRMSalesPipelineNotFoundProblem",
+                      "CRM_SALES_PIPELINE_STAGE_NOT_FOUND": "#/components/schemas/CRMSalesPipelineStageNotFoundProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict: problem document (CONFLICT)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CONFLICT": "#/components/schemas/ConflictProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition Failed: problem document (PRECONDITION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PreconditionFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "PRECONDITION_FAILED": "#/components/schemas/PreconditionFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity: problem document (VALIDATION_FAILED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "VALIDATION_FAILED": "#/components/schemas/ValidationFailedProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Upgrade Required: problem document (CLIENT_UPGRADE_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Upgrade": {
+                "$ref": "#/components/headers/Upgrade"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Precondition Required: problem document (PRECONDITION_REQUIRED)",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/ProblemCacheControl"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/ProblemContentLanguage"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/ProblemVary"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              }
+            },
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PreconditionRequiredProblem"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "code",
+                    "mapping": {
+                      "PRECONDITION_REQUIRED": "#/components/schemas/PreconditionRequiredProblem"
                     }
                   }
                 }
@@ -5990,13 +6072,14 @@
     },
     "/v1/deals/{id}/fields": {
       "patch": {
-        "operationId": "updateDeal",
-        "summary": "Update Deal",
-        "description": "Changes a deal's priority, type and remark. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Values equal to the stored ones change nothing.",
+        "operationId": "updateDealFields",
+        "summary": "Update Deal Fields",
+        "description": "Changes a deal's priority, type and remark. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Values equal to the stored ones change nothing.\n\nDeprecated: since 2026-11-25; use `crm.deals.update` instead.",
         "tags": [
           "deals"
         ],
-        "x-gd-public-id": "crm.deals.update",
+        "deprecated": true,
+        "x-gd-public-id": "crm.deal_fields.update",
         "x-gd-effect": {
           "mutation": "non_additive",
           "interaction": "closed",
@@ -6011,6 +6094,14 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
+        "x-gd-if-match": {
+          "operation": "crm.deals.get",
+          "pointer": "/deal/revision"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -6045,7 +6136,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateDealInput"
+                "$ref": "#/components/schemas/UpdateDealFieldsInput"
               }
             }
           }
@@ -6404,8 +6495,8 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+          "428": {
+            "description": "Precondition Required: problem document (PRECONDITION_REQUIRED)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -6425,13 +6516,13 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                      "$ref": "#/components/schemas/PreconditionRequiredProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                      "PRECONDITION_REQUIRED": "#/components/schemas/PreconditionRequiredProblem"
                     }
                   }
                 }
@@ -6479,10 +6570,11 @@
       "put": {
         "operationId": "moveDealStage",
         "summary": "Move Deal Stage",
-        "description": "Moves a deal to another stage of its current pipeline. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Moving to the current stage changes nothing.",
+        "description": "Moves a deal to another stage of its current pipeline. If-Match must carry the revision from the deal's latest read; a stale revision fails with 412 and the caller rereads the deal before retrying. Moving to the current stage changes nothing.\n\nDeprecated: since 2026-11-25; use `crm.deals.update` instead.",
         "tags": [
           "deals"
         ],
+        "deprecated": true,
         "x-gd-public-id": "crm.deals.move_stage",
         "x-gd-effect": {
           "mutation": "non_additive",
@@ -6498,6 +6590,14 @@
         "x-gd-organization-keys-admitted": true,
         "x-gd-idempotency": "safe",
         "x-gd-outlet-scope": "filtered",
+        "x-gd-outlet-selector": {
+          "name": "outlet_id",
+          "in": "query"
+        },
+        "x-gd-if-match": {
+          "operation": "crm.deals.get",
+          "pointer": "/deal/revision"
+        },
         "security": [
           {
             "gatherdealBearer": []
@@ -6899,8 +6999,8 @@
               }
             }
           },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
+          "428": {
+            "description": "Precondition Required: problem document (PRECONDITION_REQUIRED)",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/ProblemCacheControl"
@@ -6920,13 +7020,13 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
+                      "$ref": "#/components/schemas/PreconditionRequiredProblem"
                     }
                   ],
                   "discriminator": {
                     "propertyName": "code",
                     "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
+                      "PRECONDITION_REQUIRED": "#/components/schemas/PreconditionRequiredProblem"
                     }
                   }
                 }
@@ -7024,8 +7124,8 @@
         ],
         "x-gd-pagination": {
           "style": "adaptive",
-          "page_param": "p",
-          "page_size_param": "count",
+          "page_param": "page",
+          "page_size_param": "limit",
           "after_param": "after",
           "before_param": "before",
           "total_param": "total",
@@ -7050,7 +7150,7 @@
         ],
         "parameters": [
           {
-            "name": "p",
+            "name": "page",
             "in": "query",
             "description": "Page number (1-based). Selects page mode; mutually exclusive with after\nand before.",
             "schema": {
@@ -7059,7 +7159,7 @@
             }
           },
           {
-            "name": "count",
+            "name": "limit",
             "in": "query",
             "description": "Items per page. Defaults to 20, max 100 (larger values are clamped and\nechoed as page_size).",
             "schema": {
@@ -7096,25 +7196,12 @@
             }
           },
           {
-            "name": "s",
+            "name": "sort",
             "in": "query",
-            "description": "Field name to sort by (e.g., \"created_at\", \"name\").",
+            "description": "Comma-separated sort fields, e.g. \"name\" or \"-create_at,name\". Each field\nsorts ascending unless prefixed with \"-\" for descending.",
             "schema": {
               "type": "string",
               "pattern": "^(-?(?:create_at|name))(,-?(?:create_at|name))*$"
-            }
-          },
-          {
-            "name": "o",
-            "in": "query",
-            "description": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
             }
           },
           {
@@ -7130,7 +7217,8 @@
                   "type": "null"
                 }
               ]
-            }
+            },
+            "x-gd-encoding": "base64url-json"
           },
           {
             "name": "q",
@@ -7411,40 +7499,6 @@
                     "propertyName": "code",
                     "mapping": {
                       "CLIENT_UPGRADE_REQUIRED": "#/components/schemas/ClientUpgradeRequiredProblem"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "499": {
-            "description": ": problem document (CLIENT_CLOSED_REQUEST)",
-            "headers": {
-              "Cache-Control": {
-                "$ref": "#/components/headers/ProblemCacheControl"
-              },
-              "Content-Language": {
-                "$ref": "#/components/headers/ProblemContentLanguage"
-              },
-              "Vary": {
-                "$ref": "#/components/headers/ProblemVary"
-              },
-              "X-Correlation-Id": {
-                "$ref": "#/components/headers/CorrelationId"
-              }
-            },
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ClientClosedRequestProblem"
-                    }
-                  ],
-                  "discriminator": {
-                    "propertyName": "code",
-                    "mapping": {
-                      "CLIENT_CLOSED_REQUEST": "#/components/schemas/ClientClosedRequestProblem"
                     }
                   }
                 }
@@ -8479,55 +8533,6 @@
           "retryable"
         ]
       },
-      "ClientClosedRequestProblem": {
-        "type": "object",
-        "description": "CLIENT_CLOSED_REQUEST (499): The client closed the request.",
-        "properties": {
-          "type": {
-            "type": "string",
-            "format": "uri",
-            "const": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
-          },
-          "title": {
-            "type": "string",
-            "description": "Localized by Accept-Language; English: \"The client closed the request.\""
-          },
-          "status": {
-            "type": "integer",
-            "const": 499
-          },
-          "detail": {
-            "type": "string",
-            "description": "Localized instance-specific text."
-          },
-          "instance": {
-            "type": "string",
-            "description": "urn:gatherdeal:request:<correlation_id>"
-          },
-          "code": {
-            "type": "string",
-            "const": "CLIENT_CLOSED_REQUEST"
-          },
-          "retryable": {
-            "type": "boolean",
-            "const": false
-          },
-          "correlation_id": {
-            "type": "string"
-          },
-          "record": {
-            "$ref": "#/components/schemas/ProblemRecord"
-          }
-        },
-        "required": [
-          "type",
-          "title",
-          "status",
-          "code",
-          "retryable"
-        ]
-      },
       "ClientUpgradeRequiredDetails": {
         "type": "object",
         "description": "ClientUpgradeRequiredDetails are the details of CLIENT_UPGRADE_REQUIRED.",
@@ -9384,17 +9389,17 @@
             "format": "date-time",
             "description": "Last update time in UTC."
           },
+          "revision": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "description": "Revision is the deal's opaque strong entity tag, quotes included. Send it\nunchanged as If-Match to update the deal; any write to the deal changes\nit."
+          },
           "remark": {
             "type": "string",
             "minLength": 1,
             "maxLength": 500,
             "description": "Deal remark, when present."
-          },
-          "revision": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 64,
-            "description": "Revision is the deal's opaque strong entity tag, quotes included. Send it\nunchanged as If-Match to move or update the deal; any write to the deal\nchanges it."
           }
         },
         "required": [
@@ -9454,6 +9459,12 @@
             "type": "string",
             "format": "date-time",
             "description": "Last update time in UTC."
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64,
+            "description": "Revision is the deal's opaque strong entity tag, quotes included. Send it\nunchanged as If-Match to update the deal; any write to the deal changes\nit."
           }
         },
         "required": [
@@ -9464,7 +9475,8 @@
           "pipeline",
           "stage",
           "create_at",
-          "update_at"
+          "update_at",
+          "revision"
         ]
       },
       "DealPipeline": {
@@ -10919,12 +10931,12 @@
       },
       "KeyedAcknowledgment": {
         "type": "object",
-        "description": "KeyedAcknowledgment is the complete success payload persisted by a scoped route.",
+        "description": "KeyedAcknowledgment confirms a keyed write and names the resource it\naffected. Retrying the write with the same idempotency key returns the same\nacknowledgment.",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Identifier of the resource acknowledged by this operation."
+            "description": "Identifier of the affected resource."
           }
         },
         "required": [
@@ -11586,6 +11598,55 @@
           "retryable"
         ]
       },
+      "PreconditionRequiredProblem": {
+        "type": "object",
+        "description": "PRECONDITION_REQUIRED (428): This request must be conditional. Send If-Match with the revision from the latest read.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "const": "https://docs.gatherdeal.ai/errors/PRECONDITION_REQUIRED",
+            "description": "Problem type URI, one-to-one with code; documentation only, never dereferenced at runtime."
+          },
+          "title": {
+            "type": "string",
+            "description": "Localized by Accept-Language; English: \"This request must be conditional. Send If-Match with the revision from the latest read.\""
+          },
+          "status": {
+            "type": "integer",
+            "const": 428
+          },
+          "detail": {
+            "type": "string",
+            "description": "Localized instance-specific text."
+          },
+          "instance": {
+            "type": "string",
+            "description": "urn:gatherdeal:request:<correlation_id>"
+          },
+          "code": {
+            "type": "string",
+            "const": "PRECONDITION_REQUIRED"
+          },
+          "retryable": {
+            "type": "boolean",
+            "const": false
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProblemRecord"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "retryable"
+        ]
+      },
       "ProblemParameter": {
         "type": "object",
         "properties": {
@@ -11861,10 +11922,50 @@
           "retryable"
         ]
       },
-      "UpdateDealInput": {
+      "UpdateDealFieldsInput": {
         "type": "object",
         "description": "An omitted field keeps its value and null clears it. A remark keeps 1 to 500\ncharacters after trimming each line.",
         "properties": {
+          "priority": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SalesPipelineDealPriority"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SalesPipelineDealType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "remark": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500,
+            "description": "Deal remark; null clears it."
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateDealInput": {
+        "type": "object",
+        "description": "An omitted field keeps its value and null clears it. A remark keeps 1 to 500\ncharacters after trimming each line. The staff-only fields keep their\nearlier meaning: attachments are linked, never replaced or cleared, and\noutlet_id moves the deal (null makes it organization-wide).",
+        "properties": {
+          "stage_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Target stage; it must belong to the deal's current pipeline."
+          },
           "priority": {
             "oneOf": [
               {
@@ -12304,6 +12405,17 @@
       }
     },
     {
+      "code": "PRECONDITION_REQUIRED",
+      "type": "https://docs.gatherdeal.ai/errors/PRECONDITION_REQUIRED",
+      "status": 428,
+      "retryable": false,
+      "title": "This request must be conditional. Send If-Match with the revision from the latest read.",
+      "details": null,
+      "problem": {
+        "$ref": "#/components/schemas/PreconditionRequiredProblem"
+      }
+    },
+    {
       "code": "CLIENT_UPGRADE_REQUIRED",
       "type": "https://docs.gatherdeal.ai/errors/CLIENT_UPGRADE_REQUIRED",
       "status": 426,
@@ -12314,17 +12426,6 @@
       },
       "problem": {
         "$ref": "#/components/schemas/ClientUpgradeRequiredProblem"
-      }
-    },
-    {
-      "code": "CLIENT_CLOSED_REQUEST",
-      "type": "https://docs.gatherdeal.ai/errors/CLIENT_CLOSED_REQUEST",
-      "status": 499,
-      "retryable": false,
-      "title": "The client closed the request.",
-      "details": null,
-      "problem": {
-        "$ref": "#/components/schemas/ClientClosedRequestProblem"
       }
     },
     {

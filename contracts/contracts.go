@@ -57,8 +57,13 @@ type Operation struct {
 	// DelegatedExpansions are the with_* query parameters a delegated
 	// access may set; the server refuses every other expansion.
 	DelegatedExpansions []string `json:"delegated_expansions"`
+	// SortableFields are the field names the sort parameter accepts.
+	SortableFields []string `json:"sortable_fields"`
 	// Pagination is set on list operations that return a ListPage.
 	Pagination *Pagination `json:"pagination"`
+	// Deprecation is set on an operation that remains available for now
+	// and has a successor.
+	Deprecation *Deprecation `json:"deprecation"`
 	// Errors are the problem codes the operation declares.
 	Errors     []OperationError `json:"errors"`
 	GoMethod   string           `json:"go_method"`
@@ -84,6 +89,14 @@ func (op *Operation) UnmarshalJSON(data []byte) error {
 	}
 	*op = Operation(wire.fields)
 	return nil
+}
+
+// Deprecation describes a deprecated operation.
+type Deprecation struct {
+	// Since is the date (YYYY-MM-DD) the operation was deprecated.
+	Since string `json:"since"`
+	// Successor is the public ID of the operation that replaces it.
+	Successor string `json:"successor"`
 }
 
 // PaginationAdaptive is the only list style this CLI speaks: page numbers

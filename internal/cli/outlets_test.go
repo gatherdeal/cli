@@ -9,13 +9,15 @@ import (
 	"github.com/gatherdeal/cli/internal/output"
 )
 
+const outletRecord = `{"status":"success","outlet":{"id":"33333333-3333-3333-3333-333333333333","code":"HQ","name":"Head office","currency":"MYR","address":{"city":"Kuala Lumpur"}}}`
+
 const outletsPage = `{"status":"success","outlets":{"data":[{"id":"33333333-3333-3333-3333-333333333333","code":"HQ","name":"Head office","currency":"MYR","address":{"city":"Kuala Lumpur"}}],"page_size":1,"page":1,"has_next_page":false,"has_prev_page":false}}`
 
 func TestOutletsList(t *testing.T) {
 	f, te := loggedIn(t)
 	f.outlets = func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		for k, want := range map[string]string{"id": waOutletID, "code": "HQ", "name": "Head", "q": "office", "p": "1", "count": "1", "with_owner": "true", "with_organization": "true", "is_master": "false", "s": "name", "o": "asc"} {
+		for k, want := range map[string]string{"id": waOutletID, "code": "HQ", "name": "Head", "q": "office", "page": "1", "limit": "1", "with_owner": "true", "with_organization": "true", "is_master": "false", "sort": "-name"} {
 			if q.Get(k) != want {
 				t.Errorf("%s = %q want %q", k, q.Get(k), want)
 			}
@@ -25,7 +27,7 @@ func TestOutletsList(t *testing.T) {
 		}
 		writeJSON(w, 200, outletsPage)
 	}
-	res := te.run("outlets", "list", "--id", waOutletID, "--code", "HQ", "--name", "Head", "--search", "office", "--page", "1", "--page-size", "1", "--with-owner", "--with-organization", "--is-master=false", "--sort", "name", "--order", "asc")
+	res := te.run("outlets", "list", "--id", waOutletID, "--code", "HQ", "--name", "Head", "--search", "office", "--page", "1", "--page-size", "1", "--with-owner", "--with-organization", "--is-master=false", "--sort", "-name")
 	if res.exit != 0 {
 		t.Fatal(res.stdout)
 	}
@@ -39,16 +41,21 @@ func TestOutletsGetByIDOrCode(t *testing.T) {
 			f.outlets = func(w http.ResponseWriter, r *http.Request) {
 				calls++
 				q := r.URL.Query()
-				key := "code"
 				if value == waOutletID {
-					key = "id"
+					// A UUID is read with outlets.get.
+					if r.URL.Path != "/identity/v1/outlets/"+waOutletID || q.Get("with_owner") != "true" || q.Has("outlet_id") {
+						t.Errorf("request %s", r.URL)
+					}
+					writeJSON(w, 200, outletRecord)
+					return
 				}
-				if q.Get(key) != value || q.Get("count") != "1" || q.Get("total") != "none" || q.Has("outlet_id") {
-					t.Errorf("query %s", q)
+				// A code is looked up with the list's exact code selector.
+				if r.URL.Path != "/identity/v1/outlets" || q.Get("code") != value || q.Get("limit") != "1" || q.Get("total") != "none" || q.Get("with_owner") != "true" || q.Has("outlet_id") {
+					t.Errorf("request %s", r.URL)
 				}
 				writeJSON(w, 200, outletsPage)
 			}
-			res := te.run("outlets", "get", value)
+			res := te.run("outlets", "get", value, "--with-owner")
 			if res.exit != 0 || calls != 1 || res.data()["id"] != waOutletID {
 				t.Fatal(res.stdout)
 			}
@@ -61,14 +68,25 @@ func TestOutletsGetByIDOrCode(t *testing.T) {
 func TestOutletsNotFound(t *testing.T) {
 	f, te := loggedIn(t)
 	lookups, writes := 0, 0
-	f.outlets = func(w http.ResponseWriter, _ *http.Request) {
+	f.outlets = func(w http.ResponseWriter, r *http.Request) {
 		lookups++
+		if r.URL.Path != "/identity/v1/outlets" {
+			writeJSON(w, 404, problemJSON(404, "IDENTITY_OUTLET_NOT_FOUND", "Outlet not found.", nil))
+			return
+		}
 		writeJSON(w, 200, `{"status":"success","outlets":{"data":[],"has_next_page":false,"has_prev_page":false}}`)
 	}
 	f.whatsapp = func(w http.ResponseWriter, _ *http.Request) { writes++; writeJSON(w, 200, `{}`) }
-	for _, args := range [][]string{{"outlets", "get", "hidden"}, {"outlets", "get", waOutletID}, {"whatsapp", "agents", "create", "--outlet", "hidden", "--yes", "--no-wait"}} {
-		res := te.run(args...)
-		if res.exit != 5 || res.errorCode() != output.CodeOutletNotFound {
+	for _, tc := range []struct {
+		args []string
+		code string
+	}{
+		{[]string{"outlets", "get", "hidden"}, output.CodeOutletNotFound},
+		{[]string{"outlets", "get", waOutletID}, "IDENTITY_OUTLET_NOT_FOUND"},
+		{[]string{"whatsapp", "agents", "create", "--outlet", "hidden", "--yes", "--no-wait"}, output.CodeOutletNotFound},
+	} {
+		res := te.run(tc.args...)
+		if res.exit != 5 || res.errorCode() != tc.code {
 			t.Fatal(res.stdout)
 		}
 	}
@@ -108,7 +126,7 @@ func TestWhatsAppCreateOutletCode(t *testing.T) {
 				if body.OutletID != waOutletID || r.Header.Get("Idempotency-Key") != "code-create" {
 					t.Errorf("body %+v", body)
 				}
-				writeJSON(w, 200, `{"status":"success","agent":{"id":"`+waAgentID+`"},"pairing":`+waPending+`}`)
+				writeJSON(w, 201, `{"status":"success","agent":{"id":"`+waAgentID+`"}}`)
 			}
 			args := []string{"whatsapp", "agents", "create", "--outlet", "HQ", "--idempotency-key", "code-create"}
 			if dryRun {
@@ -148,9 +166,13 @@ func TestWhatsAppOutletCodeAndInputMustAgree(t *testing.T) {
 			f, te := loggedIn(t)
 			writes := 0
 			f.outlets = func(w http.ResponseWriter, _ *http.Request) { writeJSON(w, 200, outletsPage) }
-			f.whatsapp = func(w http.ResponseWriter, _ *http.Request) {
+			f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodGet {
+					writeJSON(w, 200, `{"status":"success","pairing":`+waPending+`}`)
+					return
+				}
 				writes++
-				writeJSON(w, 200, `{"status":"success","agent":{"id":"`+waAgentID+`"},"pairing":`+waPending+`}`)
+				writeJSON(w, 201, `{"status":"success","agent":{"id":"`+waAgentID+`"}}`)
 			}
 			te.stdin = `{"outlet_id":"` + id + `"}`
 			res := te.run("whatsapp", "agents", "create", "--outlet", "HQ", "--input", "-", "--yes", "--no-wait")
@@ -167,7 +189,11 @@ func TestWhatsAppOutletCodeAndInputMustAgree(t *testing.T) {
 
 func TestRecordReadsPreserveNull(t *testing.T) {
 	f, te := loggedIn(t)
-	f.outlets = func(w http.ResponseWriter, _ *http.Request) {
+	f.outlets = func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/identity/v1/outlets" {
+			writeJSON(w, 200, `{"status":"success","outlet":{"business_hours":null}}`)
+			return
+		}
 		writeJSON(w, 200, `{"status":"success","outlets":{"data":[{"business_hours":null}]}}`)
 	}
 	for _, tc := range []struct {

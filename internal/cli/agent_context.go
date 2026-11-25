@@ -70,6 +70,8 @@ Paging (paginated record lists)
   to avoid skipping unseen records; restart instead of guessing a cursor.
   Walks allow N + 8 requests (10008 for --all without --limit), then fail
   with CLI_PROTOCOL_ERROR and no records, even if empty-page cursors advance.
+- --sort takes comma-separated fields from the command's --help: a bare
+  field sorts ascending, a leading - sorts descending (--sort -create_at,name).
 - --jq output has no meta, so when you must know whether more records exist
   (meta.page_info.has_next_page), use --fields, which keeps the envelope.
 
@@ -166,28 +168,32 @@ var appNotes = map[string]string{
   narrows the deal list. Use gatherdeal crm deals get <id> for one deal.
 - CRM writes require the matching CRM write approval (contacts or deals)
   during auth login and use --dry-run to preview or --yes to execute.
-- contacts create, contact-tags assign, contact-logs create and deals create
-  use a key from meta.write.idempotency_key. For a retry of the same operation,
-  pass that key with --idempotency-key; IDEMPOTENCY_KEY_CONFLICT means the key
-  was used for other input. Use a fresh key to reassign a tag after removal.
+- contacts create, contact-logs create and deals create use a key from
+  meta.write.idempotency_key. For a retry of the same operation, pass that key
+  with --idempotency-key; IDEMPOTENCY_KEY_CONFLICT means the key was used for
+  other input. contact-tags assign and remove take no key and are safe to
+  repeat.
 - gatherdeal crm deals create --outlet <id> --input <json> --yes creates a deal
   in that outlet from {"pipeline_id":"…","stage_id":"…"} plus optional type,
   priority and remark; CRM names it and returns data.id. Without --outlet, CRM
   uses the access's only deal-write outlet or fails with
   CRM_DEAL_OUTLET_REQUIRED.
-- deals move-stage and deals update need the deal's current revision. Read
-  data.revision with gatherdeal crm deals get <id> (--jq .revision prints it)
+- deals update needs the deal's current revision. Read data.revision with
+  gatherdeal crm deals get <id> (--jq .revision prints it)
   and pass it unchanged, quotes included, as --if-match: for example
-  --if-match '"r1"'. A successful move or update returns data.revision for the
-  next write. PRECONDITION_FAILED (exit 6) means the deal changed since that
-  read: read it again before deciding whether to repeat the change.
-- deals update --input takes priority, type and remark: omit a member to keep
-  it, null clears it. deals move-stage --input takes {"stage_id":"…"} from
-  the deal's own pipeline.
+  --if-match '"r1"'. A successful update returns data.revision for the next
+  write.
+  PRECONDITION_FAILED (exit 6) means the deal changed since that read: read it
+  again before deciding whether to repeat the change.
+- deals update --input takes stage_id, priority, type and remark: omit a member
+  to keep it, null clears it. stage_id moves the deal to a stage of its own
+  pipeline, for example {"stage_id":"…"}.
+- deals move-stage and deal-fields update are deprecated; use deals update.
 `,
 	"outlets": `- gatherdeal outlets list [--code CODE] [--id UUID] [--search TEXT] --limit N
   reads only authorized outlets, with the general paging rules.
-- gatherdeal outlets get <id-or-code> resolves through the scoped list.
+- gatherdeal outlets get <id-or-code> reads one outlet by UUID; a code is
+  looked up with the list's exact code selector first.
   Exit 5 means absent or out of scope; never retry in another profile.
 `,
 	"whatsapp": `- These agents serve the WhatsApp API. They do not appear as messaging inbox
@@ -206,13 +212,19 @@ var appNotes = map[string]string{
   data.expires_at and, when present, data.pairing_code (XXXX-XXXX), with the
   "Link with phone number instead" instruction. Never request a new pairing
   code or repeat create while the person is typing one.
-- Check once with gatherdeal whatsapp agents pairing <agent_id>: pending
+- Check once with gatherdeal whatsapp agents pairing get <agent_id>: pending
   repeats instructions and exits 9; connected exits 0; expired/failed exits 6.
   Without --no-wait, create waits at most five minutes or until pairing expires.
 - Pairing needs the passport origin from discovery and the organization code
   from the profile. Missing context stops creation; log in to establish it.
-- agents update requires revision from the agent's update_at. agents delete
-  unlinks the device and releases its quota slot asynchronously.
+- agents update needs the agent's current revision: read data.revision with
+  gatherdeal whatsapp agents get <agent_id> and pass it unchanged, quotes
+  included, as --if-match. PRECONDITION_FAILED (exit 6) means the agent
+  changed since that read. agents delete unlinks the device and releases its
+  quota slot asynchronously.
+- message-templates replace sends the whole template: every variant carries
+  an id, the existing variant's id to keep it or a new UUID you generate to
+  add one. Variants left out are removed.
 - messages create sends to one recipient. Message status describes runtime
   acceptance, not recipient delivery.
 `,

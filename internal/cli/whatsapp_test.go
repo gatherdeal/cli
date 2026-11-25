@@ -85,6 +85,14 @@ func TestWhatsAppCreateNoWait(t *testing.T) {
 	calls := 0
 	f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
 		calls++
+		if calls == 2 {
+			// agents create reads the pairing instructions after creating the agent.
+			if r.Method != http.MethodGet || r.URL.Path != "/whatsapp/v1/agents/"+waAgentID+"/pairing" || r.URL.Query().Get("outlet_id") != waOutletID {
+				t.Errorf("unexpected request %s %s", r.Method, r.URL)
+			}
+			writeJSON(w, 200, `{"status":"success","pairing":`+waPending+`}`)
+			return
+		}
 		if r.Method != http.MethodPost || r.URL.Path != "/whatsapp/v1/agents" || r.Header.Get("Idempotency-Key") != "create-one" || r.URL.Query().Get("outlet_id") != waOutletID {
 			t.Errorf("unexpected request %s %s", r.Method, r.URL)
 		}
@@ -98,11 +106,11 @@ func TestWhatsAppCreateNoWait(t *testing.T) {
 		if body.OutletID != waOutletID || body.Phone != "+60123456789" {
 			t.Errorf("body %+v", body)
 		}
-		writeJSON(w, 200, `{"status":"success","agent":{"id":"`+waAgentID+`"},"pairing":`+waPending+`}`)
+		writeJSON(w, 201, `{"status":"success","agent":{"id":"`+waAgentID+`"}}`)
 	}
 	before := len(te.sleeps)
 	res := te.run("whatsapp", "agents", "create", "--outlet", waOutletID, "--phone", "+60123456789", "--yes", "--no-wait", "--idempotency-key", "create-one")
-	if res.exit != 9 || calls != 1 || len(te.sleeps) != before {
+	if res.exit != 9 || calls != 2 || len(te.sleeps) != before {
 		t.Fatalf("calls=%d %s", calls, res.stdout)
 	}
 	data := res.data()
@@ -131,7 +139,7 @@ func TestWhatsAppPairingExitCodes(t *testing.T) {
 				}
 				writeJSON(w, 200, `{"status":"success","pairing":`+strings.Replace(waPending, "pending", tc.status, 1)+`}`)
 			}
-			res := te.run("whatsapp", "agents", "pairing", waAgentID)
+			res := te.run("whatsapp", "agents", "pairing", "get", waAgentID)
 			if res.exit != tc.exit || calls != 1 || len(te.sleeps) != before {
 				t.Fatalf("calls=%d %s", calls, res.stdout)
 			}
@@ -174,14 +182,15 @@ func TestWhatsAppCreateWaitIsBounded(t *testing.T) {
 	f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
 		calls++
 		if r.Method == http.MethodPost {
-			writeJSON(w, 200, `{"status":"success","agent":{"id":"`+waAgentID+`"},"pairing":`+waPending+`}`)
+			writeJSON(w, 201, `{"status":"success","agent":{"id":"`+waAgentID+`"}}`)
 			return
 		}
 		writeJSON(w, 200, `{"status":"success","pairing":`+waPending+`}`)
 	}
 	before := te.now()
 	res := te.run("whatsapp", "agents", "create", "--outlet", waOutletID, "--yes")
-	if res.exit != 9 || calls != 151 || te.now().Sub(before) != 5*time.Minute {
+	// One create, the first pairing read and 150 polls.
+	if res.exit != 9 || calls != 152 || te.now().Sub(before) != 5*time.Minute {
 		t.Fatalf("calls=%d elapsed=%s %s", calls, te.now().Sub(before), res.stdout)
 	}
 }
@@ -283,5 +292,56 @@ func TestMessageCreateVariants(t *testing.T) {
 				t.Fatalf("%s %s: %s calls=%d", tc.members, mode, r.stdout, calls)
 			}
 		}
+	}
+}
+
+func TestWhatsAppAgentUpdateIfMatch(t *testing.T) {
+	f, te := loggedIn(t)
+	calls := 0
+	f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		body, _ := io.ReadAll(r.Body)
+		if r.Method != http.MethodPatch || r.URL.Path != "/whatsapp/v1/agents/"+waAgentID || r.Header.Get("If-Match") != `"r1"` || string(body) != `{"outlet_id":null}` {
+			t.Errorf("unexpected request %s %s If-Match=%q body=%s", r.Method, r.URL, r.Header.Get("If-Match"), body)
+		}
+		writeJSON(w, 200, `{"status":"success","agent":{"id":"`+waAgentID+`","revision":"\"r2\""}}`)
+	}
+	base := []string{"whatsapp", "agents", "update", waAgentID, "--input", `{"outlet_id":null}`}
+	for _, tc := range []struct {
+		args []string
+		exit int
+	}{
+		{[]string{"--yes"}, 2},                                                           // --if-match is required
+		{[]string{"--yes", "--if-match", "r1"}, 2},                                       // an entity tag keeps its quotes
+		{[]string{"--dry-run", "--if-match", `"r1"`}, 0},                                 // previews without dispatch
+		{[]string{"--yes", "--if-match", `"r1"`, "--input", `{"revision":"\"r1\""}`}, 2}, // revision is not a body member
+	} {
+		if res := te.run(append(append([]string{}, base...), tc.args...)...); res.exit != tc.exit {
+			t.Fatalf("%v: %s", tc.args, res.stdout)
+		}
+	}
+	if calls != 0 {
+		t.Fatalf("preflight made %d requests", calls)
+	}
+	res := te.run(append(base, "--yes", "--if-match", `"r1"`)...)
+	if res.exit != 0 || calls != 1 || res.data()["revision"] != `"r2"` {
+		t.Fatalf("calls=%d %s", calls, res.stdout)
+	}
+}
+
+func TestWhatsAppCreatePairingReadFails(t *testing.T) {
+	f, te := loggedIn(t)
+	writes := 0
+	f.whatsapp = func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			writes++
+			writeJSON(w, 201, `{"status":"success","agent":{"id":"`+waAgentID+`"}}`)
+			return
+		}
+		writeJSON(w, 503, problemJSON(503, "SERVICE_UNAVAILABLE", "Unavailable.", nil))
+	}
+	res := te.run("whatsapp", "agents", "create", "--outlet", waOutletID, "--yes", "--no-wait")
+	if res.exit == 0 || writes != 1 || res.data()["agent_id"] != waAgentID || !strings.Contains(res.env["hint"].(string), "whatsapp agents pairing get "+waAgentID) {
+		t.Fatalf("writes=%d %s", writes, res.stdout)
 	}
 }

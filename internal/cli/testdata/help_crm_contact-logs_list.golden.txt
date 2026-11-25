@@ -15,8 +15,7 @@ Flags:
   --all                        Walk forward through every page with cursors (starting after --after when given) and return all contact logs in one data array, at most 10000 (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: contact logs created, changed or deleted during the walk may be missed or seen out of order.
   --limit <int>                Return at most this many contact logs (1-10000), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after <next_cursor> when present.
   --before <string>            Opaque cursor: the page before this position. Pass a previous response's prev_cursor.
-  --sort <string>              Field name to sort by (e.g., "created_at", "name").
-  --order <string>             Sort direction: "asc" or "desc". Defaults to "desc". One of: asc, desc.
+  --sort <string>              Comma-separated fields to sort by, from: create_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at).
   --filter <string>            JSON value for filter.
   --contact-id <string>        (required) Contact whose notes to list.
   --search <string>            Server-side free-text search.

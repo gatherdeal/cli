@@ -66,9 +66,9 @@ func (c call) apiError(ctx context.Context, err error, write bool) error {
 	}
 	return httpx.TransportError(ctx, err)
 }
-func (c *Client) Invoke(ctx context.Context, binding wa.CLIBinding, input any, outlet, key string, write bool) (jsontext.Value, string, error) {
+func (c *Client) Invoke(ctx context.Context, binding wa.CLIBinding, input any, outlet, key string, write bool, opts ...wa.RequestOption) (jsontext.Value, string, error) {
 	call := c.call(outlet)
-	raw, err := binding.Invoke(ctx, call.api, input, key)
+	raw, err := binding.Invoke(ctx, call.api, input, key, opts...)
 	if err != nil {
 		err = call.apiError(ctx, err, write)
 	}
@@ -108,20 +108,22 @@ func (c *Client) FetchAgentPairing(ctx context.Context, in *wa.FetchAgentPairing
 	}
 	return out.Pairing, call.d.CorrelationID, nil
 }
-func (c *Client) CreateAgent(ctx context.Context, in *wa.CreateAgentInput, outlet string, key string) (*wa.CreateAgentOutput, string, error) {
+func (c *Client) CreateAgent(ctx context.Context, in *wa.CreateAgentInput, outlet string, key string) (*wa.Agent, string, error) {
 	call := c.call(outlet)
 	out, err := call.api.CreateAgent(ctx, in, wa.WithIdempotencyKey(key))
 	if err != nil {
 		return nil, call.d.CorrelationID, call.apiError(ctx, err, true)
 	}
-	if out == nil || out.Agent == nil || out.Pairing == nil {
+	if out == nil || out.Agent == nil || out.Agent.ID == "" {
 		return nil, call.d.CorrelationID, output.UnknownWriteOutcome(missing())
 	}
-	return out, call.d.CorrelationID, nil
+	return out.Agent, call.d.CorrelationID, nil
 }
-func (c *Client) UpdateAgent(ctx context.Context, in *wa.UpdateAgentInput, outlet string) (*wa.Agent, string, error) {
+
+// UpdateAgent sends ifMatch, the agent's revision, as If-Match.
+func (c *Client) UpdateAgent(ctx context.Context, in *wa.UpdateAgentInput, outlet, ifMatch string) (*wa.Agent, string, error) {
 	call := c.call(outlet)
-	out, err := call.api.UpdateAgent(ctx, in)
+	out, err := call.api.UpdateAgent(ctx, in, wa.WithIfMatch(ifMatch))
 	if err != nil {
 		return nil, call.d.CorrelationID, call.apiError(ctx, err, true)
 	}

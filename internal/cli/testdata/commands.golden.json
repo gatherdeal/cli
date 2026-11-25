@@ -229,16 +229,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field to sort by, e.g. create_at or name."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction.",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at, name. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "tag",
@@ -653,16 +644,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field to sort by."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction.",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: id, create_at, update_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "fields",
@@ -686,6 +668,7 @@
           "current_run",
           "egress",
           "id",
+          "revision",
           "phone",
           "status",
           "create_at",
@@ -693,7 +676,7 @@
           "distribution_id",
           "outlet_id",
           "organization_id",
-          "system",
+          "is_system",
           "name",
           "description",
           "error_message",
@@ -765,6 +748,7 @@
           "current_run",
           "egress",
           "id",
+          "revision",
           "phone",
           "status",
           "create_at",
@@ -772,7 +756,7 @@
           "distribution_id",
           "outlet_id",
           "organization_id",
-          "system",
+          "is_system",
           "name",
           "description",
           "error_message",
@@ -854,16 +838,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field to sort by."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction.",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "agent",
@@ -920,7 +895,7 @@
           "reply_to_id",
           "target_id",
           "reaction",
-          "redacted",
+          "is_redacted",
           "status",
           "send_window",
           "not_before",
@@ -998,7 +973,7 @@
           "reply_to_id",
           "target_id",
           "reaction",
-          "redacted",
+          "is_redacted",
           "status",
           "send_window",
           "not_before",
@@ -1054,9 +1029,9 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp agents pairing",
+        "name": "whatsapp agents pairing get",
         "network": true,
-        "operation": "whatsapp.agents.pairing",
+        "operation": "whatsapp.agents.pairing.get",
         "output": "json",
         "read_only": true,
         "summary": "Check a WhatsApp agent's pairing once, without requesting a new code."
@@ -1098,7 +1073,7 @@
           {
             "name": "no-wait",
             "type": "bool",
-            "usage": "Return pairing instructions immediately (exit 9); check later with agents pairing."
+            "usage": "Return pairing instructions immediately (exit 9); check later with whatsapp agents pairing get."
           },
           {
             "name": "dry-run",
@@ -1176,6 +1151,12 @@
             "name": "yes",
             "type": "bool",
             "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "if-match",
+            "required": true,
+            "type": "string",
+            "usage": "Revision from the latest read, quotes included, sent unchanged as If-Match. A stale revision fails with PRECONDITION_FAILED; read again before retrying."
           },
           {
             "name": "input",
@@ -1402,16 +1383,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field to sort by."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction.",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: id, create_at, update_at, name, code. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "with-organization",
@@ -1465,7 +1437,7 @@
         "args": [
           {
             "name": "id-or-code",
-            "usage": "Outlet UUID or code."
+            "usage": "Outlet UUID, or an outlet code to look up through the outlets list."
           }
         ],
         "flags": [
@@ -1490,6 +1462,16 @@
             "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
           },
           {
+            "name": "with-organization",
+            "type": "bool",
+            "usage": "Include the outlet's organization."
+          },
+          {
+            "name": "with-owner",
+            "type": "bool",
+            "usage": "Include the outlet's owner."
+          },
+          {
             "name": "fields",
             "type": "string",
             "usage": "Comma-separated top-level fields to keep in each record (the data object, or each element of the data array); the envelope stays. Fields a record lacks stay absent. Names must come from record_fields in `gatherdeal commands`. Applied before --jq."
@@ -1502,6 +1484,7 @@
         ],
         "name": "outlets get",
         "network": true,
+        "operation": "identity.outlets.get",
         "output": "json",
         "read_only": true,
         "record_fields": [
@@ -1673,16 +1656,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "filter",
@@ -1775,11 +1749,6 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
-            "name": "idempotency-key",
-            "type": "string",
-            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
-          },
-          {
             "name": "jq",
             "type": "string",
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
@@ -1863,16 +1832,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at, name. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "filter",
@@ -2094,6 +2054,79 @@
       },
       {
         "app": "crm",
+        "args": [
+          {
+            "name": "id",
+            "usage": "Deal identifier."
+          }
+        ],
+        "deprecated": {
+          "since": "2026-11-25",
+          "successor": "crm deals update"
+        },
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "if-match",
+            "required": true,
+            "type": "string",
+            "usage": "Revision from the latest read, quotes included, sent unchanged as If-Match. A stale revision fails with PRECONDITION_FAILED; read again before retrying."
+          },
+          {
+            "name": "input",
+            "required": true,
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm deal-fields update",
+        "network": true,
+        "operation": "crm.deal_fields.update",
+        "output": "json",
+        "read_only": false,
+        "summary": "[deprecated] Update Deal Fields (use crm deals update)."
+      },
+      {
+        "app": "crm",
         "args": [],
         "flags": [
           {
@@ -2216,8 +2249,8 @@
           "priority",
           "create_at",
           "update_at",
-          "remark",
-          "revision"
+          "revision",
+          "remark"
         ],
         "summary": "Get Deal."
       },
@@ -2306,16 +2339,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "filter",
@@ -2363,7 +2387,8 @@
           "type",
           "priority",
           "create_at",
-          "update_at"
+          "update_at",
+          "revision"
         ],
         "summary": "List Deals."
       },
@@ -2375,6 +2400,10 @@
             "usage": "Deal identifier."
           }
         ],
+        "deprecated": {
+          "since": "2026-11-25",
+          "successor": "crm deals update"
+        },
         "flags": [
           {
             "name": "profile",
@@ -2434,7 +2463,7 @@
         "operation": "crm.deals.move_stage",
         "output": "json",
         "read_only": false,
-        "summary": "Move Deal Stage."
+        "summary": "[deprecated] Move Deal Stage (use crm deals update)."
       },
       {
         "app": "crm",
@@ -2581,16 +2610,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at, name. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "filter",
@@ -2694,7 +2714,7 @@
         "args": [
           {
             "name": "suppression-id",
-            "usage": "suppression id."
+            "usage": "The suppression to remove."
           }
         ],
         "flags": [
@@ -2807,21 +2827,12 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "to",
             "type": "string",
-            "usage": "to."
+            "usage": "Only the suppression of this phone number."
           },
           {
             "name": "fields",
@@ -3097,21 +3108,12 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "status",
             "type": "string",
-            "usage": "status.",
+            "usage": "Only broadcasts in this status.",
             "values": [
               "draft",
               "scheduled",
@@ -3218,7 +3220,7 @@
         "args": [
           {
             "name": "broadcast-id",
-            "usage": "broadcast id."
+            "usage": "The draft broadcast to add recipients to."
           }
         ],
         "flags": [
@@ -3281,11 +3283,11 @@
         "args": [
           {
             "name": "broadcast-id",
-            "usage": "broadcast id."
+            "usage": "The draft broadcast."
           },
           {
             "name": "recipient-id",
-            "usage": "recipient id."
+            "usage": "The recipient to remove."
           }
         ],
         "flags": [
@@ -3337,7 +3339,7 @@
         "args": [
           {
             "name": "broadcast-id",
-            "usage": "broadcast id."
+            "usage": "The broadcast whose recipients to list."
           }
         ],
         "flags": [
@@ -3403,21 +3405,12 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: position, settled_at. A field sorts ascending; prefix it with - to sort descending (for example -position)."
           },
           {
             "name": "status",
             "type": "string",
-            "usage": "status.",
+            "usage": "Only recipients in this status.",
             "values": [
               "pending",
               "queued",
@@ -3431,12 +3424,12 @@
           {
             "name": "agent-id",
             "type": "string",
-            "usage": "agent id."
+            "usage": "Only recipients assigned to this sender agent."
           },
           {
             "name": "to",
             "type": "string",
-            "usage": "to."
+            "usage": "Only the recipient with this phone number."
           },
           {
             "name": "fields",
@@ -3589,7 +3582,7 @@
         "args": [
           {
             "name": "broadcast-id",
-            "usage": "broadcast id."
+            "usage": "The draft broadcast to update."
           }
         ],
         "flags": [
@@ -3652,7 +3645,7 @@
         "args": [
           {
             "name": "id",
-            "usage": "id."
+            "usage": "The chat message to read."
           }
         ],
         "flags": [
@@ -3714,7 +3707,7 @@
           "edited_at",
           "revoked_at",
           "expires_at",
-          "view_once",
+          "is_view_once",
           "reactions",
           "receipt"
         ],
@@ -3782,7 +3775,7 @@
         "args": [
           {
             "name": "chat-id",
-            "usage": "chat id."
+            "usage": "The chat."
           }
         ],
         "flags": [
@@ -3918,16 +3911,7 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: update_at, create_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "fields",
@@ -3965,7 +3949,7 @@
         "args": [
           {
             "name": "chat-id",
-            "usage": "chat id."
+            "usage": "The chat whose messages to list."
           }
         ],
         "flags": [
@@ -4044,9 +4028,9 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp chats messages",
+        "name": "whatsapp chats messages list",
         "network": true,
-        "operation": "whatsapp.chats.messages",
+        "operation": "whatsapp.chats.messages.list",
         "output": "json",
         "read_only": true,
         "record_fields": [
@@ -4066,7 +4050,7 @@
           "edited_at",
           "revoked_at",
           "expires_at",
-          "view_once",
+          "is_view_once",
           "reactions",
           "receipt"
         ],
@@ -4107,6 +4091,11 @@
             "usage": "Explicitly confirm execution of this write."
           },
           {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
             "name": "input",
             "required": true,
             "type": "string",
@@ -4130,7 +4119,7 @@
         "args": [
           {
             "name": "template-id",
-            "usage": "template id."
+            "usage": "The message template to delete."
           }
         ],
         "flags": [
@@ -4182,7 +4171,7 @@
         "args": [
           {
             "name": "template-id",
-            "usage": "template id."
+            "usage": "The message template to read."
           }
         ],
         "flags": [
@@ -4302,21 +4291,12 @@
           {
             "name": "sort",
             "type": "string",
-            "usage": "Field name to sort by (e.g., \"created_at\", \"name\")."
-          },
-          {
-            "name": "order",
-            "type": "string",
-            "usage": "Sort direction: \"asc\" or \"desc\". Defaults to \"desc\".",
-            "values": [
-              "asc",
-              "desc"
-            ]
+            "usage": "Comma-separated fields to sort by, from: create_at. A field sorts ascending; prefix it with - to sort descending (for example -create_at)."
           },
           {
             "name": "name",
             "type": "string",
-            "usage": "name."
+            "usage": "Only templates whose name starts with this prefix."
           },
           {
             "name": "fields",
@@ -4353,7 +4333,7 @@
         "args": [
           {
             "name": "template-id",
-            "usage": "template id."
+            "usage": "The message template to render."
           }
         ],
         "flags": [
@@ -4401,7 +4381,7 @@
         "args": [
           {
             "name": "template-id",
-            "usage": "template id."
+            "usage": "The message template to replace."
           }
         ],
         "flags": [
@@ -4447,12 +4427,12 @@
             "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
           }
         ],
-        "name": "whatsapp message-templates update",
+        "name": "whatsapp message-templates replace",
         "network": true,
-        "operation": "whatsapp.message_templates.update",
+        "operation": "whatsapp.message_templates.replace",
         "output": "json",
         "read_only": false,
-        "summary": "Update Message Template."
+        "summary": "Replace Message Template."
       }
     ],
     "envelope_schema_version": 1,

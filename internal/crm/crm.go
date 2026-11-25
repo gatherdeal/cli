@@ -59,9 +59,9 @@ type ListContactsParams struct {
 	Total crmv1.TotalMode `json:"total,omitempty"`
 	// Search is free text matched by the server.
 	Search string `json:"search,omitempty"`
-	// SortBy is a field name; SortOrder is "asc" or "desc".
-	SortBy    string `json:"sort,omitempty"`
-	SortOrder string `json:"order,omitempty"`
+	// Sort lists comma-separated fields; a "-" prefix sorts that field
+	// descending, a bare field ascending.
+	Sort string `json:"sort,omitempty"`
 	// OutletID narrows the request to one outlet of the access.
 	OutletID string     `json:"outlet_id,omitempty"`
 	Expand   Expansions `json:"expansions,omitempty"`

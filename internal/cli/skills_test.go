@@ -321,14 +321,15 @@ func TestSkillIndexes(t *testing.T) {
 		"crm contact-logs list --contact-id <id>",
 		"filter_fields (allowed root filter operators)",
 		"matching CRM write approval",
-		"Use a fresh key to reassign a tag after removal.",
+		"contact-tags assign and remove take no key and are safe to",
+		"deals move-stage and deal-fields update are deprecated; use deals update.",
 		"pass it unchanged, quotes included, as --if-match",
 	} {
 		if !strings.Contains(content["references/crm.md"], want) {
 			t.Errorf("CRM skill lacks %q", want)
 		}
 	}
-	if want := "- whatsapp agents: List, create, pair, update and delete WhatsApp agents. Verbs: create, delete, get, list, pairing, update.\n"; !strings.Contains(content["references/whatsapp.md"], want) {
+	if want := "- whatsapp agents: List, create, pair, update and delete WhatsApp agents. Verbs: create, delete, get, list, update.\n- whatsapp agents pairing: Check a WhatsApp agent's pairing. Verbs: get.\n"; !strings.Contains(content["references/whatsapp.md"], want) {
 		t.Errorf("whatsapp index lacks %q", want)
 	}
 	for _, want := range []string{"whatsapp chat-messages list", "--count", "--after-rev", "data.messages", "data.after_rev", "data.has_more"} {

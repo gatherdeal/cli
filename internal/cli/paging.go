@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/gatherdeal/cli/contracts"
@@ -22,6 +23,31 @@ func pageFlags(publicID string, resource string) []FlagSpec {
 		{Name: "all", Kind: kindBool, Usage: fmt.Sprintf("Walk forward through every page with cursors (starting after --after when given) and return all %s in one data array, at most %d (the hard cap; then meta.page_info.has_next_page is true). A live traversal, not a snapshot: %s created, changed or deleted during the walk may be missed or seen out of order.", resource, paging.MaxItems, resource)},
 		{Name: "limit", Kind: kindInt, Usage: fmt.Sprintf("Return at most this many %s (1-%d), following cursors across pages as needed (a walk like --all; not with --page or --total). meta.page_info.has_next_page is true if more exist; resume with --after <next_cursor> when present.", resource, paging.MaxItems)},
 	}
+}
+
+// sortFlag is the --sort flag of a list operation that declares sortable
+// fields. parse checks each field against the operation's contract.
+func sortFlag(publicID string) FlagSpec {
+	fields := contracts.MustOperation(publicID).SortableFields
+	if len(fields) == 0 {
+		panic(fmt.Sprintf("contracts: %s declares no sortable fields", publicID))
+	}
+	example := fields[0]
+	if slices.Contains(fields, "create_at") {
+		example = "create_at"
+	}
+	return FlagSpec{Name: "sort", Kind: kindString, Usage: fmt.Sprintf("Comma-separated fields to sort by, from: %s. A field sorts ascending; prefix it with - to sort descending (for example -%s).", strings.Join(fields, ", "), example)}
+}
+
+// validateSort checks a --sort value against the operation's sortable
+// fields: one or more comma-separated names, each optionally prefixed with -.
+func validateSort(value string, fields []string) error {
+	for item := range strings.SplitSeq(value, ",") {
+		if !slices.Contains(fields, strings.TrimPrefix(item, "-")) {
+			return usageError("--sort %q: each field must be one of %s, optionally prefixed with - for descending", item, strings.Join(fields, ", "))
+		}
+	}
+	return nil
 }
 
 // flagSearch is the server-side free-text search of the list operations
