@@ -32,8 +32,8 @@ const (
 	// ExitActionRequired: a human must act first (approve a login, accept
 	// a server risk, choose a credential store).
 	ExitActionRequired ExitCode = 9
-	// ExitPartial: the command completed only partly. Reserved: no command
-	// produces it.
+	// ExitPartial: the command completed only partly: a batch command
+	// committed some chunks and not others.
 	ExitPartial ExitCode = 10
 	// ExitInterrupted: interrupted by a signal.
 	ExitInterrupted ExitCode = 130
@@ -59,7 +59,7 @@ func ExitCodes() []ExitCodeInfo {
 		{ExitRateLimited, "rate_limited", "Rate limited. retryable means the failure condition is transient, never that repeating a command that changes state is safe."},
 		{ExitUnavailable, "unavailable", "Network, TLS, DNS or timeout failure, or a server error (5xx). retryable means the failure condition is transient, never that repeating a command that changes state is safe."},
 		{ExitActionRequired, "action_required", "A human must act first (approve the login, accept a server risk, choose a credential store)."},
-		{ExitPartial, "partial", "Partial completion (reserved)."},
+		{ExitPartial, "partial", "Partial completion: a batch command committed some of its chunks and not others (CLI_BATCH_INCOMPLETE); data lists the state of each item."},
 		{ExitInterrupted, "interrupted", "Interrupted by a signal."},
 	}
 }

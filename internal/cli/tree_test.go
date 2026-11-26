@@ -48,7 +48,7 @@ func TestUnknownGroupChoices(t *testing.T) {
 		{[]string{"whatsapp", "chat_messages", "list"}, `unknown resource "chat_messages"`},
 		{[]string{"whatsapp", "broadcast_suppressions", "list"}, `unknown resource "broadcast_suppressions"`},
 		{[]string{"whatsapp", "message_templates", "list"}, `unknown resource "message_templates"`},
-		{[]string{"crm", "contacts", "delete"}, "valid choices: create, get, list, update"},
+		{[]string{"crm", "contacts", "delete"}, "valid choices: batch-create, create, get, list, update"},
 		{[]string{"auth", "unknown"}, "valid choices: login, logout, profiles, status"},
 	} {
 		res := newTestEnv(t, nil).run(tc.args...)

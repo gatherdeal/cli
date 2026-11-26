@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/gatherdeal/cli/internal/conformance"
 	crmv1 "github.com/gatherdeal/cli/internal/generated/crm/v1"
@@ -290,5 +291,21 @@ func TestDecodeAPIConformance(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestRetryAfter(t *testing.T) {
+	now := time.Date(2026, 11, 26, 10, 0, 0, 0, time.UTC)
+	for v, want := range map[string]time.Duration{
+		"":                              0,
+		"3":                             3 * time.Second,
+		"-1":                            0,
+		"soon":                          0,
+		"Thu, 26 Nov 2026 10:00:05 GMT": 5 * time.Second,
+		"Thu, 26 Nov 2026 09:59:00 GMT": 0,
+	} {
+		if got := retryAfter(v, now); got != want {
+			t.Errorf("retryAfter(%q) = %v, want %v", v, got, want)
+		}
 	}
 }

@@ -129,6 +129,9 @@ type Error struct {
 	Hint          string
 	// Problem is the raw problem document of a server failure.
 	Problem json.RawMessage
+	// RetryAfter is the response's Retry-After delay, 0 when absent. It is
+	// never written to the envelope and never authorizes a retry by itself.
+	RetryAfter time.Duration
 	// Cause is kept for errors.Is/As; it is never written to the envelope.
 	Cause error
 }
