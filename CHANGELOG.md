@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 (2026-11-26)
 
 Use the new command names in scripts and saved prompts.
 
