@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- New batch commands write many CRM records from a JSON Lines or JSON array
+  file: `crm contacts batch-create`, `crm contact-logs batch-create`,
+  `crm contact-tags batch-create`, `crm contact-tags batch-add` and
+  `crm contact-tags batch-remove`. Items are sent in atomic chunks of up to
+  100, keyed `<key>.<n>`, and the result reports each item as `succeeded`,
+  `errored`, `uncommitted` or `unknown`. See "Batch writes" in the README.
+- New `crm contact-tags create` creates an organization tag.
+- Exit code 10 (`CLI_BATCH_INCOMPLETE`) now reports a batch command that
+  committed some chunks and not others.
+
 ## 0.6.0 (2026-11-26)
 
 Use the new command names in scripts and saved prompts.

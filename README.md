@@ -299,6 +299,7 @@ execute or `--dry-run` to preview the request.
 gatherdeal crm contact-logs list --contact-id <contact-id> --limit 20
 gatherdeal crm contacts create --input '{"kind":"personal","name":"Amina"}' --yes
 gatherdeal crm contacts update <contact-id> --input '{"remark":"Met at the launch"}' --yes
+gatherdeal crm contact-tags create --input '{"name":"VIP"}' --yes
 gatherdeal crm contact-tags add <contact-id> <tag-id> --yes
 gatherdeal crm contact-tags remove <contact-id> <tag-id> --yes
 gatherdeal crm contact-logs create --input '{"contact_id":"<contact-id>","content":"Called to follow up"}' --yes
@@ -308,10 +309,71 @@ Contact updates accept `name`, `phone`, `email`, `remark` and
 `preferred_language`. Tag assignment and removal take both IDs in the order
 shown above.
 
-Contact creation and contact-log creation generate an idempotency key and
+`crm contact-tags create` creates an organization tag and returns its `id`;
+`CRM_CONTACT_TAG_ALREADY_EXISTS` means the name is taken.
+
+Contact, contact-log and tag creation generate an idempotency key and
 report it in `meta.write.idempotency_key`. When retrying the same request,
 pass its original key with `--idempotency-key`. Tag assignment and removal
 take no key: repeating them leaves the same result.
+
+### Batch writes
+
+Batch commands write many records from a file:
+
+| Command | One item |
+| --- | --- |
+| `gatherdeal crm contacts batch-create` | a contact, as for `contacts create` (no profile image or attributes) |
+| `gatherdeal crm contact-logs batch-create` | `{"contact_id":"…","content":"…"}` (no attachments) |
+| `gatherdeal crm contact-tags batch-create` | `{"name":"…","description":"…"}` |
+| `gatherdeal crm contact-tags batch-add` | `{"contact_id":"…","tag_id":"…"}` |
+| `gatherdeal crm contact-tags batch-remove` | `{"contact_id":"…","tag_id":"…"}` |
+
+```sh
+gatherdeal crm contact-tags batch-add --outlet <outlet-id> --file tags.jsonl --dry-run
+gatherdeal crm contact-tags batch-add --outlet <outlet-id> --file tags.jsonl --yes
+jq -c '.[]' contacts.json | gatherdeal crm contacts batch-create --file - --yes
+```
+
+`--file` reads JSON Lines (one item per line) or one JSON array of items;
+`-` reads standard input. Every item is checked against the operation's
+schema before anything is sent. The items are sent in input order in
+chunks of the operation's limit (100 for these commands). **Each chunk is
+atomic: all of its items are written or none is. Chunks are independent,
+so a batch of more than one chunk can end partly written.**
+
+Chunk `n` (from 0) is sent with the idempotency key `<key>.<n>`, where
+`<key>` is `--idempotency-key` or a generated key reported in
+`meta.write.idempotency_key` and on stderr. After a network error, a
+timeout or a server error, the CLI resends that chunk unchanged, with the
+same key, up to three times. Any other refusal ends the chunk. By default
+the command stops after the first chunk that does not commit and does not
+send the rest; `--continue-on-error` sends every chunk. `--dry-run` prints
+each chunk's key and request body without sending anything.
+
+`data` holds one entry per input item, `{index, state, data?, problem?}`:
+
+| `state` | Meaning |
+| --- | --- |
+| `succeeded` | Written; `data` is the item's result, such as `{"id":"…"}` or `{"outcome":"added"}` |
+| `errored` | Its chunk was rejected (`BATCH_REJECTED`) because of this item; `problem` says why |
+| `uncommitted` | Not written: its chunk was rejected for another item or refused, or was not sent |
+| `unknown` | May have been written: the server's answer was lost or unclear |
+
+Print one line per item with `--jq '.[]'`. The command exits 0 only when
+every item succeeded. When some chunks committed and others did not, it
+fails with `CLI_BATCH_INCOMPLETE` (exit 10); when nothing committed, it
+fails with the first chunk's error, for example `BATCH_REJECTED` (exit 6).
+`error.details` counts the states and lists each chunk's index range, key,
+state, attempts and error. Items left `uncommitted` are never resent
+automatically: fix or drop the errored items and send the rest as a new
+batch with a new key.
+
+Any `unknown` item makes the command fail with `CLI_WRITE_OUTCOME_UNKNOWN`
+(exit 8). Rerun it with the same `--file`, unedited, and the same
+`--idempotency-key`: committed chunks replay their results and unknown
+chunks resolve. Or check the records with a read command. The CLI keeps no
+record of a batch between runs.
 
 ## Read sales pipelines and deals
 
@@ -600,7 +662,7 @@ instead (`successor`).
 | 7 | Rate limited; try again later |
 | 8 | Network, TLS or timeout failure, or a server error |
 | 9 | A person must act first: approve the login, confirm a server, choose a credential store, pair WhatsApp, confirm a write or an uninstall, or install an update |
-| 10 | Partial completion (reserved) |
+| 10 | Partial completion: a batch command committed some chunks and not others (`CLI_BATCH_INCOMPLETE`); `data` lists each item's state |
 | 130 | Interrupted |
 
 For a server failure, the exit code derives from the HTTP status of the
