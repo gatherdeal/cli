@@ -96,6 +96,9 @@ Writes
   It exits 0 only when every item succeeded; CLI_BATCH_INCOMPLETE (exit 10)
   means some chunks committed. After an unknown outcome, rerun with the same
   --file and --idempotency-key, unedited, or check the records with a read.
+  IDEMPOTENCY_KEY_CONFLICT (exit 6) means the key was used with a different
+  input: resend that earlier run's original file with the key to finish it,
+  or use a new key for a new import.
 
 Logging in
 1. Run ` + "`gatherdeal auth login --no-wait`" + `. It exits 9 and the envelope's

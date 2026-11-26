@@ -384,11 +384,12 @@ func TestBatchUnknownOutcomeStops(t *testing.T) {
 		{"server errors", []func(w http.ResponseWriter){
 			func(w http.ResponseWriter) { w.WriteHeader(http.StatusBadGateway) },
 		}, 3},
-		{"key conflict", []func(w http.ResponseWriter){
+		{"key conflict after an unknown outcome", []func(w http.ResponseWriter){
+			func(w http.ResponseWriter) { w.WriteHeader(http.StatusBadGateway) },
 			func(w http.ResponseWriter) {
 				writeJSON(w, 409, problemJSON(409, "IDEMPOTENCY_KEY_CONFLICT", "Conflict.", nil))
 			},
-		}, 1},
+		}, 2},
 		{"refusal after an unknown outcome", []func(w http.ResponseWriter){
 			func(w http.ResponseWriter) { w.WriteHeader(http.StatusGatewayTimeout) },
 			func(w http.ResponseWriter) { writeJSON(w, 422, rejection(true, 0)) },
@@ -427,6 +428,69 @@ func TestBatchUnknownOutcomeStops(t *testing.T) {
 				t.Fatal(chunk)
 			}
 		})
+	}
+}
+
+func TestBatchKeyConflict(t *testing.T) {
+	conflict := problemJSON(409, "IDEMPOTENCY_KEY_CONFLICT", "Idempotency key conflict.", nil)
+	for _, tc := range []struct {
+		name      string
+		committed bool // the second chunk commits
+		exit      int
+		code      string
+	}{
+		{"every chunk conflicts", false, 6, "IDEMPOTENCY_KEY_CONFLICT"},
+		{"conflict beside a committed chunk", true, 6, "IDEMPOTENCY_KEY_CONFLICT"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f, te := loggedIn(t)
+			sends := batchServer(t, f, func(_ int, s batchSend, w http.ResponseWriter) {
+				if tc.committed && strings.HasSuffix(s.key, ".1") {
+					writeJSON(w, 200, addedReceipt(len(s.items)))
+					return
+				}
+				writeJSON(w, 409, conflict)
+			})
+			te.stdin, te.sleeps = membershipLines(150), nil
+			res := te.run(batchArgs("--idempotency-key", "reused-key")...)
+			if res.exit != tc.exit || res.errorCode() != tc.code || len(*sends) != 2 || len(te.sleeps) != 0 {
+				t.Fatal(res.exit, len(*sends), res.stdout)
+			}
+			e := res.env["error"].(map[string]any)
+			if e["http_status"].(float64) != 409 || !strings.Contains(res.env["hint"].(string), "already used with a different input") ||
+				!strings.Contains(res.env["hint"].(string), "use a new --idempotency-key") || strings.Contains(res.env["hint"].(string), "Rerun with the same --file") {
+				t.Fatal(res.stdout)
+			}
+			if d := e["details"].(map[string]any); d["unknown"].(float64) == 0 || d["chunks"].([]any)[0].(map[string]any)["state"] != "unknown" {
+				t.Fatal(d)
+			}
+			rows := batchRows(t, res)
+			got := states(rows)
+			unknown := span(0, 149)
+			if tc.committed {
+				unknown = span(0, 99)
+			}
+			if !slices.Equal(got["unknown"], unknown) || rows[0]["problem"].(map[string]any)["code"] != "IDEMPOTENCY_KEY_CONFLICT" {
+				t.Fatal(got)
+			}
+			if tc.committed && (!slices.Equal(got["succeeded"], span(100, 149)) || rows[100]["problem"] != nil) {
+				t.Fatal(got)
+			}
+		})
+	}
+
+	// A conflict beside an unknown transport outcome keeps the general unknown error.
+	f, te := loggedIn(t)
+	batchServer(t, f, func(_ int, s batchSend, w http.ResponseWriter) {
+		if strings.HasSuffix(s.key, ".1") {
+			w.WriteHeader(http.StatusBadGateway)
+			return
+		}
+		writeJSON(w, 409, conflict)
+	})
+	te.stdin = membershipLines(150)
+	if res := te.run(batchArgs()...); res.exit != 8 || res.errorCode() != "CLI_WRITE_OUTCOME_UNKNOWN" {
+		t.Fatal(res.stdout)
 	}
 }
 

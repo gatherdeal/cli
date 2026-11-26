@@ -379,6 +379,15 @@ Any `unknown` item makes the command fail with `CLI_WRITE_OUTCOME_UNKNOWN`
 chunks resolve. Or check the records with a read command. The CLI keeps no
 record of a batch between runs.
 
+When the server answers `IDEMPOTENCY_KEY_CONFLICT`, the key was already
+used with a different input and nothing was written for this one. The
+chunk's items stay `unknown`, each with that problem, because the earlier
+run under the key may have written them. If every unknown chunk is such a
+conflict, the command fails with `IDEMPOTENCY_KEY_CONFLICT` (exit 6, as for
+a single write) instead of `CLI_WRITE_OUTCOME_UNKNOWN`. To finish the
+earlier run, resend its original file, unedited, with that key; for a new
+import, use a new `--idempotency-key`.
+
 ## Read sales pipelines and deals
 
 These commands require `crm.deal.read`. Use `--search` to match names, and

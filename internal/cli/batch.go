@@ -85,6 +85,14 @@ type chunkReport struct {
 	Attempts       int          `json:"attempts"`
 	Complete       *bool        `json:"complete,omitempty"`
 	Error          *chunkFailed `json:"error,omitempty"`
+
+	conflict *output.Error
+}
+
+const codeKeyConflict = "IDEMPOTENCY_KEY_CONFLICT"
+
+func isKeyConflict(e *output.Error) bool {
+	return e.HTTPStatus == http.StatusConflict && e.Code == codeKeyConflict
 }
 
 type chunkFailed struct {
@@ -332,6 +340,9 @@ type chunkResult struct {
 	attempts int
 	results  []json.RawMessage
 	err      error
+	// keyConflict is a key conflict answered while the key was clean: the
+	// key holds another input, possibly committed by an earlier run.
+	keyConflict bool
 }
 
 // sendChunk sends one frozen chunk, always as the same request with the
@@ -360,7 +371,10 @@ func (inv *Invocation) sendChunk(ctx context.Context, invoke invokeInput, c *bat
 		case ctx.Err() != nil:
 		case e.Code == output.CodeWriteOutcomeUnknown || e.HTTPStatus >= 500:
 			resend = true
-		case e.HTTPStatus == http.StatusConflict && e.Code == "IDEMPOTENCY_KEY_CONFLICT":
+		case isKeyConflict(e):
+			if clean {
+				return chunkResult{state: chunkUnknown, attempts: attempt, err: err, keyConflict: true}
+			}
 		case clean && e.HTTPStatus == http.StatusTooManyRequests:
 			if attempt >= batchMaxAttempts || inv.sleep(ctx, batchDelay(attempt, e)) != nil {
 				return chunkResult{state: chunkRefused, attempts: attempt, err: err}
@@ -433,8 +447,14 @@ func applyChunk(rows []batchRow, c *batchChunk, res chunkResult, report *chunkRe
 		}
 		return
 	case chunkUnknown:
+		// A key conflict is answered for the whole chunk; each item carries it.
+		var problem json.RawMessage
+		if res.keyConflict {
+			problem = output.AsError(res.err).Problem
+		}
 		for i := range c.items {
 			rows[c.first+i].State = batchUnknown
+			rows[c.first+i].Problem = problem
 		}
 	case chunkRefused:
 		if complete, problems, ok := itemProblems(res.err, len(c.items)); ok {
@@ -445,6 +465,9 @@ func applyChunk(rows []batchRow, c *batchChunk, res chunkResult, report *chunkRe
 		}
 	}
 	e := output.AsError(res.err)
+	if res.keyConflict {
+		report.conflict = e
+	}
 	report.Error = &chunkFailed{Code: e.Code, Message: e.Message, HTTPStatus: e.HTTPStatus, CorrelationID: e.CorrelationID}
 }
 
@@ -488,6 +511,22 @@ func itemProblems(err error, n int) (bool, map[int]json.RawMessage, bool) {
 // the command's error.
 func batchOutcome(rows []batchRow, reports []chunkReport, first error) error {
 	s := batchSummary{Chunks: reports}
+	// conflict is the first key conflict when every unknown chunk ended in
+	// one: the server wrote nothing for this input, but an earlier run
+	// under the key may have.
+	var conflict *output.Error
+	for _, r := range reports {
+		if r.State != chunkUnknown {
+			continue
+		}
+		if r.conflict == nil {
+			conflict = nil
+			break
+		}
+		if conflict == nil {
+			conflict = r.conflict
+		}
+	}
 	for _, r := range rows {
 		switch r.State {
 		case batchSucceeded:
@@ -503,6 +542,12 @@ func batchOutcome(rows []batchRow, reports []chunkReport, first error) error {
 	switch {
 	case s.Succeeded == len(rows):
 		return nil
+	case s.Unknown > 0 && conflict != nil:
+		// Same exit code and error code as a single write's key conflict.
+		e := *conflict
+		e.Cause = conflict
+		return e.WithDetails(s).
+			WithHint("The --idempotency-key was already used with a different input, so the server wrote nothing for this one. Items marked unknown may have been written by that earlier run: to finish it, resend its original file, unedited, with this key. For a new import, use a new --idempotency-key.")
 	case s.Unknown > 0:
 		return output.UnknownWriteOutcome(first).WithDetails(s).
 			WithHint("Items in unknown state may have been written. Rerun with the same --file and --idempotency-key to replay committed chunks and resolve unknown ones, or check them through a read command; never edit or reorder the file before such a rerun.")
