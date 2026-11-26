@@ -1555,6 +1555,74 @@
             "usage": "Stable replay key; preserve it when reconciling an uncertain result."
           },
           {
+            "name": "file",
+            "required": true,
+            "type": "string",
+            "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
+          },
+          {
+            "name": "continue-on-error",
+            "type": "bool",
+            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm contact-logs batch-create",
+        "network": true,
+        "operation": "crm.contact_logs.batch_create",
+        "output": "json",
+        "read_only": false,
+        "summary": "Batch Create Contact Logs from --file in chunks of up to 100 items; each chunk is atomic, the chunks are independent."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
             "name": "input",
             "required": true,
             "type": "string",
@@ -1788,6 +1856,263 @@
             "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
           },
           {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "file",
+            "required": true,
+            "type": "string",
+            "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
+          },
+          {
+            "name": "continue-on-error",
+            "type": "bool",
+            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm contact-tags batch-add",
+        "network": true,
+        "operation": "crm.contact_tags.batch_add",
+        "output": "json",
+        "read_only": false,
+        "summary": "Batch Add Contact Tags from --file in chunks of up to 100 items; each chunk is atomic, the chunks are independent."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "file",
+            "required": true,
+            "type": "string",
+            "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
+          },
+          {
+            "name": "continue-on-error",
+            "type": "bool",
+            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm contact-tags batch-create",
+        "network": true,
+        "operation": "crm.contact_tags.batch_create",
+        "output": "json",
+        "read_only": false,
+        "summary": "Batch Create Contact Tags from --file in chunks of up to 100 items; each chunk is atomic, the chunks are independent."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "file",
+            "required": true,
+            "type": "string",
+            "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
+          },
+          {
+            "name": "continue-on-error",
+            "type": "bool",
+            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm contact-tags batch-remove",
+        "network": true,
+        "operation": "crm.contact_tags.batch_remove",
+        "output": "json",
+        "read_only": false,
+        "summary": "Batch Remove Contact Tags from --file in chunks of up to 100 items; each chunk is atomic, the chunks are independent."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "input",
+            "required": true,
+            "type": "string",
+            "usage": "JSON body: inline JSON, a file path, or - for standard input."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm contact-tags create",
+        "network": true,
+        "operation": "crm.contact_tags.create",
+        "output": "json",
+        "read_only": false,
+        "summary": "Create Contact Tag."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
             "name": "page",
             "type": "int",
             "usage": "Page number (1-based; default 1). Page numbers reach at most 10000 rows deep; continue with --after beyond that."
@@ -1927,6 +2252,74 @@
         "output": "json",
         "read_only": false,
         "summary": "Remove Contact Tag."
+      },
+      {
+        "app": "crm",
+        "args": [],
+        "flags": [
+          {
+            "name": "profile",
+            "type": "string",
+            "usage": "Local profile name (default: \"default\", the built-in production profile; with --server: the server host)."
+          },
+          {
+            "name": "server",
+            "type": "string",
+            "usage": "Non-default GatherDeal server origin. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "lang",
+            "type": "string",
+            "usage": "Language of server error text: a tag such as ms, zh-Hans, zh-Hant or en, or an Accept-Language list (default: from LC_ALL, LC_MESSAGES or LANG; otherwise en). Error codes never change."
+          },
+          {
+            "name": "accept-server-risk",
+            "type": "string",
+            "usage": "Confirm a non-default --server during auth login without a terminal prompt; ignored by other commands. Must equal the server origin exactly. Only pass it if you chose that server yourself."
+          },
+          {
+            "name": "outlet",
+            "type": "string",
+            "usage": "Outlet id (UUID) within this access's approved write scope."
+          },
+          {
+            "name": "dry-run",
+            "type": "bool",
+            "usage": "Preview the typed request without submitting the write."
+          },
+          {
+            "name": "yes",
+            "type": "bool",
+            "usage": "Explicitly confirm execution of this write."
+          },
+          {
+            "name": "idempotency-key",
+            "type": "string",
+            "usage": "Stable replay key; preserve it when reconciling an uncertain result."
+          },
+          {
+            "name": "file",
+            "required": true,
+            "type": "string",
+            "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
+          },
+          {
+            "name": "continue-on-error",
+            "type": "bool",
+            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+          },
+          {
+            "name": "jq",
+            "type": "string",
+            "usage": "jq expression over data (not the envelope) of a successful result. Prints each result on its own line instead of the envelope: strings raw, other values as compact JSON. A failure prints the normal error envelope unfiltered. An invalid expression exits 2 before any request."
+          }
+        ],
+        "name": "crm contacts batch-create",
+        "network": true,
+        "operation": "crm.contacts.batch_create",
+        "output": "json",
+        "read_only": false,
+        "summary": "Batch Create Contacts from --file in chunks of up to 100 items; each chunk is atomic, the chunks are independent."
       },
       {
         "app": "crm",
@@ -4702,7 +5095,7 @@
       },
       {
         "code": 10,
-        "meaning": "Partial completion (reserved).",
+        "meaning": "Partial completion: a batch command committed some of its chunks and not others (CLI_BATCH_INCOMPLETE); data lists the state of each item.",
         "name": "partial"
       },
       {

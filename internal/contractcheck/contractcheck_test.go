@@ -467,7 +467,8 @@ func TestRequestFlagsMatchContracts(t *testing.T) {
 		}
 		var doc struct {
 			Paths map[string]map[string]struct {
-				ID          string `json:"x-gd-public-id"`
+				ID          string          `json:"x-gd-public-id"`
+				Batch       json.RawMessage `json:"x-gd-batch"`
 				RequestBody json.RawMessage
 				Parameters  []struct {
 					Name, In string
@@ -492,8 +493,11 @@ func TestRequestFlagsMatchContracts(t *testing.T) {
 					flags[f.Name] = f
 				}
 				input, hasInput := flags["input"]
-				if hasInput != (route.RequestBody != nil) {
-					t.Errorf("%s: --input present=%v, OpenAPI request body present=%v", c.Name(), hasInput, route.RequestBody != nil)
+				// A batch body is read from --file and sent in chunks.
+				file, hasFile := flags["file"]
+				batch := route.Batch != nil
+				if hasInput != (route.RequestBody != nil && !batch) || hasFile != batch || batch && (!file.Required || route.RequestBody == nil) {
+					t.Errorf("%s: --input present=%v, --file present=%v, OpenAPI request body present=%v, batch=%v", c.Name(), hasInput, hasFile, route.RequestBody != nil, batch)
 				}
 				if hasInput && input.Required != (route.ID != "whatsapp.agents.create") {
 					t.Errorf("%s: unexpected --input required=%v", c.Name(), input.Required)

@@ -59,7 +59,11 @@ func generatedCommands(existing []*Command) []*Command {
 			// them through its successor.
 			dispatch = crmSuccessor(b, op.Deprecation.Successor)
 		}
-		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, dispatch.Bind, (*crmv1.Client)(nil),
+		var batch *batchSpec
+		if b.Batch != nil {
+			batch = &batchSpec{MaxItems: b.Batch.MaxItems}
+		}
+		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, batch, dispatch.Bind, (*crmv1.Client)(nil),
 			func(inv *Invocation) (invokeInput, error) {
 				client, err := inv.contactsClient()
 				if err != nil {
@@ -70,11 +74,7 @@ func generatedCommands(existing []*Command) []*Command {
 				if requiresIfMatch(op.PublicID) {
 					opts = append(opts, crmv1.WithIfMatch(inv.str("if-match")))
 				}
-				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
-					key, err := inv.generatedWriteKey(op)
-					if err != nil {
-						return nil, "", err
-					}
+				return func(ctx context.Context, input any, key string) (jsontext.Value, string, error) {
 					return client.Invoke(ctx, dispatch, input, outlet, key, !op.ReadOnly(), opts...)
 				}, nil
 			})
@@ -88,7 +88,7 @@ func generatedCommands(existing []*Command) []*Command {
 			continue
 		}
 		op := contracts.MustOperation(b.PublicID)
-		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, b.Bind, (*wa.Client)(nil),
+		c := generatedCommand(op, b.Summary, b.HasBody, b.Arguments, nil, b.Bind, (*wa.Client)(nil),
 			func(inv *Invocation) (invokeInput, error) {
 				client, err := inv.whatsappClient()
 				if err != nil {
@@ -99,11 +99,7 @@ func generatedCommands(existing []*Command) []*Command {
 				if requiresIfMatch(op.PublicID) {
 					opts = append(opts, wa.WithIfMatch(inv.str("if-match")))
 				}
-				return func(ctx context.Context, input any) (jsontext.Value, string, error) {
-					key, err := inv.generatedWriteKey(op)
-					if err != nil {
-						return nil, "", err
-					}
+				return func(ctx context.Context, input any, key string) (jsontext.Value, string, error) {
 					return client.Invoke(ctx, b, input, outlet, key, !op.ReadOnly(), opts...)
 				}, nil
 			})
@@ -146,12 +142,15 @@ type bindingArgument struct {
 	Required           bool
 }
 type bindInput func(map[string]jsontext.Value, jsontext.Value) (any, error)
-type invokeInput func(context.Context, any) (jsontext.Value, string, error)
+
+// invokeInput sends one bound request with the given idempotency key ("" for
+// an unkeyed operation).
+type invokeInput func(ctx context.Context, input any, key string) (jsontext.Value, string, error)
 
 func generatedCommand[A ~struct {
 	Name, WireName, In string
 	Required           bool
-}](op contracts.Operation, summary string, hasBody bool, args []A, bind bindInput, client any, connect func(*Invocation) (invokeInput, error)) *Command {
+}](op contracts.Operation, summary string, hasBody bool, args []A, batch *batchSpec, bind bindInput, client any, connect func(*Invocation) (invokeInput, error)) *Command {
 	if RequiresPublishedOperationExclusion(op) {
 		return nil
 	}
@@ -176,6 +175,9 @@ func generatedCommand[A ~struct {
 		} else if !p.shared {
 			c.Flags = append(c.Flags, p.flag)
 		}
+	}
+	if batch != nil {
+		return batchCommand(c, op, *batch, params, bind, connect)
 	}
 	result := generatedResult(op, client, c)
 	run := func(ctx context.Context, inv *Invocation) (any, error) {
@@ -252,7 +254,11 @@ func generatedCommand[A ~struct {
 					return nil, err
 				}
 			}
-			raw, corr, err := invoke(ctx, bound)
+			key, err := inv.generatedWriteKey(op)
+			if err != nil {
+				return nil, err
+			}
+			raw, corr, err := invoke(ctx, bound, key)
 			inv.Meta.CorrelationID = corr
 			return raw, auth.Explain(err)
 		}

@@ -85,6 +85,16 @@ Writes
   write-<invocation_id>.json in the CLI config directory using the ID on stderr.
   CLI_WRITE_OUTCOME_UNKNOWN (exit 8) means reconcile before repeating a write.
   A retryable error never authorizes replay.
+- batch-<verb> commands read items from --file (JSON Lines or one JSON array;
+  - for stdin) and send them in chunks of the operation's limit. Each chunk
+  is atomic and keyed <key>.<n> from meta.write.idempotency_key; chunks are
+  independent. data has one entry per input item: {index, state, data?,
+  problem?} with state succeeded, errored (problem says why), uncommitted
+  (not written; send it again in a new batch) or unknown (may be written).
+  The command stops at the first chunk that fails unless --continue-on-error.
+  It exits 0 only when every item succeeded; CLI_BATCH_INCOMPLETE (exit 10)
+  means some chunks committed. After an unknown outcome, rerun with the same
+  --file and --idempotency-key, unedited, or check the records with a read.
 
 Logging in
 1. Run ` + "`gatherdeal auth login --no-wait`" + `. It exits 9 and the envelope's
@@ -173,6 +183,12 @@ var appNotes = map[string]string{
   with --idempotency-key; IDEMPOTENCY_KEY_CONFLICT means the key was used for
   other input. contact-tags add and remove take no key and are safe to
   repeat.
+- gatherdeal crm contact-tags create --input '{"name":"VIP"}' --yes creates an
+  organization tag and returns data.id; CRM_CONTACT_TAG_ALREADY_EXISTS means
+  the name is taken (find it with contact-tags list --search).
+- contacts batch-create, contact-logs batch-create, contact-tags batch-create,
+  batch-add and batch-remove take the same items as the single write, for
+  example {"contact_id":"…","tag_id":"…"} per line for batch-add.
 - gatherdeal crm deals create --outlet <id> --input <json> --yes creates a deal
   in that outlet from {"pipeline_id":"…","stage_id":"…"} plus optional type,
   priority and remark; CRM names it and returns data.id. Without --outlet, CRM

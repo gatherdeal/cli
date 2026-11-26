@@ -56,6 +56,10 @@ const (
 	CodeProfilePrincipalMismatch    = "CLI_PROFILE_PRINCIPAL_MISMATCH"
 )
 
+// CodeBatchIncomplete: a batch command committed some of its chunks and not
+// others; data lists the state of each item.
+const CodeBatchIncomplete = "CLI_BATCH_INCOMPLETE"
+
 const (
 	CodeWriteOutcomeUnknown       = "CLI_WRITE_OUTCOME_UNKNOWN"
 	CodeWriteConfirmationRequired = "CLI_WRITE_CONFIRMATION_REQUIRED"

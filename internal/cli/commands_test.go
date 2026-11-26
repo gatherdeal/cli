@@ -25,9 +25,9 @@ func TestCommandsPrefix(t *testing.T) {
 		args []string
 		want []string
 	}{
-		{[]string{"crm"}, []string{"crm contacts list", "crm contacts get", "crm contact-logs create", "crm contact-logs list", "crm contact-tags add", "crm contact-tags list", "crm contact-tags remove", "crm contacts create", "crm contacts update", "crm deal-fields update", "crm deals create", "crm deals get", "crm deals list", "crm deals move-stage", "crm deals update", "crm sales-pipelines list", "crm contact-tags assign"}},
-		{[]string{"crm", "contacts"}, []string{"crm contacts list", "crm contacts get", "crm contacts create", "crm contacts update"}},
-		{[]string{"crm", "contact-tags"}, []string{"crm contact-tags add", "crm contact-tags list", "crm contact-tags remove", "crm contact-tags assign"}},
+		{[]string{"crm"}, []string{"crm contacts list", "crm contacts get", "crm contact-logs batch-create", "crm contact-logs create", "crm contact-logs list", "crm contact-tags add", "crm contact-tags batch-add", "crm contact-tags batch-create", "crm contact-tags batch-remove", "crm contact-tags create", "crm contact-tags list", "crm contact-tags remove", "crm contacts batch-create", "crm contacts create", "crm contacts update", "crm deal-fields update", "crm deals create", "crm deals get", "crm deals list", "crm deals move-stage", "crm deals update", "crm sales-pipelines list", "crm contact-tags assign"}},
+		{[]string{"crm", "contacts"}, []string{"crm contacts list", "crm contacts get", "crm contacts batch-create", "crm contacts create", "crm contacts update"}},
+		{[]string{"crm", "contact-tags"}, []string{"crm contact-tags add", "crm contact-tags batch-add", "crm contact-tags batch-create", "crm contact-tags batch-remove", "crm contact-tags create", "crm contact-tags list", "crm contact-tags remove", "crm contact-tags assign"}},
 		{[]string{"whatsapp", "messages"}, []string{"whatsapp messages list", "whatsapp messages get", "whatsapp messages create"}},
 		{[]string{"whatsapp", "agents", "create"}, []string{"whatsapp agents create"}},
 		{[]string{"auth"}, []string{"auth profiles list", "auth login", "auth status", "auth logout"}},
