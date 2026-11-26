@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 (2026-11-26)
+
+- `gatherdeal status`, and the account check that runs after
+  `gatherdeal login`, now use the identity `/v1/access-context` endpoint.
+  Upgrade before the old endpoint is retired: earlier versions will then
+  fail to report sign-in status.
+
 ## 0.6.0 (2026-11-26)
 
 Use the new command names in scripts and saved prompts.
