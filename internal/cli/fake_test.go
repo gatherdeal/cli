@@ -160,7 +160,7 @@ func (f *fakeServer) discovery() server.Discovery {
 	return server.Discovery{
 		SchemaVersion: 1, Server: o, Issuer: o + "/oidc", ClientID: "gatherdeal-cli",
 		DeviceAuthorizationEndpoint: o + "/oidc/device/authorize", TokenEndpoint: o + "/oidc/device/token",
-		RevocationEndpoint: o + "/oidc/revoke", StatusEndpoint: o + "/identity/v1/authenticate",
+		RevocationEndpoint: o + "/oidc/revoke", StatusEndpoint: o + "/identity/v1/access-context",
 		VerificationURI: f.verificationURI, Services: map[string]server.Service{"crm": {BasePath: "/crm/v1"}},
 		MinCLIVersion: "0.1.0",
 	}
@@ -278,7 +278,7 @@ func (f *fakeServer) handle(w http.ResponseWriter, r *http.Request) {
 		}
 		f.revoked[r.PostForm.Get("token")] = true
 		writeJSON(w, 200, "null")
-	case r.Method == http.MethodPost && r.URL.Path == "/identity/v1/authenticate":
+	case r.Method == http.MethodPost && r.URL.Path == "/identity/v1/access-context":
 		f.statusCalls++
 		if hook := f.onStatus; hook != nil {
 			// A login calls status after the token response and before it
