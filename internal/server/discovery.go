@@ -49,7 +49,7 @@ func Production() Discovery {
 		DeviceAuthorizationEndpoint: ProductionOrigin + "/oidc/device/authorize",
 		TokenEndpoint:               ProductionOrigin + "/oidc/device/token",
 		RevocationEndpoint:          ProductionOrigin + "/oidc/revoke",
-		StatusEndpoint:              ProductionOrigin + "/identity/v1/authenticate",
+		StatusEndpoint:              ProductionOrigin + "/identity/v1/access-context",
 		VerificationURI:             "https://" + ProductionVerificationHost + "/device",
 		Services:                    compiledServices(),
 		MinCLIVersion:               "0.1.0",
