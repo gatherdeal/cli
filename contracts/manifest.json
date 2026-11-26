@@ -8,9 +8,190 @@
       "service_path": "/crm",
       "contract": "contracts/crm/v1/openapi.json",
       "go_package": "internal/generated/crm/v1",
-      "digest": "sha256:a58cd29ebc1238773134db65506582862adf7a61dd32b08ecc352d4418d05d89",
-      "generated_go_digest": "sha256:57c69650fb2cc6d828eb8dca34534d3d3a2282966f73cdb14cdd18c7febf2610",
+      "digest": "sha256:1e0a462977a9b1c654d4d23aa1a20b56e355a879a73e00c3ec647888e67bf6ef",
+      "generated_go_digest": "sha256:4a4d7dfaa4131e38670122623d1e3ed548acff1c74c1294fdbf553c2a8570d45",
+      "source_commit": "2af4b734bcf7739be3ace5b385eb783cab05465e",
+      "utilities_version": "v0.0.0-20261126055054-69106a490751",
       "operations": [
+        {
+          "public_id": "crm.contact_logs.batch_create",
+          "command": "crm contact-logs batch-create",
+          "tool": "crm_contact_logs_batch_create",
+          "method": "POST",
+          "path": "/v1/contact-logs/batch-create",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.contact.read",
+              "crm.contact.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "BATCH_REJECTED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_LOG_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "item_errors": [
+            "CRM_CONTACT_NOT_FOUND",
+            "FORBIDDEN",
+            "VALIDATION_FAILED"
+          ],
+          "batch": {
+            "verb": "create",
+            "max_items": 100
+          },
+          "go_method": "BatchCreateContactLogs",
+          "input_type": "BatchInputBatchCreateContactLogItem",
+          "output_type": "BatchOutputKeyedAcknowledgment"
+        },
         {
           "public_id": "crm.contact_logs.create",
           "command": "crm contact-logs create",
@@ -547,6 +728,705 @@
           ]
         },
         {
+          "public_id": "crm.contact_tags.batch_add",
+          "command": "crm contact-tags batch-add",
+          "tool": "crm_contact_tags_batch_add",
+          "method": "POST",
+          "path": "/v1/contact-tags/batch-add",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.contact.read",
+              "crm.contact.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "BATCH_REJECTED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_TAG_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "item_errors": [
+            "CRM_CONTACT_NOT_FOUND",
+            "CRM_CONTACT_TAG_NOT_FOUND",
+            "FORBIDDEN",
+            "VALIDATION_FAILED"
+          ],
+          "batch": {
+            "verb": "add",
+            "max_items": 100
+          },
+          "go_method": "BatchAddContactTags",
+          "input_type": "BatchInputContactTagMembershipItem",
+          "output_type": "BatchOutputContactTagAddResult"
+        },
+        {
+          "public_id": "crm.contact_tags.batch_create",
+          "command": "crm contact-tags batch-create",
+          "tool": "crm_contact_tags_batch_create",
+          "method": "POST",
+          "path": "/v1/contact-tags/batch-create",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.definition.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "BATCH_REJECTED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_TAG_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "item_errors": [
+            "CRM_CONTACT_TAG_ALREADY_EXISTS",
+            "FORBIDDEN",
+            "VALIDATION_FAILED"
+          ],
+          "batch": {
+            "verb": "create",
+            "max_items": 100
+          },
+          "go_method": "BatchCreateContactTags",
+          "input_type": "BatchInputBatchCreateContactTagItem",
+          "output_type": "BatchOutputKeyedAcknowledgment"
+        },
+        {
+          "public_id": "crm.contact_tags.batch_remove",
+          "command": "crm contact-tags batch-remove",
+          "tool": "crm_contact_tags_batch_remove",
+          "method": "POST",
+          "path": "/v1/contact-tags/batch-remove",
+          "effect": {
+            "mutation": "non_additive",
+            "interaction": "closed",
+            "risks": [
+              "destructive"
+            ]
+          },
+          "permissions": {
+            "allOf": [
+              "crm.contact.read",
+              "crm.contact.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "BATCH_REJECTED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_TAG_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "item_errors": [
+            "CRM_CONTACT_NOT_FOUND",
+            "CRM_CONTACT_TAG_NOT_FOUND",
+            "FORBIDDEN",
+            "VALIDATION_FAILED"
+          ],
+          "batch": {
+            "verb": "remove",
+            "max_items": 100
+          },
+          "go_method": "BatchRemoveContactTags",
+          "input_type": "BatchInputContactTagMembershipItem",
+          "output_type": "BatchOutputContactTagRemoveResult"
+        },
+        {
+          "public_id": "crm.contact_tags.create",
+          "command": "crm contact-tags create",
+          "tool": "crm_contact_tags_create",
+          "method": "POST",
+          "path": "/v1/contact-tags",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.definition.write"
+            ]
+          },
+          "outlet_scope": "organization_level",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_TAG_ALREADY_EXISTS",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_TAG_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "go_method": "CreateContactTag",
+          "input_type": "CreateContactTagInput",
+          "output_type": "KeyedAcknowledgment"
+        },
+        {
           "public_id": "crm.contact_tags.list",
           "command": "crm contact-tags list",
           "tool": "crm_contact_tags_list",
@@ -928,6 +1808,192 @@
           "input_type": "RemoveContactTagInput"
         },
         {
+          "public_id": "crm.contacts.batch_create",
+          "command": "crm contacts batch-create",
+          "tool": "crm_contacts_batch_create",
+          "method": "POST",
+          "path": "/v1/contacts/batch-create",
+          "effect": {
+            "mutation": "additive",
+            "interaction": "closed",
+            "risks": []
+          },
+          "permissions": {
+            "allOf": [
+              "crm.contact.write"
+            ]
+          },
+          "outlet_scope": "filtered",
+          "idempotency": "keyed",
+          "errors": [
+            {
+              "code": "BAD_REQUEST",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "BATCH_REJECTED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "CLIENT_UPGRADE_REQUIRED",
+              "status": 426,
+              "retryable": false
+            },
+            {
+              "code": "CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_MASTER_OUTLET_MISSING",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_NOT_FOUND",
+              "status": 404,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_OUTLET_REQUIRED",
+              "status": 422,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_AUDIENCE_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_CREDENTIAL_LOCATION",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EFFECT_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_EXPANSION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FEATURE_NOT_ENTITLED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_FILTER_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_IMPERSONATION_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_INACTIVE",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_KIND_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_KEY_NOT_ADMITTED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ORGANIZATION_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_OUTLET_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PERMISSION_DENIED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_PRINCIPAL_INACTIVE",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_ROUTE_NOT_ALLOWED",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_TARGET_MISMATCH",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "DELEGATED_ACCESS_UNSUPPORTED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "FORBIDDEN",
+              "status": 403,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_CONFLICT",
+              "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "IDEMPOTENCY_KEY_REQUIRED",
+              "status": 400,
+              "retryable": false
+            },
+            {
+              "code": "INTERNAL_ERROR",
+              "status": 500,
+              "retryable": false
+            },
+            {
+              "code": "UNAUTHORIZED",
+              "status": 401,
+              "retryable": false
+            },
+            {
+              "code": "VALIDATION_FAILED",
+              "status": 422,
+              "retryable": false
+            }
+          ],
+          "item_errors": [
+            "CRM_CONTACT_CHILD_KIND_MISMATCH",
+            "CRM_CONTACT_NOT_FOUND",
+            "CRM_CONTACT_PHONE_OCCUPIED",
+            "CRM_CONTACT_TAG_NOT_FOUND",
+            "FORBIDDEN",
+            "VALIDATION_FAILED"
+          ],
+          "batch": {
+            "verb": "create",
+            "max_items": 100
+          },
+          "go_method": "BatchCreateContacts",
+          "input_type": "BatchInputBatchCreateContactItem",
+          "output_type": "BatchOutputKeyedAcknowledgment"
+        },
+        {
           "public_id": "crm.contacts.create",
           "command": "crm contacts create",
           "tool": "crm_contacts_create",
@@ -962,6 +2028,11 @@
               "retryable": false
             },
             {
+              "code": "CRM_CONTACT_CHILD_KIND_MISMATCH",
+              "status": 422,
+              "retryable": false
+            },
+            {
               "code": "CRM_CONTACT_EMAIL_OCCUPIED",
               "status": 409,
               "retryable": false
@@ -984,6 +2055,11 @@
             {
               "code": "CRM_CONTACT_PHONE_OCCUPIED",
               "status": 409,
+              "retryable": false
+            },
+            {
+              "code": "CRM_CONTACT_TAG_NOT_FOUND",
+              "status": 404,
               "retryable": false
             },
             {
@@ -2988,6 +4064,14 @@
           "schema": "#/components/schemas/BadRequestProblem"
         },
         {
+          "code": "BATCH_REJECTED",
+          "type": "https://docs.gatherdeal.ai/errors/BATCH_REJECTED",
+          "status": 422,
+          "retryable": false,
+          "title": "The batch was rejected.",
+          "schema": "#/components/schemas/BatchRejectedProblem"
+        },
+        {
           "code": "CLIENT_UPGRADE_REQUIRED",
           "type": "https://docs.gatherdeal.ai/errors/CLIENT_UPGRADE_REQUIRED",
           "status": 426,
@@ -3082,6 +4166,14 @@
           "retryable": false,
           "title": "Contact is not allowed to be set as a referrer.",
           "schema": "#/components/schemas/CRMContactReferrerNotAllowedProblem"
+        },
+        {
+          "code": "CRM_CONTACT_TAG_ALREADY_EXISTS",
+          "type": "https://docs.gatherdeal.ai/errors/CRM_CONTACT_TAG_ALREADY_EXISTS",
+          "status": 409,
+          "retryable": false,
+          "title": "Contact tag already exists.",
+          "schema": "#/components/schemas/CRMContactTagAlreadyExistsProblem"
         },
         {
           "code": "CRM_CONTACT_TAG_NOT_FOUND",
