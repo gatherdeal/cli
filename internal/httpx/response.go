@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 // ResponseDoer sends through the origin-bound client. The outlet selector is
@@ -20,6 +22,22 @@ type ResponseDoer struct {
 	OutletID      string
 	CorrelationID string
 	Problem       []byte
+	// RetryAfter is the last response's Retry-After delay, 0 when absent.
+	RetryAfter time.Duration
+}
+
+// retryAfter parses a Retry-After value: delay seconds or an HTTP date.
+func retryAfter(v string, now time.Time) time.Duration {
+	if v == "" {
+		return 0
+	}
+	if s, err := strconv.Atoi(v); err == nil {
+		return time.Duration(max(s, 0)) * time.Second
+	}
+	if t, err := http.ParseTime(v); err == nil && t.After(now) {
+		return t.Sub(now)
+	}
+	return 0
 }
 
 func (d *ResponseDoer) Do(req *http.Request) (*http.Response, error) {
@@ -34,6 +52,7 @@ func (d *ResponseDoer) Do(req *http.Request) (*http.Response, error) {
 		return resp, err
 	}
 	d.CorrelationID = resp.Header.Get(CorrelationHeader)
+	d.RetryAfter = retryAfter(resp.Header.Get("Retry-After"), time.Now())
 	d.Problem = nil
 	if (resp.StatusCode >= 200 && resp.StatusCode < 300) || MediaType(resp.Header.Get("Content-Type")) != ProblemMediaType {
 		return resp, nil

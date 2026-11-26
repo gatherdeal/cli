@@ -253,6 +253,15 @@ func ExpansionField(param string) string {
 // without one by its HTTP status, a contract violation as a protocol error
 // and anything else as a transport failure.
 func (c call) apiError(ctx context.Context, err error, write bool) error {
+	err = c.classify(ctx, err, write)
+	var e *output.Error
+	if errors.As(err, &e) {
+		e.RetryAfter = c.d.RetryAfter
+	}
+	return err
+}
+
+func (c call) classify(ctx context.Context, err error, write bool) error {
 	var problem *crmv1.Problem
 	if errors.As(err, &problem) {
 		p := problem
