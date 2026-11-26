@@ -6,8 +6,11 @@
   file: `crm contacts batch-create`, `crm contact-logs batch-create`,
   `crm contact-tags batch-create`, `crm contact-tags batch-add` and
   `crm contact-tags batch-remove`. Items are sent in atomic chunks of up to
-  100, keyed `<key>.<n>`, and the result reports each item as `succeeded`,
-  `errored`, `uncommitted` or `unknown`. See "Batch writes" in the README.
+  100, keyed `<key>.<n>`; every chunk is sent even when one fails, unless
+  `--stop-on-error` is given. A chunk is resent unchanged, with the same
+  key, after a network or server error and after a rate limit. The result
+  reports each item as `succeeded`, `errored`, `uncommitted` or `unknown`.
+  See "Batch writes" in the README.
 - New `crm contact-tags create` creates an organization tag.
 - Exit code 10 (`CLI_BATCH_INCOMPLETE`) now reports a batch command that
   committed some chunks and not others.

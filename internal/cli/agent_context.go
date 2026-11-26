@@ -91,7 +91,8 @@ Writes
   independent. data has one entry per input item: {index, state, data?,
   problem?} with state succeeded, errored (problem says why), uncommitted
   (not written; send it again in a new batch) or unknown (may be written).
-  The command stops at the first chunk that fails unless --continue-on-error.
+  Every chunk is sent even when one fails (--stop-on-error stops at the
+  first failure); a rate-limited chunk is resent unchanged after its delay.
   It exits 0 only when every item succeeded; CLI_BATCH_INCOMPLETE (exit 10)
   means some chunks committed. After an unknown outcome, rerun with the same
   --file and --idempotency-key, unedited, or check the records with a read.

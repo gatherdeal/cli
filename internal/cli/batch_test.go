@@ -223,13 +223,13 @@ func TestBatchRejectionMapsIndices(t *testing.T) {
 			})
 			te.stdin = membershipLines(250)
 			res := te.run(batchArgs()...)
-			if res.exit != 10 || res.errorCode() != "CLI_BATCH_INCOMPLETE" || len(*sends) != 2 {
+			if res.exit != 10 || res.errorCode() != "CLI_BATCH_INCOMPLETE" || len(*sends) != 3 {
 				t.Fatal(res.exit, res.stderr)
 			}
 			rows := batchRows(t, res)
 			got := states(rows)
-			uncommitted := append(append(span(100, 102), span(104, 106)...), span(108, 249)...)
-			if !slices.Equal(got["succeeded"], span(0, 99)) || !slices.Equal(got["errored"], []int{103, 107}) || !slices.Equal(got["uncommitted"], uncommitted) {
+			uncommitted := append(append(span(100, 102), span(104, 106)...), span(108, 199)...)
+			if !slices.Equal(got["succeeded"], append(span(0, 99), span(200, 249)...)) || !slices.Equal(got["errored"], []int{103, 107}) || !slices.Equal(got["uncommitted"], uncommitted) {
 				t.Fatal(got)
 			}
 			if p := rows[103]["problem"].(map[string]any); p["code"] != "CRM_CONTACT_NOT_FOUND" || p["index"].(float64) != 3 {
@@ -239,22 +239,21 @@ func TestBatchRejectionMapsIndices(t *testing.T) {
 			chunks := details["chunks"].([]any)
 			second, third := chunks[1].(map[string]any), chunks[2].(map[string]any)
 			if second["state"] != "refused" || second["complete"] != complete || second["error"].(map[string]any)["code"] != "BATCH_REJECTED" ||
-				third["state"] != "not_sent" || third["first_index"].(float64) != 200 || third["idempotency_key"] == "" {
+				third["state"] != "committed" || third["first_index"].(float64) != 200 || third["idempotency_key"] == "" {
 				t.Fatal(chunks)
 			}
-			if details["succeeded"].(float64) != 100 || details["errored"].(float64) != 2 || details["uncommitted"].(float64) != 148 {
+			if details["succeeded"].(float64) != 150 || details["errored"].(float64) != 2 || details["uncommitted"].(float64) != 98 {
 				t.Fatal(details)
 			}
-			if !strings.Contains(res.stderr, "Stopped after chunk 1; chunks 2-2 were not sent") {
-				t.Fatal(res.stderr)
-			}
 
-			// --continue-on-error sends the later chunks.
+			// --stop-on-error leaves the later chunks unsent.
 			*sends = nil
-			res = te.run(batchArgs("--continue-on-error")...)
+			res = te.run(batchArgs("--stop-on-error")...)
 			got = states(batchRows(t, res))
-			if res.exit != 10 || len(*sends) != 3 || !slices.Equal(got["succeeded"], append(span(0, 99), span(200, 249)...)) {
-				t.Fatal(res.exit, got)
+			chunks = res.env["error"].(map[string]any)["details"].(map[string]any)["chunks"].([]any)
+			if res.exit != 10 || len(*sends) != 2 || !slices.Equal(got["succeeded"], span(0, 99)) || !slices.Contains(got["uncommitted"], 249) ||
+				chunks[2].(map[string]any)["state"] != "not_sent" || !strings.Contains(res.stderr, "Stopped after chunk 1 (--stop-on-error); chunks 2-2 were not sent") {
+				t.Fatal(res.exit, got, res.stderr)
 			}
 		})
 	}
@@ -267,11 +266,12 @@ func TestBatchFirstChunkRefusals(t *testing.T) {
 		body   string
 		exit   int
 		code   string
+		sends  int
 	}{
-		{"rejected", 422, rejection(true, 1), 6, "BATCH_REJECTED"},
-		{"too large", 413, "Request Entity Too Large", 6, "CLI_UPSTREAM_ERROR"},
-		{"rate limited", 429, problemJSON(429, "RATE_LIMITED", "Too many requests.", nil), 7, "RATE_LIMITED"},
-		{"denied", 403, problemJSON(403, "FORBIDDEN", "Forbidden.", nil), 4, "FORBIDDEN"},
+		{"rejected", 422, rejection(true, 1), 6, "BATCH_REJECTED", 2},
+		{"too large", 413, "Request Entity Too Large", 6, "CLI_UPSTREAM_ERROR", 2},
+		{"rate limited", 429, problemJSON(429, "RATE_LIMITED", "Too many requests.", nil), 7, "RATE_LIMITED", 6},
+		{"denied", 403, problemJSON(403, "FORBIDDEN", "Forbidden.", nil), 4, "FORBIDDEN", 2},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f, te := loggedIn(t)
@@ -286,8 +286,14 @@ func TestBatchFirstChunkRefusals(t *testing.T) {
 			})
 			te.stdin, te.sleeps = membershipLines(150), nil
 			res := te.run(batchArgs()...)
-			if res.exit != tc.exit || len(*sends) != 1 || len(te.sleeps) != 0 {
-				t.Fatal(res.exit, len(*sends), res.stdout)
+			// Every chunk is attempted; only a 429 is resent, unchanged.
+			if res.exit != tc.exit || len(*sends) != tc.sends || len(te.sleeps) != tc.sends-2 {
+				t.Fatal(res.exit, len(*sends), te.sleeps, res.stdout)
+			}
+			for i, s := range *sends {
+				if first := (*sends)[i/(tc.sends/2)*(tc.sends/2)]; s.key != first.key || s.body != first.body {
+					t.Fatalf("send %d changed its chunk's request", i)
+				}
 			}
 			if tc.code != "CLI_UPSTREAM_ERROR" && res.errorCode() != tc.code {
 				t.Fatal(res.stdout)
@@ -295,8 +301,8 @@ func TestBatchFirstChunkRefusals(t *testing.T) {
 			got := states(batchRows(t, res))
 			want := span(0, 149)
 			if tc.name == "rejected" {
-				want = slices.Delete(want, 1, 2)
-				if !slices.Equal(got["errored"], []int{1}) {
+				want = slices.Delete(slices.Delete(want, 101, 102), 1, 2)
+				if !slices.Equal(got["errored"], []int{1, 101}) {
 					t.Fatal(got)
 				}
 			}
@@ -335,6 +341,40 @@ func TestBatchUnknownOutcomeResendsIdenticalRequest(t *testing.T) {
 	}
 }
 
+func TestBatchRateLimitResendsAfterRetryDelay(t *testing.T) {
+	f, te := loggedIn(t)
+	limited := func(ms int) string {
+		var p map[string]any
+		_ = json.Unmarshal([]byte(problemJSON(429, "RATE_LIMITED", "Too many requests.", nil)), &p)
+		if ms > 0 {
+			p["retry_after_ms"] = ms
+		}
+		b, _ := json.Marshal(p)
+		return string(b)
+	}
+	sends := batchServer(t, f, func(n int, s batchSend, w http.ResponseWriter) {
+		switch n {
+		case 1:
+			w.Header().Set("Retry-After", "3")
+			writeJSON(w, 429, limited(0))
+		case 2:
+			writeJSON(w, 429, limited(2000))
+		default:
+			writeJSON(w, 200, addedReceipt(len(s.items)))
+		}
+	})
+	te.stdin, te.sleeps = membershipLines(2), nil
+	res := te.run(batchArgs("--idempotency-key", "limited-key")...)
+	if res.exit != 0 || len(*sends) != 3 || !slices.Equal(te.sleeps, []time.Duration{3 * time.Second, 2 * time.Second}) {
+		t.Fatal(res.exit, len(*sends), te.sleeps, res.stdout)
+	}
+	for _, s := range *sends {
+		if s.key != "limited-key.0" || s.body != (*sends)[0].body {
+			t.Fatal("a rate-limited chunk was changed")
+		}
+	}
+}
+
 func TestBatchUnknownOutcomeStops(t *testing.T) {
 	for _, tc := range []struct {
 		name    string
@@ -359,21 +399,27 @@ func TestBatchUnknownOutcomeStops(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f, te := loggedIn(t)
-			sends := batchServer(t, f, func(n int, _ batchSend, w http.ResponseWriter) {
-				tc.answers[min(n, len(tc.answers))-1](w)
+			attempts := 0
+			sends := batchServer(t, f, func(_ int, s batchSend, w http.ResponseWriter) {
+				if strings.HasSuffix(s.key, ".1") {
+					writeJSON(w, 200, addedReceipt(len(s.items)))
+					return
+				}
+				attempts++
+				tc.answers[min(attempts, len(tc.answers))-1](w)
 			})
 			te.stdin = membershipLines(150)
 			res := te.run(batchArgs()...)
-			if res.exit != 8 || res.errorCode() != "CLI_WRITE_OUTCOME_UNKNOWN" || len(*sends) != tc.sends {
+			if res.exit != 8 || res.errorCode() != "CLI_WRITE_OUTCOME_UNKNOWN" || len(*sends) != tc.sends+1 {
 				t.Fatal(res.exit, len(*sends), res.stdout)
 			}
-			for _, s := range *sends {
+			for _, s := range (*sends)[:tc.sends] {
 				if s.key != (*sends)[0].key || s.body != (*sends)[0].body {
 					t.Fatal("an unresolved chunk was changed")
 				}
 			}
 			got := states(batchRows(t, res))
-			if !slices.Equal(got["unknown"], span(0, 99)) || !slices.Equal(got["uncommitted"], span(100, 149)) {
+			if !slices.Equal(got["unknown"], span(0, 99)) || !slices.Equal(got["succeeded"], span(100, 149)) {
 				t.Fatal(got)
 			}
 			chunk := res.env["error"].(map[string]any)["details"].(map[string]any)["chunks"].([]any)[0].(map[string]any)

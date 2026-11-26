@@ -344,12 +344,16 @@ so a batch of more than one chunk can end partly written.**
 
 Chunk `n` (from 0) is sent with the idempotency key `<key>.<n>`, where
 `<key>` is `--idempotency-key` or a generated key reported in
-`meta.write.idempotency_key` and on stderr. After a network error, a
-timeout or a server error, the CLI resends that chunk unchanged, with the
-same key, up to three times. Any other refusal ends the chunk. By default
-the command stops after the first chunk that does not commit and does not
-send the rest; `--continue-on-error` sends every chunk. `--dry-run` prints
-each chunk's key and request body without sending anything.
+`meta.write.idempotency_key` and on stderr. A chunk is sent at most three
+times, always unchanged and with the same key: after a network error, a
+timeout or a server error, and after a rate limit (429), which it waits
+out first (`Retry-After` or the problem's `retry_after_ms`, at most 10
+seconds per wait). A chunk still rate limited after three sends is
+uncommitted. Any other refusal ends the chunk at once. Every chunk is sent
+even when an earlier one fails; `--stop-on-error` stops after the first
+chunk that does not commit and leaves the rest unsent and uncommitted.
+`--dry-run` prints each chunk's key and request body without sending
+anything.
 
 `data` holds one entry per input item, `{index, state, data?, problem?}`:
 
@@ -357,7 +361,7 @@ each chunk's key and request body without sending anything.
 | --- | --- |
 | `succeeded` | Written; `data` is the item's result, such as `{"id":"…"}` or `{"outcome":"added"}` |
 | `errored` | Its chunk was rejected (`BATCH_REJECTED`) because of this item; `problem` says why |
-| `uncommitted` | Not written: its chunk was rejected for another item or refused, or was not sent |
+| `uncommitted` | Not written: its chunk was rejected for another item, refused or stayed rate limited, or was not sent (`--stop-on-error`) |
 | `unknown` | May have been written: the server's answer was lost or unclear |
 
 Print one line per item with `--jq '.[]'`. The command exits 0 only when

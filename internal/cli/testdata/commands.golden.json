@@ -1561,9 +1561,9 @@
             "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
           },
           {
-            "name": "continue-on-error",
+            "name": "stop-on-error",
             "type": "bool",
-            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+            "usage": "Stop after the first chunk that does not commit and report the items of the chunks not sent as uncommitted. By default every chunk is sent."
           },
           {
             "name": "jq",
@@ -1882,9 +1882,9 @@
             "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
           },
           {
-            "name": "continue-on-error",
+            "name": "stop-on-error",
             "type": "bool",
-            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+            "usage": "Stop after the first chunk that does not commit and report the items of the chunks not sent as uncommitted. By default every chunk is sent."
           },
           {
             "name": "jq",
@@ -1945,9 +1945,9 @@
             "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
           },
           {
-            "name": "continue-on-error",
+            "name": "stop-on-error",
             "type": "bool",
-            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+            "usage": "Stop after the first chunk that does not commit and report the items of the chunks not sent as uncommitted. By default every chunk is sent."
           },
           {
             "name": "jq",
@@ -2013,9 +2013,9 @@
             "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
           },
           {
-            "name": "continue-on-error",
+            "name": "stop-on-error",
             "type": "bool",
-            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+            "usage": "Stop after the first chunk that does not commit and report the items of the chunks not sent as uncommitted. By default every chunk is sent."
           },
           {
             "name": "jq",
@@ -2304,9 +2304,9 @@
             "usage": "Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, 100 per request."
           },
           {
-            "name": "continue-on-error",
+            "name": "stop-on-error",
             "type": "bool",
-            "usage": "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."
+            "usage": "Stop after the first chunk that does not commit and report the items of the chunks not sent as uncommitted. By default every chunk is sent."
           },
           {
             "name": "jq",

@@ -102,7 +102,7 @@ type batchSummary struct {
 	Chunks      []chunkReport `json:"chunks"`
 }
 
-var flagContinueOnError = FlagSpec{Name: "continue-on-error", Kind: kindBool, Usage: "Send every chunk even after one fails. By default the command stops at the first chunk that does not commit and reports the items of the chunks it did not send as uncommitted."}
+var flagStopOnError = FlagSpec{Name: "stop-on-error", Kind: kindBool, Usage: "Stop after the first chunk that does not commit and report the items of the chunks not sent as uncommitted. By default every chunk is sent."}
 
 // batchCommand turns a generated command into the batch form.
 func batchCommand(c *Command, op contracts.Operation, spec batchSpec, params []commandParameter, bind bindInput, connect func(*Invocation) (invokeInput, error)) *Command {
@@ -122,7 +122,7 @@ func batchCommand(c *Command, op contracts.Operation, spec batchSpec, params []c
 	c.Flags = append(c.Flags, c.Write.flags(op)...)
 	c.Flags = append(c.Flags,
 		FlagSpec{Name: "file", Kind: kindString, Required: true, Usage: fmt.Sprintf("Items to write: a JSON Lines file (one item per line) or a file holding one JSON array of items; - reads standard input. Each item is one request item of the operation; the items are sent in input order, %d per request.", spec.MaxItems)},
-		flagContinueOnError,
+		flagStopOnError,
 	)
 	return c
 }
@@ -186,8 +186,8 @@ func runBatch(ctx context.Context, inv *Invocation, op contracts.Operation, spec
 		if ctx.Err() != nil {
 			break
 		}
-		if !inv.boolean("continue-on-error") && i+1 < len(plan) {
-			inv.Env.stderrf("Stopped after chunk %d; chunks %d-%d were not sent and their items are uncommitted. Pass --continue-on-error to send every chunk.\n", c.n, c.n+1, plan[len(plan)-1].n)
+		if inv.boolean("stop-on-error") && i+1 < len(plan) {
+			inv.Env.stderrf("Stopped after chunk %d (--stop-on-error); chunks %d-%d were not sent and their items are uncommitted.\n", c.n, c.n+1, plan[len(plan)-1].n)
 			break
 		}
 	}
@@ -334,10 +334,13 @@ type chunkResult struct {
 	err      error
 }
 
-// sendChunk sends one frozen chunk. A definitive refusal on a clean key ends
-// it; an unknown outcome is resent unchanged (same request, same key) up to
-// batchMaxAttempts times. A key conflict and any failure after an unknown
-// outcome stay unknown.
+// sendChunk sends one frozen chunk, always as the same request with the
+// same key, at most batchMaxAttempts times. A 429 on a clean key is resent
+// after its retry delay and the key stays clean; when the attempts run out
+// the chunk is refused (nothing committed). Any other 4xx on a clean key
+// refuses it at once. An unknown outcome (network error, timeout, 5xx,
+// unusable receipt) is resent; a key conflict, and any failure other than
+// a 5xx after an unknown outcome, end the chunk as unknown.
 func (inv *Invocation) sendChunk(ctx context.Context, invoke invokeInput, c *batchChunk, receipt *jsonschema.Schema) chunkResult {
 	clean := true
 	for attempt := 1; ; attempt++ {
@@ -358,6 +361,11 @@ func (inv *Invocation) sendChunk(ctx context.Context, invoke invokeInput, c *bat
 		case e.Code == output.CodeWriteOutcomeUnknown || e.HTTPStatus >= 500:
 			resend = true
 		case e.HTTPStatus == http.StatusConflict && e.Code == "IDEMPOTENCY_KEY_CONFLICT":
+		case clean && e.HTTPStatus == http.StatusTooManyRequests:
+			if attempt >= batchMaxAttempts || inv.sleep(ctx, batchDelay(attempt, e)) != nil {
+				return chunkResult{state: chunkRefused, attempts: attempt, err: err}
+			}
+			continue
 		case clean && e.HTTPStatus >= 400 && e.HTTPStatus < 500:
 			return chunkResult{state: chunkRefused, attempts: attempt, err: err}
 		}
@@ -379,6 +387,7 @@ func batchDelay(attempt int, e *output.Error) time.Duration {
 	if json.Unmarshal(e.Problem, &p) == nil {
 		delay = max(delay, time.Duration(p.RetryAfterMS)*time.Millisecond)
 	}
+	delay = max(delay, e.RetryAfter)
 	return min(delay, batchMaxDelay)
 }
 
