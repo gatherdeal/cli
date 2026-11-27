@@ -1,7 +1,7 @@
 # Contributing to the GatherDeal CLI
 
 Install Go 1.27.3 or newer and golangci-lint v2.15.0. Run the release
-tooling tests on Linux or macOS with Node.js 24 and OpenSSL.
+tooling tests on Linux or macOS with Node.js 26 and OpenSSL.
 
 ## Build, test and lint
 
